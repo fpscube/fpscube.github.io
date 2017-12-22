@@ -1,0 +1,98 @@
+<html>
+<head>
+<title>Game</title>
+
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+<script type="text/javascript" src="webgl-utils.js"></script>
+<script type="text/javascript" src="game.js"></script>
+<script type="text/javascript" src="cube.js"></script>
+
+<script id="shader-fs" type="x-shader/x-fragment">
+    precision mediump float;
+    
+    // Passed in from the vertex shader.
+    varying vec3 v_normal;
+    varying vec3 v_surfaceToLight;
+    //varying vec3 v_surfaceToView;
+    
+    uniform vec4 u_color;
+    
+    void main() {
+      // because v_normal is a varying it's interpolated
+      // we it will not be a uint vector. Normalizing it
+      // will make it a unit vector again
+      vec3 normal = normalize(v_normal);
+    
+      vec3 surfaceToLightDirection = normalize(v_surfaceToLight);
+      //vec3 surfaceToViewDirection = normalize(v_surfaceToView);
+      //vec3 halfVector = normalize(surfaceToLightDirection + surfaceToViewDirection);
+    
+    //  float light = dot(normal, surfaceToLightDirection);
+      float light = dot(normal , surfaceToLightDirection);
+     // float specular = dot(normal, halfVector);
+    
+      // Lets multiply just the color portion (not the alpha)
+      // by the light
+      //gl_FragColor = vec4(0.1,0.1,0.1,1.0)  + vec4(-1.0,-1.0,-1.0,-1.0) 
+	  if (light > 0.0)
+	  {
+		gl_FragColor = vec4(light,light,light,1.0) ;
+	  }
+	  else
+	  {
+		gl_FragColor = vec4(0.1,0.1,0.1,1.0) ;
+	  }
+      //gl_FragColor = light;
+	  //gl_FragColor = gl_FragColor +(0.1,0.1,0.1,1.0) ;
+
+     // Just add in the specular
+     // gl_FragColor.rgb += specular;
+    }
+</script>
+<script id="shader-vs" type="x-shader/x-vertex">
+    attribute vec4 aVertexPosition;
+    attribute vec3 aVertexNormal;
+
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+    uniform mat4 uMVInverseTransposeMatrix;
+    uniform vec3 uLightWorldPosition;
+    
+    varying vec3 v_normal;    
+    varying vec3 v_surfaceToLight;
+    varying vec3 v_surfaceToView;
+    
+    void main() {
+      // Multiply the position by the matrix.
+      gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
+    
+      // orient the normals and pass to the fragment shader
+      v_normal = mat3(uMVInverseTransposeMatrix) * aVertexNormal;
+    
+      // compute the world position of the surfoace
+      vec3 surfaceWorldPosition = (uMVMatrix * aVertexPosition).xyz;
+    
+      // compute the vector of the surface to the light
+      // and pass it to the fragment shader
+      v_surfaceToLight = vec3(0.0,15.0,0.0) - surfaceWorldPosition;
+    
+      // compute the vector of the surface to the view/camera
+      // and pass it to the fragment shader
+      //v_surfaceToView = u_viewWorldPosition - surfaceWorldPosition;
+    }
+    
+</script>
+<script type="text/javascript" src="webgl.js"></script>
+
+</head>
+<body onload="webGLStart();" onkeydown="mediaSetKeyDownFct(event)" onkeyup="mediaSetKeyUpFct(event)" onmousedown="mediaSetMouseDownFct(event)" onmouseup="mediaSetMouseUpFct(event)" >
+<button type="fullscreen" onclick="fullScreen()">fullscreen</button>
+<button type="fullscreen" onclick="smallScreen()">small</button>
+ <p>
+ <canvas id="canvas" style="border: none;" width="1024" height="600"></canvas>
+
+</body>
+</html>
+
+
