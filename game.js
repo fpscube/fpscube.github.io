@@ -105,21 +105,17 @@ function drawGame() {
 	
 	//bullets and enemies collision
 	//hBulletList
-	for (var i=0;i<hBulletList.length;i++)
-	{	 
-		for (var y=0;y<enemieList.length;y++)
-		{
+	for (var i=hBulletList.length-1;i>=0;i--){	 
+		for (var y=enemieList.length-1;y>=0;y--){
 			if 	((Math.abs(hBulletList[i][0]-enemieList[y][0]) < 1.0) &&
 				(Math.abs(hBulletList[i][1]-enemieList[y][1]) < 1.0) &&
-				(Math.abs(hBulletList[i][2]-enemieList[y][2]) < 1.0))
-			{
-				hBulletList.splice(i,1);
-				enemieList.splice(y,1);
-			}
-			
+				(Math.abs(hBulletList[i][2]-enemieList[y][2]) < 1.0)){
+					hBulletList.splice(i,1);
+					enemieList.splice(y,1);
+					break
+			}			
 		}
-	}
-	
+	}	
 
 
 	//camera managment
