@@ -92,17 +92,35 @@ function drawGame() {
 	gAnim += 90 * elapsed
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	
-	//hero position update
+	//hero key move
 	if(mediaIsKey("ArrowLeft") || mediaIsKey("Left")){hPosZ-=elapsed*20*Math.cos(degToRad(-hAngleY+90));hPosX-=elapsed*20*Math.sin(degToRad(-hAngleY+90));}
 	if(mediaIsKey("ArrowRight") || mediaIsKey("Right")){hPosZ-=elapsed*20*Math.cos(degToRad(-hAngleY-90));hPosX-=elapsed*20*Math.sin(degToRad(-hAngleY-90));}
 	if(mediaIsKey("ArrowUp") || mediaIsKey("Up")){hPosZ-=elapsed*20*Math.cos(degToRad(-hAngleY));hPosX-=elapsed*20*Math.sin(degToRad(-hAngleY));}
 	if(mediaIsKey("ArrowDown") || mediaIsKey("Down")){hPosZ-=elapsed*20*Math.cos(degToRad(-hAngleY+180));hPosX-=elapsed*20*Math.sin(degToRad(-hAngleY+180));}	
 	
-	
-	
+	//hero gravity
 	if (hPosX > 50 || hPosX < -50  || hPosZ < -50  || hPosZ > 50  )  hSpeedY = -1000*elapsed ; 
 	hPosY += hSpeedY*elapsed;
 	if (hPosY < -60) {	initGame();}
+	
+	//bullets and enemies collision
+	//hBulletList
+	for (var i=0;i<hBulletList.length;i++)
+	{	 
+		for (var y=0;y<enemieList.length;y++)
+		{
+			if 	((Math.abs(hBulletList[i][0]-enemieList[y][0]) < 1.0) &&
+				(Math.abs(hBulletList[i][1]-enemieList[y][1]) < 1.0) &&
+				(Math.abs(hBulletList[i][2]-enemieList[y][2]) < 1.0))
+			{
+				hBulletList.splice(i,1);
+				enemieList.splice(y,1);
+			}
+			
+		}
+	}
+	
+
 
 	//camera managment
 	mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 1000.0, pMatrix);
