@@ -1,7 +1,8 @@
 // Game Model
-var gPosX ; var gPosY ; var gPosZ ;
+var gPos=[] ;
+var gDir=[];
 var gAngleY=0; var gAngleX=0; 
-var gSpeedY;
+var gSpeed=[];
 var gKeyPressed={};
 var gLastTime=0;
 var gAnim=0;
@@ -17,6 +18,14 @@ function updatePosition(e) {
 	{
 		gAngleY += e.movementX*0.1;
 		gAngleX += e.movementY*0.1;
+		mvVector =  vec3.create();
+		vec3.cross(gDir,[0,1,0],mvVector);
+
+		speedCoef = 2.5
+		gDir[0] += mvVector[0]*speedCoef*e.movementX/screen.width;
+		gDir[1] -= speedCoef*e.movementY/screen.height;
+		gDir[2] += mvVector[2]*speedCoef*e.movementX/screen.width;
+		vec3.normalize(gDir,gDir);
 	}
 }
 
@@ -26,8 +35,8 @@ function mediaIsKey(name){return (gKeyPressed[name]==1);}
 
 function mediaSetMouseUpFct(event){return;}
 function mediaSetMouseDownFct(event){
-	if (event.button==0)  gBulletList.push([gPosX,gPosY,gPosZ,gAngleY - 90,-gAngleX]);
-	if (event.button==2)  gEnemieList.push([0,2 ,-60,gAngleY - 90,-gAngleX]);
+	if (event.button==0)  gBulletList.push([[gPos[0],gPos[1],gPos[2]],[gDir[0],gDir[1],gDir[2]]]);
+	if (event.button==2)  gEnemieList.push([[-gPos[0],gPos[1],-gPos[2]],[-gDir[0],0,-gDir[2]]]);
 	if (gBulletList.length > 20)  gBulletList.shift();	
 }
 
@@ -36,7 +45,9 @@ function mediaSetMouseDownFct(event){
 
 function initGame() {
 	// game data Init
-	gPosX = 0; gPosY = 6; gPosZ = 40; gAngleY=0; gAngleX=0 ; gSpeedY = 0;
+	gPos = [0,6,40]; gAngleY=0; gAngleX=0 ; 
+	gDir = [0,0,-1];
+	gSpeed = [0,0,0];
 	gBulletList = [];
 	gEnemieList = [];	
 
@@ -81,28 +92,32 @@ function drawGame() {
 	var timeNow =  new Date().getTime();
 	gElapsed = (timeNow - gLastTime)/1000; 
 	gLastTime = timeNow; 	
-	gAnim += 180 * gElapsed
+	gAnim += 100 * gElapsed
 
 	// Clear Display
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	
 	// Deplacement
-	if(mediaIsKey("ArrowLeft") || mediaIsKey("Left")){gPosZ-=gElapsed*20*Math.cos(degToRad(-gAngleY+90));gPosX-=gElapsed*20*Math.sin(degToRad(-gAngleY+90));}
-	if(mediaIsKey("ArrowRight") || mediaIsKey("Right")){gPosZ-=gElapsed*20*Math.cos(degToRad(-gAngleY-90));gPosX-=gElapsed*20*Math.sin(degToRad(-gAngleY-90));}
-	if(mediaIsKey("ArrowUp") || mediaIsKey("Up")){gPosZ-=gElapsed*20*Math.cos(degToRad(-gAngleY));gPosX-=gElapsed*20*Math.sin(degToRad(-gAngleY));}
-	if(mediaIsKey("ArrowDown") || mediaIsKey("Down")){gPosZ-=gElapsed*20*Math.cos(degToRad(-gAngleY+180));gPosX-=gElapsed*20*Math.sin(degToRad(-gAngleY+180));}	
+	mvVector =  vec3.create();
+	vec3.cross(gDir,[0,1,0],mvVector);	
+	if(mediaIsKey("ArrowLeft") || mediaIsKey("Left")){gPos[0]-=gElapsed*20*mvVector[0];gPos[2]-=gElapsed*20*mvVector[2];}
+	if(mediaIsKey("ArrowRight") || mediaIsKey("Right")){gPos[0]+=gElapsed*20*mvVector[0];gPos[2]+=gElapsed*20*mvVector[2];}
+	if(mediaIsKey("ArrowUp") || mediaIsKey("Up")){gPos[0]+=gElapsed*20*gDir[0];gPos[2]+=gElapsed*20*gDir[2];}
+	if(mediaIsKey("ArrowDown") || mediaIsKey("Down")){gPos[0]-=gElapsed*20*gDir[0];gPos[2]-=gElapsed*20*gDir[2];}	
 	
 	// Gravity
-	if (gPosX > 50 || gPosX < -50  || gPosZ < -50  || gPosZ > 50  )  gSpeedY = -1000*gElapsed ; 
-	gPosY += gSpeedY*gElapsed;
-	if (gPosY < -60) {	initGame();}
+	if (gPos[0] > 50 || gPos[0] < -50  || gPos[2] < -50  || gPos[2] > 50  )  gSpeed[1] = -1000*gElapsed ; 
+	gPos[1] += gSpeed[1]*gElapsed;
+	if (gPos[1] < -60) {initGame();}
 	
 	// Bullets And Enemies Collisions
 	for (var i=gBulletList.length-1;i>=0;i--){	 
 		for (var y=gEnemieList.length-1;y>=0;y--){
-			if 	((Math.abs(gBulletList[i][0]-gEnemieList[y][0]) < 1.0) &&
-				(Math.abs(gBulletList[i][1]-gEnemieList[y][1]) < 1.0) &&
-				(Math.abs(gBulletList[i][2]-gEnemieList[y][2]) < 1.0)){
+			bulletPos = gBulletList[i][0];
+			enemiePos = gEnemieList[y][0];
+			if 	((Math.abs(bulletPos[0]-enemiePos[0]) < 1.0) &&
+				(Math.abs(bulletPos[1]-enemiePos[1]) < 1.0) &&
+				(Math.abs(bulletPos[2]-enemiePos[2]) < 1.0)){
 					gBulletList.splice(i,1);
 					gEnemieList.splice(y,1);
 					break
@@ -111,11 +126,12 @@ function drawGame() {
 	}	
 
 	// Camera managment
+	var lookAtMatrix = mat4.create();
 	mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 1000.0, pMatrix);
-	mat4.rotate(pMatrix,degToRad(gAngleX), [1, 0, 0]);
-	mat4.rotate(pMatrix,degToRad(gAngleY), [0, 1, 0]);
-	mat4.translate(pMatrix, [-gPosX, -gPosY ,-gPosZ ]);
-	
+	viewPos = [gPos[0] + gDir[0],gPos[1] + gDir[1],gPos[2] + gDir[2]];
+	mat4.lookAt(gPos,viewPos,[0,1,0],lookAtMatrix);
+	mat4.multiply(pMatrix,lookAtMatrix,pMatrix)
+
 	// init mvMAtrix
 	mat4.identity(mvMatrix)
 	setMatrixUniforms();
@@ -141,15 +157,14 @@ function drawGame() {
 	
 	// Bullets	
 	for (var id in gBulletList) {
-		bulletPos = gBulletList[id];
-		var angleY = bulletPos[3]
-		var angleX = bulletPos[4]
-		bulletPos[0] +=  gElapsed*100* Math.cos(degToRad(angleY ))*Math.cos(degToRad(angleX));
-		bulletPos[2] +=  gElapsed*100* Math.sin(degToRad(angleY ))*Math.cos(degToRad(angleX));
-		bulletPos[1] +=  gElapsed*100* Math.sin(degToRad(angleX));
+		bulletPos = gBulletList[id][0];
+		bulletDir = gBulletList[id][1];
+		bulletPos[0] += gElapsed*100*bulletDir[0];
+		bulletPos[1] += gElapsed*100*bulletDir[1];
+		bulletPos[2] += gElapsed*100*bulletDir[2];
 		mvPushMatrix()	;
 		mat4.translate(mvMatrix, bulletPos);
-		mat4.rotate(mvMatrix, degToRad(gAnim)*2, [1, 1, 1]);
+		mat4.rotate(mvMatrix, degToRad(gAnim)*5, [1, 1, 1]);
 		mat4.scale(mvMatrix,[0.5,0.5,0.25]);
 		setMatrixUniforms();
 		gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
@@ -158,16 +173,17 @@ function drawGame() {
 
 	// Enemies	
 	for (var id in gEnemieList) {
-		enemiePos = gEnemieList[id];
-		var angleY = enemiePos[3]
-		var angleX = enemiePos[4]
-		enemiePos[0] -=  gElapsed*10*Math.cos(degToRad(angleY ))*Math.cos(degToRad(angleX));
-		enemiePos[1] -=  gElapsed*10* Math.sin(degToRad(angleX));
-		enemiePos[2] -=  gElapsed*10*Math.sin(degToRad(angleY ))*Math.cos(degToRad(angleX));
+		enemiePos = gEnemieList[id][0];
+		enemieDir = gEnemieList[id][1];
+		enemiePos[0] += gElapsed*10*enemieDir[0];
+		enemiePos[1] += gElapsed*10*enemieDir[1];
+		enemiePos[2] += gElapsed*10*enemieDir[2];
 		mvPushMatrix();
+		newPos = [-(enemiePos[0]+enemieDir[0]),-(enemiePos[1]+enemieDir[1]),enemiePos[2]+enemieDir[2]];
 		mat4.translate(mvMatrix, enemiePos);
-		mat4.rotate(mvMatrix, degToRad(-angleY+90), [0, 1, 0]);
-		mat4.rotate(mvMatrix, degToRad(-angleX), [1, 0, 0]);
+		mat4.lookAt([0,0,0],[-enemieDir[0],enemieDir[1],enemieDir[2]],[0,1,0],lookAtMatrix);
+		mat4.multiply(mvMatrix,lookAtMatrix,mvMatrix);
+		// mat4.rotate(mvMatrix, degToRad(-angleX), [1, 0, 0]);
 		setMatrixUniforms();
 		mvPushMatrix();
 		

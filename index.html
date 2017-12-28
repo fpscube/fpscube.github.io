@@ -19,35 +19,17 @@
     uniform vec4 u_color;
     
     void main() {
-      // because v_normal is a varying it's interpolated
-      // we it will not be a uint vector. Normalizing it
-      // will make it a unit vector again
       vec3 normal = normalize(v_normal);
-    
       vec3 surfaceToLightDirection = normalize(v_surfaceToLight);
-      //vec3 surfaceToViewDirection = normalize(v_surfaceToView);
-      //vec3 halfVector = normalize(surfaceToLightDirection + surfaceToViewDirection);
-    
-    //  float light = dot(normal, surfaceToLightDirection);
       float light = dot(normal , surfaceToLightDirection);
-     // float specular = dot(normal, halfVector);
-    
-      // Lets multiply just the color portion (not the alpha)
-      // by the light
-      //gl_FragColor = vec4(0.1,0.1,0.1,1.0)  + vec4(-1.0,-1.0,-1.0,-1.0) 
-	  if (light > 0.0)
-	  {
-		gl_FragColor = vec4(light,light,light,1.0) ;
-	  }
-	  else
-	  {
-		gl_FragColor = vec4(0.1,0.1,0.1,1.0) ;
-	  }
-      //gl_FragColor = light;
-	  //gl_FragColor = gl_FragColor +(0.1,0.1,0.1,1.0) ;
-
-     // Just add in the specular
-     // gl_FragColor.rgb += specular;
+      if (light > 0.0)
+      {
+        gl_FragColor = vec4(light,light,light,1.0) ;
+      }
+      else
+      {
+        gl_FragColor = vec4(0.1,0.1,0.1,1.0) ;
+      }      
     }
 </script>
 <script id="shader-vs" type="x-shader/x-vertex">
