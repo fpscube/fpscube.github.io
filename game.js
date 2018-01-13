@@ -33,13 +33,13 @@ function mediaIsKey(name){return (gKeyPressed[name]==1);}
 function mediaSetMouseUpFct(event){return;}
 function mediaSetMouseDownFct(event){
 	if (event.button==0)  gBulletList.push([[gPos[0],gPos[1],gPos[2]],[gDir[0],gDir[1],gDir[2]]]);
-	if (event.button==2)  gEnemieList.push([[-gPos[0],gPos[1],-gPos[2]],[-gDir[0],0,-gDir[2]],[0,0,0]]);
+	if (event.button==2)  gEnemieList.push([[-gPos[0],gPos[1]+20,-gPos[2]],[-gDir[0],0,-gDir[2]],[0,0,0]]);
 	if (gBulletList.length > 20)  gBulletList.shift();	
 }
 
 function addEnemies()
 {
-	gEnemieList.push([[gPos[0] +  (Math.random() + 2) *50,gPos[1],gPos[2] + (Math.random() + 2) * 50],[Math.random(),Math.random(),Math.random()],[0,0,0]]);
+	gEnemieList.push([[gPos[0] +  (Math.random() + 2) *50,gPos[1]+20,gPos[2] + (Math.random() + 2) * 50],[Math.random(),Math.random(),Math.random()],[0,0,0]]);
 }
 
 // ######### Init ##############// 
@@ -187,13 +187,18 @@ function drawGame() {
 		enemieDir[0] = gPos[0] - enemiePos[0];
 		enemieDir[1] = gPos[1] - enemiePos[1];
 		enemieDir[2] = gPos[2] - enemiePos[2];
-		vec3.normalize(enemieDir,enemieDir);
-		enemiePos[0] += (gElapsed*enemieSpeed[0] + gElapsed*10*enemieDir[0]);
-		enemiePos[1] += (gElapsed*enemieSpeed[1] + gElapsed*10*enemieDir[1]);
-		enemiePos[2] += (gElapsed*enemieSpeed[2] + gElapsed*10*enemieDir[2]);
-		enemieSpeed[0] = gElapsed*10*enemieDir[0];
-		enemieSpeed[1] = gElapsed*10*enemieDir[1];
-		enemieSpeed[2] = gElapsed*10*enemieDir[2];
+		dist = vec3.length(enemieDir);
+		if (dist > 20)
+		{
+			vec3.normalize(enemieDir,enemieDir);
+			enemiePos[0] += (gElapsed*enemieSpeed[0] + gElapsed*10*enemieDir[0]);
+			enemiePos[1] += (gElapsed*enemieSpeed[1] + gElapsed*10*enemieDir[1]);
+			enemiePos[2] += (gElapsed*enemieSpeed[2] + gElapsed*10*enemieDir[2]);
+			enemieSpeed[0] = gElapsed*10*enemieDir[0];
+			enemieSpeed[1] = gElapsed*10*enemieDir[1];
+			enemieSpeed[2] = gElapsed*10*enemieDir[2];
+		}
+		
 
 		mvPushMatrix();
 		newPos = [-(enemiePos[0]+enemieDir[0]),-(enemiePos[1]+enemieDir[1]),enemiePos[2]+enemieDir[2]];
