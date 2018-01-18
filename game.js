@@ -5,8 +5,7 @@ var gSpeed=[];
 var gKeyPressed={};
 var gLastTime=0;
 var gAnim=0;
-var gAnimBody=0;
-var gAnimGuns=0;
+var gLife=0;
 var gElapsed=0;
 var gBulletList = [];
 var gEnemieList = [];
@@ -34,14 +33,14 @@ function mediaIsKey(name){return (gKeyPressed[name]==1);}
 
 function mediaSetMouseUpFct(event){return;}
 function mediaSetMouseDownFct(event){
-	if (event.button==0)  gBulletList.push([[gPos[0],gPos[1],gPos[2]],[gDir[0],gDir[1],gDir[2]]]);
-	if (event.button==2)  gEnemieList.push([[-gPos[0],gPos[1]+20,-gPos[2]],[-gDir[0],0,-gDir[2]],[0,0,0]]);
+	if (event.button==0)  gBulletList.push([[gPos[0]+gDir[0]*2,gPos[1]+gDir[1]*2,gPos[2]+gDir[2]*2],[gDir[0],gDir[1],gDir[2]]]);
+	if (event.button==2)  gEnemieList.push([[-gPos[0],gPos[1]+20,-gPos[2]],[-gDir[0],0,-gDir[2]],[0,0,0],[0,0,0]]);
 	if (gBulletList.length > 20)  gBulletList.shift();	
 }
 
 function addEnemies()
 {
-	gEnemieList.push([[gPos[0] +  (Math.random() + 2) *50,gPos[1]+20,gPos[2] + (Math.random() + 2) * 50],[Math.random(),Math.random(),Math.random()],[0,0,0]]);
+	gEnemieList.push([[Math.random()*10,gPos[1]+20,-(Math.random() + 2) * 30],[0,0,0],[0,0,0],[0,0,0]]);
 }
 
 // ######### Init ##############// 
@@ -52,6 +51,7 @@ function initGame() {
 	gPos = [0,6,40]; 
 	gDir = [0,0,-1];
 	gSpeed = [0,0,0];
+	gLife = 10;
 	gBulletList = [];
 	gEnemieList = [];	
 
@@ -85,7 +85,8 @@ function initGame() {
 	// Animation init
 	gLastTime = new Date().getTime();
 	
-	//setInterval(addEnemies,10000);
+	addEnemies();
+	setInterval(addEnemies,2000);
 
 }
 
@@ -119,24 +120,41 @@ function drawGame() {
 	if (gPos[1] < -60) {initGame();}
 	gSpeed = [0,0,0];
 	
-	// Bullets And Enemies Collisions
-	for (var i=gBulletList.length-1;i>=0;i--){	 
+	// Bullets And Enemies And Hero Collisions
+	for (var i=gBulletList.length-1;i>=0;i--){	 		
+		bulletPos = gBulletList[i][0];
 		for (var y=gEnemieList.length-1;y>=0;y--){
-			bulletPos = gBulletList[i][0];
 			enemiePos = gEnemieList[y][0];
 			if 	((Math.abs(bulletPos[0]-enemiePos[0]) < 1.0) &&
 				(Math.abs(bulletPos[1]-enemiePos[1]) < 1.0) &&
 				(Math.abs(bulletPos[2]-enemiePos[2]) < 1.0)){
 					gBulletList.splice(i,1);
 					gEnemieList.splice(y,1);
-					break
+					break;
 			}			
+		}
+		if 	((Math.abs(bulletPos[0]-gPos[0]) < 1.0) &&
+		(Math.abs(bulletPos[1]-gPos[1]) < 1.0) &&
+		(Math.abs(bulletPos[2]-gPos[2]) < 1.0)){
+			gLife--;
+			if (gLife<0)initGame();
+			break;
 		}
 	}	
 
 	// Camera managment
 	var lookAtMatrix = mat4.create();
 	mat4.perspective(pMatrix,45, gl.viewportWidth / gl.viewportHeight, 0.1, 1000.0);
+
+	
+	mat4.translate(mvMatrix,mvMatrix, [-9,0,-10]);
+	// mat4.rotate(mvMatrix,mvMatrix, 0.2, [1, 0, 0]);
+	mat4.scale(mvMatrix,mvMatrix,[0.1,gLife/10,0.1]);
+	setMatrixUniforms();
+	gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
+
+
+
 	viewPos = [gPos[0] + gDir[0],gPos[1] + gDir[1],gPos[2] + gDir[2]];
 	mat4.lookAt(lookAtMatrix,gPos,viewPos,[0,1,0]);
 	mat4.multiply(pMatrix,pMatrix,lookAtMatrix)
@@ -151,8 +169,6 @@ function drawGame() {
 	// Center Rotation Cube
 	mvPushMatrix();	
 	mat4.rotate(mvMatrix,mvMatrix, degToRad(gAnim)/2, [0, 1, 0]);
-	mat4.scale(mvMatrix,mvMatrix,[2.0,2.0,2.0])
-	mat4.translate(mvMatrix,mvMatrix, [10,1,0]);
 	setMatrixUniforms();
 	gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
 	mvPopMatrix();	
@@ -186,6 +202,7 @@ function drawGame() {
 		enemiePos = gEnemieList[id][0];
 		enemieDir = gEnemieList[id][1];
 		enemieSpeed = gEnemieList[id][2];
+		animCounter = gEnemieList[id][3];
 		enemieDir[0] = gPos[0] - enemiePos[0];
 		enemieDir[1] = gPos[1] - enemiePos[1];
 		enemieDir[2] = gPos[2] - enemiePos[2];
@@ -199,19 +216,25 @@ function drawGame() {
 			enemieSpeed[0] = gElapsed*10*enemieDir[0];
 			enemieSpeed[1] = gElapsed*10*enemieDir[1];
 			enemieSpeed[2] = gElapsed*10*enemieDir[2];
-			gAnimBody += gElapsed*100;
+			animCounter[0] += gElapsed*100
 		}
 		else
-		{
+		{			
+			animCounter[1] += gElapsed*200;
+			animCounter[2] += gElapsed;
+			console.log(animCounter[2]);
+			if (animCounter[2] > 1)
+			{
+				animCounter[2]=0;
+				gBulletList.push([[enemiePos[0]+enemieDir[0]*2,enemiePos[1]+enemieDir[1]*2,enemiePos[2]+enemieDir[2]*2],enemieDir]);
+			}
 
-			gAnimGuns  += gElapsed*100;
 		}
 		
 
 		mvPushMatrix();
 		newPos = [-(enemiePos[0]+enemieDir[0]),-(enemiePos[1]+enemieDir[1]),enemiePos[2]+enemieDir[2]];
 		mat4.translate(mvMatrix,mvMatrix, enemiePos);
-		console.log(enemieDir)
 		mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],enemieDir,[0,1,0]);
 		mat4.invert(lookAtMatrix,lookAtMatrix);
 		mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
@@ -220,7 +243,7 @@ function drawGame() {
 
 		mvPushMatrix();
 		mat4.translate(mvMatrix,mvMatrix, [1.25, 0, 0]);	
-		mat4.rotate(mvMatrix,mvMatrix, degToRad(gAnimGuns*2), [0, 0, 1]);	
+		mat4.rotate(mvMatrix,mvMatrix, degToRad(animCounter[1]), [0, 0, 1]);	
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);
 		mat4.scale(mvMatrix,mvMatrix,[0.25,2.0,0.25]);
 		setMatrixUniforms();	
@@ -229,7 +252,7 @@ function drawGame() {
 
 		mvPushMatrix();
 		mat4.translate(mvMatrix,mvMatrix, [-1.25, 0, 0]);			
-		mat4.rotate(mvMatrix,mvMatrix, degToRad(-gAnimGuns*2), [0, 0, 1]);	
+		mat4.rotate(mvMatrix,mvMatrix, degToRad(-animCounter[1]), [0, 0, 1]);	
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);
 		mat4.scale(mvMatrix,mvMatrix,[0.25,2.0,0.25]);
 		setMatrixUniforms();	
@@ -239,7 +262,7 @@ function drawGame() {
 		mvPushMatrix();
 		
 		mat4.translate(mvMatrix,mvMatrix, [0, 0, 0.5]);	
-		mat4.rotate(mvMatrix,mvMatrix, degToRad((gAnimBody)), [1, 0, 0]);	
+		mat4.rotate(mvMatrix,mvMatrix, degToRad(animCounter[0]), [1, 0, 0]);	
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);	
 		mat4.scale(mvMatrix,mvMatrix,[1.0,1.0,1.0]);	
 		setMatrixUniforms();
