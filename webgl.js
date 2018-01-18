@@ -117,7 +117,7 @@ var pMatrix = mat4.create();
 
 function mvPushMatrix() {
 	var copy = mat4.create();
-	mat4.set(mvMatrix, copy);
+	mat4.copy(copy,mvMatrix);
 	mvMatrixStack.push(copy);
 }
 
@@ -132,8 +132,8 @@ function setMatrixUniforms() {
 	gl.uniform4fv (shaderProgram.vertexColorAttribute, [1.0,1.0,1.0,0.5]);
 	gl.uniform3fv (shaderProgram.lightWorldPosition, [0.0,0.0,0.0]);
 
-	mat4.inverse(mvMatrix,mvInverseMatrix);
-	mat4.transpose(mvInverseMatrix,mvInverseTransposeMatrix);
+	mat4.invert(mvInverseMatrix,mvMatrix);
+	mat4.transpose(mvInverseTransposeMatrix,mvInverseMatrix);
 	
 
 

@@ -5,6 +5,8 @@ var gSpeed=[];
 var gKeyPressed={};
 var gLastTime=0;
 var gAnim=0;
+var gAnimBody=0;
+var gAnimGuns=0;
 var gElapsed=0;
 var gBulletList = [];
 var gEnemieList = [];
@@ -16,7 +18,7 @@ function updatePosition(e) {
 	if (!isChrome || ( Math.abs(e.movementX) < 150 && Math.abs(e.movementY)< 150))
 	{
 		mvVector =  vec3.create();
-		vec3.cross(gDir,[0,1,0],mvVector);
+		vec3.cross(mvVector,gDir,[0,1,0]);
 
 		speedCoef = 2.5
 		gDir[0] += mvVector[0]*speedCoef*e.movementX/screen.width;
@@ -58,8 +60,7 @@ function initGame() {
 	gl.disable(gl.BLEND);
 	gl.enable(gl.DEPTH_TEST);      
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-	mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 1000.0, pMatrix);
-
+	
 	// Vertex Buffer
 	buffer = gl.createBuffer();
 	buffer.itemSize = 3;
@@ -84,7 +85,7 @@ function initGame() {
 	// Animation init
 	gLastTime = new Date().getTime();
 	
-	setInterval(addEnemies,10000);
+	//setInterval(addEnemies,10000);
 
 }
 
@@ -103,7 +104,7 @@ function drawGame() {
 	
 	// Deplacement
 	mvVector =  vec3.create();
-	vec3.cross(gDir,[0,1,0],mvVector);	
+	vec3.cross(mvVector,gDir,[0,1,0]);	
 	if(mediaIsKey("ArrowLeft") || mediaIsKey("Left")){gSpeed[0]=-20*mvVector[0];gSpeed[2]=-20*mvVector[2];}
 	if(mediaIsKey("ArrowRight") || mediaIsKey("Right")){gSpeed[0]=20*mvVector[0];gSpeed[2]=20*mvVector[2];}
 	if(mediaIsKey("ArrowUp") || mediaIsKey("Up")){gSpeed[0]=20*gDir[0];gSpeed[2]=20*gDir[2];}
@@ -135,10 +136,10 @@ function drawGame() {
 
 	// Camera managment
 	var lookAtMatrix = mat4.create();
-	mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 1000.0, pMatrix);
+	mat4.perspective(pMatrix,45, gl.viewportWidth / gl.viewportHeight, 0.1, 1000.0);
 	viewPos = [gPos[0] + gDir[0],gPos[1] + gDir[1],gPos[2] + gDir[2]];
-	mat4.lookAt(gPos,viewPos,[0,1,0],lookAtMatrix);
-	mat4.multiply(pMatrix,lookAtMatrix,pMatrix)
+	mat4.lookAt(lookAtMatrix,gPos,viewPos,[0,1,0]);
+	mat4.multiply(pMatrix,pMatrix,lookAtMatrix)
 
 	// init mvMAtrix
 	mat4.identity(mvMatrix)
@@ -149,21 +150,21 @@ function drawGame() {
 
 	// Center Rotation Cube
 	mvPushMatrix();	
-	mat4.rotate(mvMatrix, degToRad(gAnim)/2, [0, 1, 0]);
-	mat4.scale(mvMatrix,[2.0,2.0,2.0])
-	mat4.translate(mvMatrix, [10,1,0]);
+	mat4.rotate(mvMatrix,mvMatrix, degToRad(gAnim)/2, [0, 1, 0]);
+	mat4.scale(mvMatrix,mvMatrix,[2.0,2.0,2.0])
+	mat4.translate(mvMatrix,mvMatrix, [10,1,0]);
 	setMatrixUniforms();
 	gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
 	mvPopMatrix();	
 	
 	// Ground
 	mvPushMatrix();	
-	mat4.scale(mvMatrix,[50.0,0.1,50.0])
+	mat4.scale(mvMatrix,mvMatrix,[50.0,0.1,50.0])
 	setMatrixUniforms();
 	gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
 	mvPopMatrix();	
 	
-	// Bullets	
+	// // Bullets	
 	for (var id in gBulletList) {
 		bulletPos = gBulletList[id][0];
 		bulletDir = gBulletList[id][1];
@@ -171,16 +172,17 @@ function drawGame() {
 		bulletPos[1] += gElapsed*100*bulletDir[1];
 		bulletPos[2] += gElapsed*100*bulletDir[2];
 		mvPushMatrix()	;
-		mat4.translate(mvMatrix, bulletPos);
-		mat4.rotate(mvMatrix, degToRad(gAnim)*5, [1, 1, 1]);
-		mat4.scale(mvMatrix,[0.5,0.5,0.25]);
+		mat4.translate(mvMatrix,mvMatrix, bulletPos);
+		mat4.rotate(mvMatrix,mvMatrix, degToRad(gAnim)*5, [1, 1, 1]);
+		mat4.scale(mvMatrix,mvMatrix,[0.5,0.5,0.25]);
 		setMatrixUniforms();
 		gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
 		mvPopMatrix();
 	}
 
-	// Enemies	
+	// // Enemies	
 	for (var id in gEnemieList) {
+		
 		enemiePos = gEnemieList[id][0];
 		enemieDir = gEnemieList[id][1];
 		enemieSpeed = gEnemieList[id][2];
@@ -188,41 +190,58 @@ function drawGame() {
 		enemieDir[1] = gPos[1] - enemiePos[1];
 		enemieDir[2] = gPos[2] - enemiePos[2];
 		dist = vec3.length(enemieDir);
+		vec3.normalize(enemieDir,enemieDir);
 		if (dist > 20)
 		{
-			vec3.normalize(enemieDir,enemieDir);
 			enemiePos[0] += (gElapsed*enemieSpeed[0] + gElapsed*10*enemieDir[0]);
 			enemiePos[1] += (gElapsed*enemieSpeed[1] + gElapsed*10*enemieDir[1]);
 			enemiePos[2] += (gElapsed*enemieSpeed[2] + gElapsed*10*enemieDir[2]);
 			enemieSpeed[0] = gElapsed*10*enemieDir[0];
 			enemieSpeed[1] = gElapsed*10*enemieDir[1];
 			enemieSpeed[2] = gElapsed*10*enemieDir[2];
+			gAnimBody += gElapsed*100;
+		}
+		else
+		{
+
+			gAnimGuns  += gElapsed*100;
 		}
 		
 
 		mvPushMatrix();
 		newPos = [-(enemiePos[0]+enemieDir[0]),-(enemiePos[1]+enemieDir[1]),enemiePos[2]+enemieDir[2]];
-		mat4.translate(mvMatrix, enemiePos);
-		mat4.lookAt([0,0,0],[-enemieDir[0],enemieDir[1],enemieDir[2]],[0,1,0],lookAtMatrix);
-		mat4.multiply(mvMatrix,lookAtMatrix,mvMatrix);
+		mat4.translate(mvMatrix,mvMatrix, enemiePos);
+		console.log(enemieDir)
+		mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],enemieDir,[0,1,0]);
+		mat4.invert(lookAtMatrix,lookAtMatrix);
+		mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
 		// mat4.rotate(mvMatrix, degToRad(-angleX), [1, 0, 0]);
 		setMatrixUniforms();
+
 		mvPushMatrix();
-		
-		mat4.translate(mvMatrix, [0, 0, -0.5]);	
-		mat4.rotate(mvMatrix, degToRad(gAnim), [0, 0, 1]);	
-		mat4.rotate(mvMatrix, degToRad(90), [1, 0, 0]);
-		mat4.scale(mvMatrix,[0.25,1.0,0.25]);
+		mat4.translate(mvMatrix,mvMatrix, [1.25, 0, 0]);	
+		mat4.rotate(mvMatrix,mvMatrix, degToRad(gAnimGuns*2), [0, 0, 1]);	
+		mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);
+		mat4.scale(mvMatrix,mvMatrix,[0.25,2.0,0.25]);
+		setMatrixUniforms();	
+		gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
+		mvPopMatrix();
+
+		mvPushMatrix();
+		mat4.translate(mvMatrix,mvMatrix, [-1.25, 0, 0]);			
+		mat4.rotate(mvMatrix,mvMatrix, degToRad(-gAnimGuns*2), [0, 0, 1]);	
+		mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);
+		mat4.scale(mvMatrix,mvMatrix,[0.25,2.0,0.25]);
 		setMatrixUniforms();	
 		gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
 		mvPopMatrix();
 		
 		mvPushMatrix();
 		
-		mat4.translate(mvMatrix, [0, 0, 0.5]);	
-		mat4.rotate(mvMatrix, degToRad((gAnim+45)), [0, 0, 1]);	
-		mat4.rotate(mvMatrix, degToRad(90), [1, 0, 0]);	
-		mat4.scale(mvMatrix,[1.0,1.0,1.0]);	
+		mat4.translate(mvMatrix,mvMatrix, [0, 0, 0.5]);	
+		mat4.rotate(mvMatrix,mvMatrix, degToRad((gAnimBody)), [1, 0, 0]);	
+		mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);	
+		mat4.scale(mvMatrix,mvMatrix,[1.0,1.0,1.0]);	
 		setMatrixUniforms();
 		gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
 		mvPopMatrix();		
