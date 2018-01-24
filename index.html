@@ -37,27 +37,27 @@
 
       gl_FragColor = vec4(0.1,0.1,0.1,1.0) ;
       
-      float light = pow(light1,10.0);
+      float light = pow(light1,7.0);
       if (light > 0.0)
       {
         gl_FragColor += vec4(light*0.5,light*0.5,light,0) ;
       }   
-      light = pow(light2,10.0);
+      light = pow(light2,7.0);
       if (light > 0.0)
       {
         gl_FragColor += vec4(light,light,light*0.5,0) ;
       }       
-      light = pow(light3,10.0);
+      light = pow(light3,7.0);
       if (light > 0.0)
       {
         gl_FragColor += vec4(light,light,light*0.5,0) ;
       }       
-      light = pow(light4,10.0);
+      light = pow(light4,7.0);
       if (light > 0.0)
       {
         gl_FragColor += vec4(light*0.5,light,light,0) ;
       }         
-      light = pow(light5,10.0);
+      light = pow(light5,7.0);
       if (light > 0.0)
       {
         gl_FragColor += vec4(light,light*0.5,light,0) ;

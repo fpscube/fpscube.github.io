@@ -34,20 +34,23 @@ function mediaIsKey(name){return (gKeyPressed[name]==1);}
 function mediaSetMouseUpFct(event){return;}
 function mediaSetMouseDownFct(event){
 	if (event.button==0)  gBulletList.push([[gPos[0]+gDir[0]*2,gPos[1]+gDir[1]*2,gPos[2]+gDir[2]*2],[gDir[0],gDir[1],gDir[2]]]);
-	if (event.button==2)  gEnemieList.push([[-gPos[0],gPos[1]+20,-gPos[2]],[-gDir[0],0,-gDir[2]],[0,0,0],[0,0,0]]);
+	if (event.button==2)  gEnemieList.push([[-gPos[0],gPos[1]+20,-gPos[2]],[-gDir[0],0,-gDir[2]],10,[0,0,0],[0,0,0]]);
 	if (gBulletList.length > 20)  gBulletList.shift();	
 }
 
 function addEnemies()
 {
-	gEnemieList.push([[Math.random()*10,gPos[1]+20,-(Math.random() + 2) * 30],[0,0,0],[0,0,0],[0,0,0]]);
+	if (gEnemieList.length < 5)
+	{	
+		gEnemieList.push([[Math.random()*10,gPos[1]+(gEnemieList.length)*5,-(Math.random() + 2) * 30],[0,0,0],10,[0,0,0],[0,0,0]]);
+	}
 }
 
 // ######### Init ##############// 
 
 function initGame() {
 
-	// game data Init+  
+	// game data Init
 	gPos = [0,6,40]; 
 	gDir = [0,0,-1];
 	gSpeed = [0,0,0];
@@ -86,7 +89,7 @@ function initGame() {
 	gLastTime = new Date().getTime();
 	
 	addEnemies();
-	setInterval(addEnemies,2000);
+	setInterval(addEnemies,1000);
 
 }
 
@@ -106,10 +109,10 @@ function drawGame() {
 	// Deplacement
 	mvVector =  vec3.create();
 	vec3.cross(mvVector,gDir,[0,1,0]);	
-	if(mediaIsKey("ArrowLeft") || mediaIsKey("Left")){gSpeed[0]=-20*mvVector[0];gSpeed[2]=-20*mvVector[2];}
-	if(mediaIsKey("ArrowRight") || mediaIsKey("Right")){gSpeed[0]=20*mvVector[0];gSpeed[2]=20*mvVector[2];}
-	if(mediaIsKey("ArrowUp") || mediaIsKey("Up")){gSpeed[0]=20*gDir[0];gSpeed[2]=20*gDir[2];}
-	if(mediaIsKey("ArrowDown") || mediaIsKey("Down")){gSpeed[0]=-20*gDir[0];gSpeed[2]=-20*gDir[2];}	
+	if(mediaIsKey("ArrowLeft") || mediaIsKey("Left")  || mediaIsKey("q")){gSpeed[0]=-20*mvVector[0];gSpeed[2]=-20*mvVector[2];}
+	if(mediaIsKey("ArrowRight") || mediaIsKey("Right")  || mediaIsKey("d")){gSpeed[0]=20*mvVector[0];gSpeed[2]=20*mvVector[2];}
+	if(mediaIsKey("ArrowUp") || mediaIsKey("Up")  || mediaIsKey("z")){gSpeed[0]=20*gDir[0];gSpeed[2]=20*gDir[2];}
+	if(mediaIsKey("ArrowDown") || mediaIsKey("Down")  || mediaIsKey("s")){gSpeed[0]=-20*gDir[0];gSpeed[2]=-20*gDir[2];}	
 	
 	
 	// Gravity
@@ -140,6 +143,57 @@ function drawGame() {
 			if (gLife<0)initGame();
 			break;
 		}
+	}	
+
+	// Enemies Position
+	for (var i=0;i<gEnemieList.length;i++)
+	{
+		enemiePos = gEnemieList[i][0];
+		enemieDir = gEnemieList[i][1];
+		enemieSpeed = gEnemieList[i][2];
+		animCounter = gEnemieList[i][3];
+		vec3.subtract(enemieDir,gPos,enemiePos);
+		dist = vec3.length(enemieDir);
+		vec3.normalize(enemieDir,enemieDir);
+
+		collision=false
+		for (var y=0;y<gEnemieList.length;y++)
+		{
+			if (i==y) continue;
+			distVect = vec3.create();
+			vec3.subtract(distVect,gEnemieList[i][0],gEnemieList[y][0]);
+			distEn1En2 = vec3.length(distVect);
+			vec3.subtract(distVect,gPos,gEnemieList[y][0]);		
+			distPosEn2 = vec3.length(distVect);	
+			vec3.subtract(distVect,gPos,gEnemieList[i][0]);		
+			distPosEn1 = vec3.length(distVect);	
+			if(distEn1En2 <4 && distPosEn1>distPosEn2) collision=true ;
+
+		}
+
+		if(collision) continue;
+		
+		if (dist > 20)
+		{
+			enemieSpeed = 10;
+			animCounter[0] += gElapsed*100
+		}
+		else
+		{			
+			enemieSpeed = 0;
+			animCounter[1] += gElapsed*200;
+			animCounter[2] += gElapsed;
+			if (animCounter[2] > 1)
+			{
+				animCounter[2]=0;
+				gBulletList.push([[enemiePos[0]+enemieDir[0]*2,enemiePos[1]+enemieDir[1]*2,enemiePos[2]+enemieDir[2]*2],enemieDir]);
+			}
+
+		}
+		
+		enemiePos[0] += gElapsed*enemieSpeed*enemieDir[0];
+		enemiePos[1] += gElapsed*enemieSpeed*enemieDir[1];
+		enemiePos[2] += gElapsed*enemieSpeed*enemieDir[2];
 	}	
 
 	// Camera managment
@@ -180,7 +234,7 @@ function drawGame() {
 	gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
 	mvPopMatrix();	
 	
-	// // Bullets	
+	//  Bullets	
 	for (var id in gBulletList) {
 		bulletPos = gBulletList[id][0];
 		bulletDir = gBulletList[id][1];
@@ -196,44 +250,13 @@ function drawGame() {
 		mvPopMatrix();
 	}
 
-	// // Enemies	
+	// Ennemies draw 
 	for (var id in gEnemieList) {
-		
 		enemiePos = gEnemieList[id][0];
 		enemieDir = gEnemieList[id][1];
-		enemieSpeed = gEnemieList[id][2];
 		animCounter = gEnemieList[id][3];
-		enemieDir[0] = gPos[0] - enemiePos[0];
-		enemieDir[1] = gPos[1] - enemiePos[1];
-		enemieDir[2] = gPos[2] - enemiePos[2];
-		dist = vec3.length(enemieDir);
-		vec3.normalize(enemieDir,enemieDir);
-		if (dist > 20)
-		{
-			enemiePos[0] += (gElapsed*enemieSpeed[0] + gElapsed*10*enemieDir[0]);
-			enemiePos[1] += (gElapsed*enemieSpeed[1] + gElapsed*10*enemieDir[1]);
-			enemiePos[2] += (gElapsed*enemieSpeed[2] + gElapsed*10*enemieDir[2]);
-			enemieSpeed[0] = gElapsed*10*enemieDir[0];
-			enemieSpeed[1] = gElapsed*10*enemieDir[1];
-			enemieSpeed[2] = gElapsed*10*enemieDir[2];
-			animCounter[0] += gElapsed*100
-		}
-		else
-		{			
-			animCounter[1] += gElapsed*200;
-			animCounter[2] += gElapsed;
-			console.log(animCounter[2]);
-			if (animCounter[2] > 1)
-			{
-				animCounter[2]=0;
-				gBulletList.push([[enemiePos[0]+enemieDir[0]*2,enemiePos[1]+enemieDir[1]*2,enemiePos[2]+enemieDir[2]*2],enemieDir]);
-			}
-
-		}
-		
 
 		mvPushMatrix();
-		newPos = [-(enemiePos[0]+enemieDir[0]),-(enemiePos[1]+enemieDir[1]),enemiePos[2]+enemieDir[2]];
 		mat4.translate(mvMatrix,mvMatrix, enemiePos);
 		mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],enemieDir,[0,1,0]);
 		mat4.invert(lookAtMatrix,lookAtMatrix);
