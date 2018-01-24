@@ -44,9 +44,10 @@ function mediaSetMouseDownFct(event){
 
 function addEnemies()
 {
-	if (gEnemieList.length < 5)
+	if (gEnemieList.length < 8)
 	{	
-		gEnemieList.push([[Math.random()*10,gPos[1]+(gEnemieList.length)*5,-(Math.random() + 2) * 30],[0,0,0],10,[0,0,0],[0,0,0]]);
+		angle = Math.random()*2*Math.PI;
+		gEnemieList.push([[Math.cos(angle)*100,20,Math.sin(angle)*100],[0,0,0],10,[0,0,0],[0,0,0]]);
 	}
 }
 
