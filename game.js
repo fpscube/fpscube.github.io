@@ -2,6 +2,7 @@
 var gPos=[] ;
 var gDir=[];
 var gSpeed=[]; 
+var gSpeedCoef=50;
 var gKeyPressed={};
 var gLastTime=0;
 var gLife=0;
@@ -98,11 +99,12 @@ function drawGame() {
 	// Deplacement
 	mvVector =  vec3.create();
 	vec3.cross(mvVector,gDir,[0,1,0]);	
-	speed=200 ;
-	if(mediaIsKey("ArrowLeft") || mediaIsKey("Left")  || mediaIsKey("q")){gSpeed[0]=-speed*mvVector[0];gSpeed[2]=-speed*mvVector[2];}
-	if(mediaIsKey("ArrowRight") || mediaIsKey("Right")  || mediaIsKey("d")){gSpeed[0]=speed*mvVector[0];gSpeed[2]=speed*mvVector[2];}
-	if(mediaIsKey("ArrowUp") || mediaIsKey("Up")  || mediaIsKey("z")){gSpeed[0]=speed*gDir[0];gSpeed[2]=speed*gDir[2];}
-	if(mediaIsKey("ArrowDown") || mediaIsKey("Down")  || mediaIsKey("s")){gSpeed[0]=-speed*gDir[0];gSpeed[2]=-speed*gDir[2];}	
+	if(mediaIsKey("-")) 	gSpeedCoef -=1;	
+	if(mediaIsKey("+") )	gSpeedCoef +=1;	
+	if(mediaIsKey("ArrowLeft") || mediaIsKey("Left")  || mediaIsKey("q")){gSpeed[0]=-gSpeedCoef*mvVector[0];gSpeed[2]=-gSpeedCoef*mvVector[2];}
+	if(mediaIsKey("ArrowRight") || mediaIsKey("Right")  || mediaIsKey("d")){gSpeed[0]=gSpeedCoef*mvVector[0];gSpeed[2]=gSpeedCoef*mvVector[2];}
+	if(mediaIsKey("ArrowUp") || mediaIsKey("Up")  || mediaIsKey("z")){gSpeed[0]=gSpeedCoef*gDir[0];gSpeed[2]=gSpeedCoef*gDir[2];}
+	if(mediaIsKey("ArrowDown") || mediaIsKey("Down")  || mediaIsKey("s")){gSpeed[0]=-gSpeedCoef*gDir[0];gSpeed[2]=-gSpeedCoef*gDir[2];}	
 	
 
 	// Fire Object
@@ -129,7 +131,6 @@ function drawGame() {
 	gPos[1] += gSpeed[1]*gElapsed;
 	gPos[2] += gSpeed[2]*gElapsed;
 	
-	if (gPos[1] < -60) {initGame();}
 	gPos[1]=groundGetY(gPos[0],gPos[2]) + 10.0;
 	gSpeed = [0,0,0];
 

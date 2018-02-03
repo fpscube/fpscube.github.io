@@ -8,8 +8,9 @@ var groundIndices;
 
 function groundGetY(x,z)
 {
- y = (Math.sin(x/50)*5+Math.sin(z/50)*5 + Math.sin(x/100)*10 + Math.sin(z/100)*10);
-//  y = (Math.sin(x/100)*10+Math.sin(z/100)*10);
+ y = Math.sin(x/50)*5+Math.sin(z/50)*5 + Math.sin(x/90)*9 + Math.sin(z/90)*9 + Math.sin(x/150)*15 + Math.sin(z/150)*15;
+ //y = ((x/100)**2)+((z/100)**2);
+
   return(y);
 }
 
@@ -18,9 +19,10 @@ function groundGetNormalVec(x,z)
   vector1 =  vec3.create();
   vector2 =  vec3.create();
   vector3 =  vec3.create();
-  vec3.normalize(vector1,[1.0,  -Math.cos(x/50)-Math.cos(x/100) ,0]);
-  
-  vec3.normalize(vector2,[0,  -Math.cos(z/50)-Math.cos(z/100) ,-1.0]);
+  vec3.normalize(vector1,[-0.15,(5*50*Math.cos(x/50))/(50**2)+(9*90*Math.cos(x/90))/(90**2)+(15*150*Math.cos(x/150))/(150**2),0.0]);
+  vec3.normalize(vector2,[0,(5*50*Math.cos(z/50))/(50**2)+(9*90*Math.cos(z/90))/(90**2)+(15*150*Math.cos(z/150))/(150**2),0.15 ]);
+  //vec3.normalize(vector1,[-0.25, (2*100*x)/(100**2*100),0.0]);
+//  vec3.normalize(vector2,[0,(2*100*z)/(100**2*100),0.25]);
   vec3.cross(vector3,vector1,vector2)   ;
 
 // vec3.normalize(normVector,[1, -Math.cos(x/10)/10   - Math.cos(z/10)/10  ,1]);
