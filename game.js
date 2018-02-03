@@ -129,8 +129,7 @@ function drawGame() {
 	//if (gPos[0] > 50 || gPos[0] < -50  || gPos[2] < -50  || gPos[2] > 50  )  gSpeed[1] = -1000*gElapsed ; 
 	gPos[0] += gSpeed[0]*gElapsed;
 	gPos[1] += gSpeed[1]*gElapsed;
-	gPos[2] += gSpeed[2]*gElapsed;
-	
+	gPos[2] += gSpeed[2]*gElapsed;	
 	gPos[1]=groundGetY(gPos[0],gPos[2]) + 10.0;
 	gSpeed = [0,0,0];
 
@@ -205,6 +204,8 @@ function drawGame() {
 		enemiePos[0] += gElapsed*enemieSpeed*enemieDir[0];
 		enemiePos[1] += gElapsed*enemieSpeed*enemieDir[1];
 		enemiePos[2] += gElapsed*enemieSpeed*enemieDir[2];
+		enemiePosGroundY = groundGetY(enemiePos[0] ,enemiePos[2]) + 10.0;
+		if (enemiePos[1] < enemiePosGroundY) enemiePos[1]= enemiePosGroundY;
 	}	
 
 	//Ortho proj
