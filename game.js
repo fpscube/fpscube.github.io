@@ -56,39 +56,21 @@ function addEnemies()
 function initGame() {
 
 	// game data Init
-	gPos = [0,6,40]; 
+	gPos = [0,0,10 ]; 
 	gDir = [0,0,-1];
 	gSpeed = [0,0,0];
 	gLife = 10;
 	gBulletList = [];
 	gEnemieList = [];	
-
 	// gl init
-	gl.clearColor(0.0, 0.0, 0.0, 1.0);	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+	gl.clearColor(0x00, 0xbf, 0xff, 1.0);	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 	gl.disable(gl.BLEND);
 	gl.enable(gl.DEPTH_TEST);      
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-	
-	// Vertex Buffer
-	buffer = gl.createBuffer();
-	buffer.itemSize = 3;
-	buffer.numItems = 24;	
-	gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(gCubePositions), gl.STATIC_DRAW);	
-	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, buffer.itemSize, gl.FLOAT, false, 0, 0);
 
-	// Normal Buffer	
-	buffer = gl.createBuffer();
-	buffer.itemSize = 3;
-	buffer.numItems = 24;	
-	gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(gCubeNormals), gl.STATIC_DRAW);	
-	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
-		
-	// Index Buffer
-	buffer = gl.createBuffer ();
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer);
-	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(gIndices), gl.STATIC_DRAW);
+	// init gl object
+	cubeInit();
+	groundInit();
 		  	
 	// Animation init
 	gLastTime = new Date().getTime();
@@ -97,6 +79,8 @@ function initGame() {
 	setInterval(addEnemies,1000);
 
 }
+
+
 
 // ######### Draw ##############// 
 
@@ -114,10 +98,11 @@ function drawGame() {
 	// Deplacement
 	mvVector =  vec3.create();
 	vec3.cross(mvVector,gDir,[0,1,0]);	
-	if(mediaIsKey("ArrowLeft") || mediaIsKey("Left")  || mediaIsKey("q")){gSpeed[0]=-20*mvVector[0];gSpeed[2]=-20*mvVector[2];}
-	if(mediaIsKey("ArrowRight") || mediaIsKey("Right")  || mediaIsKey("d")){gSpeed[0]=20*mvVector[0];gSpeed[2]=20*mvVector[2];}
-	if(mediaIsKey("ArrowUp") || mediaIsKey("Up")  || mediaIsKey("z")){gSpeed[0]=20*gDir[0];gSpeed[2]=20*gDir[2];}
-	if(mediaIsKey("ArrowDown") || mediaIsKey("Down")  || mediaIsKey("s")){gSpeed[0]=-20*gDir[0];gSpeed[2]=-20*gDir[2];}	
+	speed=200 ;
+	if(mediaIsKey("ArrowLeft") || mediaIsKey("Left")  || mediaIsKey("q")){gSpeed[0]=-speed*mvVector[0];gSpeed[2]=-speed*mvVector[2];}
+	if(mediaIsKey("ArrowRight") || mediaIsKey("Right")  || mediaIsKey("d")){gSpeed[0]=speed*mvVector[0];gSpeed[2]=speed*mvVector[2];}
+	if(mediaIsKey("ArrowUp") || mediaIsKey("Up")  || mediaIsKey("z")){gSpeed[0]=speed*gDir[0];gSpeed[2]=speed*gDir[2];}
+	if(mediaIsKey("ArrowDown") || mediaIsKey("Down")  || mediaIsKey("s")){gSpeed[0]=-speed*gDir[0];gSpeed[2]=-speed*gDir[2];}	
 	
 
 	// Fire Object
@@ -139,13 +124,15 @@ function drawGame() {
 	}
 	
 	// Gravity
-	if (gPos[0] > 50 || gPos[0] < -50  || gPos[2] < -50  || gPos[2] > 50  )  gSpeed[1] = -1000*gElapsed ; 
+	//if (gPos[0] > 50 || gPos[0] < -50  || gPos[2] < -50  || gPos[2] > 50  )  gSpeed[1] = -1000*gElapsed ; 
 	gPos[0] += gSpeed[0]*gElapsed;
 	gPos[1] += gSpeed[1]*gElapsed;
 	gPos[2] += gSpeed[2]*gElapsed;
-	if (gPos[1] < -60) {initGame();}
-	gSpeed = [0,0,0];
 	
+	if (gPos[1] < -60) {initGame();}
+	gPos[1]=groundGetY(gPos[0],gPos[2]) + 10.0;
+	gSpeed = [0,0,0];
+
 	// Bullets And Enemies And Hero Collisions
 	for (var i=gBulletList.length-1;i>=0;i--){	 		
 		bulletPos = gBulletList[i][0];
@@ -225,10 +212,10 @@ function drawGame() {
 	// Life Bar Display
 	mat4.scale(mvMatrix,mvMatrix,[gLife/10,0.1,0.1]);
 	setMatrixUniforms();
-	gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
+	cubeDraw();
 
 	//Perceptive projection
-	mat4.perspective(pMatrix,45, gl.viewportWidth / gl.viewportHeight, 0.1, 1000.0);
+	mat4.perspective(pMatrix,45, gl.viewportWidth / gl.viewportHeight, 0.01, 10000.0);
 
 	//Gun Display
 	gunSpeed = 0;
@@ -250,6 +237,7 @@ function drawGame() {
 
 	// Camera managment
 	var lookAtMatrix = mat4.create();
+
 	viewPos = [gPos[0] + gDir[0],gPos[1] + gDir[1],gPos[2] + gDir[2]];
 	mat4.lookAt(lookAtMatrix,gPos,viewPos,[0,1,0]);
 	mat4.multiply(pMatrix,pMatrix,lookAtMatrix)
@@ -258,21 +246,20 @@ function drawGame() {
 	mat4.identity(mvMatrix)
 	setMatrixUniforms();
 	
-	// Center Cube
-	gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
+	// Center Cube;
+	cubeDraw();
 
 	// Center Rotation Cube
 	mvPushMatrix();	
 	mat4.rotate(mvMatrix,mvMatrix, degToRad(gAnim)/2, [0, 1, 0]);
-	setMatrixUniforms();
-	gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
+	setMatrixUniforms();;
+	cubeDraw();
 	mvPopMatrix();	
 	
-	// Ground
+	// Ground	
 	mvPushMatrix();	
-	mat4.scale(mvMatrix,mvMatrix,[50.0,0.1,50.0])
 	setMatrixUniforms();
-	gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
+	groundDraw();
 	mvPopMatrix();	
 	
 	//  Bullets	
@@ -286,8 +273,8 @@ function drawGame() {
 		mat4.translate(mvMatrix,mvMatrix, bulletPos);
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(gAnim)*5, [1, 1, 1]);
 		mat4.scale(mvMatrix,mvMatrix,[0.2,0.2,0.2]);
-		setMatrixUniforms();
-		gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
+		setMatrixUniforms();;
+		cubeDraw();
 		mvPopMatrix();
 	}
 
@@ -310,8 +297,8 @@ function drawGame() {
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(animCounter[1]), [0, 0, 1]);	
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);
 		mat4.scale(mvMatrix,mvMatrix,[0.25,2.0,0.25]);
-		setMatrixUniforms();	
-		gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
+		setMatrixUniforms();
+		cubeDraw();
 		mvPopMatrix();
 
 		mvPushMatrix();
@@ -319,8 +306,8 @@ function drawGame() {
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(-animCounter[1]), [0, 0, 1]);	
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);
 		mat4.scale(mvMatrix,mvMatrix,[0.25,2.0,0.25]);
-		setMatrixUniforms();	
-		gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
+		setMatrixUniforms();
+		cubeDraw();
 		mvPopMatrix();
 		
 		mvPushMatrix();
@@ -330,7 +317,7 @@ function drawGame() {
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);	
 		mat4.scale(mvMatrix,mvMatrix,[1.0,1.0,1.0]);	
 		setMatrixUniforms();
-		gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
+		cubeDraw();
 		mvPopMatrix();		
 		
 		

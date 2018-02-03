@@ -1,5 +1,4 @@
-
-  var gCubePositions = [
+var cubePositions = [
     // Front face
     -1.0, -1.0,  1.0,
      1.0, -1.0,  1.0,
@@ -38,7 +37,7 @@
   ];
 
 
-var gCubeNormals = [
+var cubeNormals = [
     // Front
      0.0,  0.0,  1.0,
      0.0,  0.0,  1.0,
@@ -76,7 +75,7 @@ var gCubeNormals = [
     -1.0,  0.0,  0.0
   ];
 
-  const gIndices = [
+var cubeIndices = [
     0,  1,  2,      0,  2,  3,    // front
     4,  5,  6,      4,  6,  7,    // back
     8,  9,  10,     8,  10, 11,   // top
@@ -84,3 +83,48 @@ var gCubeNormals = [
     16, 17, 18,     16, 18, 19,   // right
     20, 21, 22,     20, 22, 23,   // left
   ];
+
+var cubeVertexBuffer;
+var cubeNormalBuffer;
+var cubeIndiceBuffer;
+
+
+function cubeInit()
+{
+
+  // Vertex Buffer
+  cubeVertexBuffer = gl.createBuffer();
+  cubeVertexBuffer.itemSize = 3;
+  cubeVertexBuffer.numItems = 24;	
+  gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubePositions), gl.STATIC_DRAW);	
+
+  // Normal Buffer	
+  cubeNormalBuffer = gl.createBuffer();
+  cubeNormalBuffer.itemSize = 3;
+  cubeNormalBuffer.numItems = 24;	
+  gl.bindBuffer(gl.ARRAY_BUFFER, cubeNormalBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubeNormals), gl.STATIC_DRAW);	
+  gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, cubeNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    
+  // Index Buffer
+  cubeIndiceBuffer = gl.createBuffer ();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeIndiceBuffer);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeIndices), gl.STATIC_DRAW);
+}
+
+
+function cubeDraw()
+{
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, cubeNormalBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, cubeNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeIndiceBuffer);
+
+    
+    gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
+}

@@ -6,6 +6,7 @@
 <script type="text/javascript" src="glMatrix.js"></script>
 <script type="text/javascript" src="webgl-utils.js"></script>
 <script type="text/javascript" src="game.js"></script>
+<script type="text/javascript" src="ground.js"></script>
 <script type="text/javascript" src="cube.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
@@ -24,43 +25,16 @@
     
     void main() {
       vec3 normal = normalize(v_normal);
-      vec3 surfaceToLightDirection1 = normalize(v_surfaceToLight1);
-      vec3 surfaceToLightDirection2 = normalize(v_surfaceToLight2);
-      vec3 surfaceToLightDirection3 = normalize(v_surfaceToLight3);
-      vec3 surfaceToLightDirection4 = normalize(v_surfaceToLight4);
-      vec3 surfaceToLightDirection5 = normalize(v_surfaceToLight5);
+      vec3 surfaceToLightDirection1 = normalize(vec3(0.0,1.0,0.0));
       float light1 = dot(normal , surfaceToLightDirection1);
-      float light2 = dot(normal , surfaceToLightDirection2);
-      float light3 = dot(normal , surfaceToLightDirection3);
-      float light4 = dot(normal , surfaceToLightDirection4);
-      float light5 = dot(normal , surfaceToLightDirection5);
 
       gl_FragColor = vec4(0.1,0.1,0.1,1.0) ;
+
+      float light = light1*0.3 + 0.5;
       
-      float light = pow(light1,7.0);
-      if (light > 0.0)
-      {
-        gl_FragColor += vec4(light*0.5,light*0.5,light,0) ;
-      }   
-      light = pow(light2,7.0);
       if (light > 0.0)
       {
         gl_FragColor += vec4(light,light,light*0.5,0) ;
-      }       
-      light = pow(light3,7.0);
-      if (light > 0.0)
-      {
-        gl_FragColor += vec4(light,light,light*0.5,0) ;
-      }       
-      light = pow(light4,7.0);
-      if (light > 0.0)
-      {
-        gl_FragColor += vec4(light*0.5,light,light,0) ;
-      }         
-      light = pow(light5,7.0);
-      if (light > 0.0)
-      {
-        gl_FragColor += vec4(light,light*0.5,light,0) ;
       }   
     }
 </script>
@@ -75,10 +49,6 @@
     
     varying vec3 v_normal;    
     varying vec3 v_surfaceToLight1;
-    varying vec3 v_surfaceToLight2;
-    varying vec3 v_surfaceToLight3;
-    varying vec3 v_surfaceToLight4;
-    varying vec3 v_surfaceToLight5;
     varying vec3 v_surfaceToView;
     
     void main() {
@@ -93,12 +63,8 @@
     
       // compute the vector of the surface to the light
       // and pass it to the fragment shader
-      v_surfaceToLight1 = vec3(0,50.0,0) - surfaceWorldPosition;
-      v_surfaceToLight2 = vec3(50.0,50.0,50.0) - surfaceWorldPosition;
-      v_surfaceToLight3 = vec3(50.0,50.0,-50.0) - surfaceWorldPosition;
-      v_surfaceToLight4 = vec3(-50.0,50.0,-50.0) - surfaceWorldPosition;
-      v_surfaceToLight5 = vec3(-50.0,50.0,50.0) - surfaceWorldPosition;
-    
+      v_surfaceToLight1 = vec3(0.0,1000.0,0.0) - surfaceWorldPosition;
+
       // compute the vector of the surface to the view/camera
       // and pass it to the fragment shader
       //v_surfaceToView = u_viewWorldPosition - surfaceWorldPosition;
