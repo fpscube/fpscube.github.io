@@ -9,65 +9,42 @@
 <script type="text/javascript" src="ground.js"></script>
 <script type="text/javascript" src="cube.js"></script>
 
+
+
+
 <script id="shader-fs" type="x-shader/x-fragment">
-    precision mediump float;
+    precision highp float;
     
-    // Passed in from the vertex shader.
-    varying vec3 v_normal;
-    varying vec3 v_surfaceToLight1;
-    varying vec3 v_surfaceToLight2;
-    varying vec3 v_surfaceToLight3;
-    varying vec3 v_surfaceToLight4;
-    varying vec3 v_surfaceToLight5;
-    //varying vec3 v_surfaceToView;
-    
-    uniform vec4 u_color;
+    varying vec3 v_normal;    
+    uniform vec3 uVertexColor;
     
     void main() {
-      vec3 normal = normalize(v_normal);
-      vec3 surfaceToLightDirection1 = normalize(vec3(0.0,1.0,0.0));
-      float light1 = dot(normal , surfaceToLightDirection1);
+      float light = dot(v_normal , vec3(0.0,1.0,0.0));
 
       gl_FragColor = vec4(0.1,0.1,0.1,1.0) ;
-
-      float light = light1;
       
       if (light > 0.0)
       {
-        gl_FragColor += vec4(light,light,light*0.5,0) ;
-      }   
+        gl_FragColor += vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,0) ;
+      } 
     }
 </script>
 <script id="shader-vs" type="x-shader/x-vertex">
     attribute vec4 aVertexPosition;
     attribute vec3 aVertexNormal;
-
     uniform mat4 uMVMatrix;
     uniform mat4 uPMatrix;
-    uniform mat4 uMVInverseTransposeMatrix;
-    uniform vec3 uLightWorldPosition;
-    
+    uniform mat4 uMVInverseTransposeMatrix;    
     varying vec3 v_normal;    
-    varying vec3 v_surfaceToLight1;
-    varying vec3 v_surfaceToView;
     
     void main() {
+
       // Multiply the position by the matrix.
       gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
     
       // orient the normals and pass to the fragment shader
-      v_normal = mat3(uMVInverseTransposeMatrix) * aVertexNormal;
-    
-      // compute the world position of the surfoace
-      vec3 surfaceWorldPosition = (uMVMatrix * aVertexPosition).xyz;
-    
-      // compute the vector of the surface to the light
-      // and pass it to the fragment shader
-      v_surfaceToLight1 = vec3(0.0,1000.0,0.0) - surfaceWorldPosition;
+      v_normal =normalize( mat3(uMVInverseTransposeMatrix) * aVertexNormal);
 
-      // compute the vector of the surface to the view/camera
-      // and pass it to the fragment shader
-      //v_surfaceToView = u_viewWorldPosition - surfaceWorldPosition;
     }
     
 </script>

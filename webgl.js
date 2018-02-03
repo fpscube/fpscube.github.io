@@ -109,6 +109,7 @@ function initShaders() {
 }
 
 
+var vertexColorVector = [1.0,1.0,0.5];
 var mvMatrix = mat4.create();
 var mvInverseMatrix = mat4.create();
 var mvInverseTransposeMatrix = mat4.create();
@@ -129,7 +130,7 @@ function mvPopMatrix() {
 }
 
 function setMatrixUniforms() {
-	gl.uniform4fv (shaderProgram.vertexColorAttribute, [1.0,1.0,1.0,0.5]);
+	gl.uniform3fv (shaderProgram.vertexColorAttribute, vertexColorVector);
 	gl.uniform3fv (shaderProgram.lightWorldPosition, [0.0,0.0,0.0]);
 
 	mat4.invert(mvInverseMatrix,mvMatrix);

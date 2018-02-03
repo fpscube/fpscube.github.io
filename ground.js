@@ -8,7 +8,7 @@ var groundIndices;
 
 function groundGetY(x,z)
 {
- y = Math.sin(x/50)*5+Math.sin(z/50)*5 + Math.sin(x/90)*9 + Math.sin(z/90)*9 + Math.sin(x/150)*15 + Math.sin(z/150)*15;
+ y = Math.sin(x/50)*5+Math.sin(z/50)*5 + Math.sin(x/90)*9 + Math.sin(z/90)*9 + Math.sin(x/150)*15 + Math.sin(z/150)*15 -(x/200)**2 -(z/200)**2;
  //y = ((x/100)**2)+((z/100)**2);
 
   return(y);

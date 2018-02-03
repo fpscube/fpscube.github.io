@@ -217,9 +217,10 @@ function drawGame() {
 	cubeDraw();
 
 	//Perceptive projection
-	mat4.perspective(pMatrix,45, gl.viewportWidth / gl.viewportHeight, 0.01, 10000.0);
+	mat4.perspective(pMatrix,45, gl.viewportWidth / gl.viewportHeight, 1.0, 1000.0);
 
-	//Gun Display
+	//Gun Display	
+	vertexColorVector = [0.2,0.1,0.2];
 	gunSpeed = 0;
 	if(mediaIsKey("Fire")) gunSpeed=5;
 	mat4.identity(mvMatrix)
@@ -239,32 +240,33 @@ function drawGame() {
 
 	// Camera managment
 	var lookAtMatrix = mat4.create();
-
 	viewPos = [gPos[0] + gDir[0],gPos[1] + gDir[1],gPos[2] + gDir[2]];
 	mat4.lookAt(lookAtMatrix,gPos,viewPos,[0,1,0]);
 	mat4.multiply(pMatrix,pMatrix,lookAtMatrix)
 
 	// init mvMAtrix
 	mat4.identity(mvMatrix)
-	setMatrixUniforms();
-	
-	// Center Cube;
-	cubeDraw();
+	setMatrixUniforms();	
 
-	// Center Rotation Cube
-	mvPushMatrix();	
-	mat4.rotate(mvMatrix,mvMatrix, degToRad(gAnim)/2, [0, 1, 0]);
-	setMatrixUniforms();;
-	cubeDraw();
-	mvPopMatrix();	
-	
-	// Ground	
+	// Ground		
+	vertexColorVector = [1.0,1.0,0.5];
 	mvPushMatrix();	
 	setMatrixUniforms();
 	groundDraw();
+	mvPopMatrix();		
+	
+	// Water ;
+	mvPushMatrix();
+	mat4.identity(mvMatrix)
+	mat4.translate(mvMatrix,mvMatrix, [0.0,-35.0,0.0]);
+	vertexColorVector = [28.0/255,107.0/255,160.0/255];		
+	mat4.scale(mvMatrix,mvMatrix,[2000.0,1.0,2000.0]);
+	setMatrixUniforms();
+	cubeDraw();
 	mvPopMatrix();	
 	
-	//  Bullets	
+	//  Bullets		
+	vertexColorVector = [1.0,1.0,1.0];
 	for (var id in gBulletList) {
 		bulletPos = gBulletList[id][0];
 		bulletDir = gBulletList[id][1];
@@ -280,7 +282,8 @@ function drawGame() {
 		mvPopMatrix();
 	}
 
-	// Ennemies draw 
+	// Ennemies draw 	
+	vertexColorVector = [0.4,0.4,0.4];
 	for (var id in gEnemieList) {
 		enemiePos = gEnemieList[id][0];
 		enemieDir = gEnemieList[id][1];
