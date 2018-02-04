@@ -258,9 +258,9 @@ function drawGame() {
 	// Water ;
 	mvPushMatrix();
 	mat4.identity(mvMatrix)
-	mat4.translate(mvMatrix,mvMatrix, [0.0,-35.0,0.0]);
+	mat4.translate(mvMatrix,mvMatrix, [0.0,-40.0,0.0]);
 	vertexColorVector = [28.0/255,107.0/255,160.0/255];		
-	mat4.scale(mvMatrix,mvMatrix,[2000.0,1.0,2000.0]);
+	mat4.scale(mvMatrix,mvMatrix,[2000.0,10.0,2000.0]);
 	setMatrixUniforms();
 	cubeDraw();
 	mvPopMatrix();	
