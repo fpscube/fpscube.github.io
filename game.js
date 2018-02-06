@@ -57,14 +57,15 @@ function addEnemies()
 function initGame() {
 
 	// game data Init
-	gPos = [0,0,10 ]; 
+	gPos = [0,0,10]; 
 	gDir = [0,0,-1];
 	gSpeed = [0,0,0];
 	gLife = 10;
 	gBulletList = [];
 	gEnemieList = [];	
 	// gl init
-	gl.clearColor(0x00, 0xbf, 0xff, 1.0);	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+	gl.clearColor(0x00, 0xbf, 0xff, 1.0);	
+	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 	gl.disable(gl.BLEND);
 	gl.enable(gl.DEPTH_TEST);      
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
@@ -82,7 +83,6 @@ function initGame() {
 }
 
 
-
 // ######### Draw ##############// 
 
 function drawGame() {
@@ -92,6 +92,7 @@ function drawGame() {
 	gElapsed = (timeNow - gLastTime)/1000; 
 	gLastTime = timeNow; 	
 	gAnim += 100 * gElapsed;
+	shaderCounter += 10* gElapsed;
 
 	// Clear Display
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -220,7 +221,7 @@ function drawGame() {
 	mat4.perspective(pMatrix,45, gl.viewportWidth / gl.viewportHeight, 1.0, 1000.0);
 
 	//Gun Display	
-	vertexColorVector = [0.2,0.1,0.2];
+	vertexColorVector = [0.2,0.1,0.2,1.0];
 	gunSpeed = 0;
 	if(mediaIsKey("Fire")) gunSpeed=5;
 	mat4.identity(mvMatrix)
@@ -249,24 +250,27 @@ function drawGame() {
 	setMatrixUniforms();	
 
 	// Ground		
-	vertexColorVector = [1.0,1.0,0.5];
+	vertexColorVector = [1.0,1.0,0.5,1.0];
 	mvPushMatrix();	
 	setMatrixUniforms();
 	groundDraw();
 	mvPopMatrix();		
 	
 	// Water ;
+	
+	//gl.enable(gl.BLEND);
 	mvPushMatrix();
 	mat4.identity(mvMatrix)
 	mat4.translate(mvMatrix,mvMatrix, [0.0,-40.0,0.0]);
-	vertexColorVector = [28.0/255,107.0/255,160.0/255];		
+	vertexColorVector = [28.0/255,107.0/255,160.0/255,1.0];		
 	mat4.scale(mvMatrix,mvMatrix,[2000.0,10.0,2000.0]);
 	setMatrixUniforms();
 	cubeDraw();
 	mvPopMatrix();	
+//	gl.disable(gl.BLEND);
 	
 	//  Bullets		
-	vertexColorVector = [1.0,1.0,1.0];
+	vertexColorVector = [1.0,1.0,1.0,1.0];
 	for (var id in gBulletList) {
 		bulletPos = gBulletList[id][0];
 		bulletDir = gBulletList[id][1];
@@ -283,7 +287,7 @@ function drawGame() {
 	}
 
 	// Ennemies draw 	
-	vertexColorVector = [0.4,0.4,0.4];
+	vertexColorVector = [0.4,0.4,0.4,1.0];
 	for (var id in gEnemieList) {
 		enemiePos = gEnemieList[id][0];
 		enemieDir = gEnemieList[id][1];

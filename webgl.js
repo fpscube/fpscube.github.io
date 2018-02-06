@@ -101,6 +101,7 @@ function initShaders() {
 	gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
 
 	shaderProgram.vertexColorAttribute = gl.getUniformLocation(shaderProgram, "uVertexColor");
+	shaderProgram.counter = gl.getUniformLocation(shaderProgram, "uCounter");
 	shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
 	shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
 	shaderProgram.worldMatrix = gl.getUniformLocation(shaderProgram, "uWorldMatrix");
@@ -108,8 +109,8 @@ function initShaders() {
 	shaderProgram.lightWorldPosition = gl.getUniformLocation(shaderProgram, "uLightWorldPosition");
 }
 
-
-var vertexColorVector = [1.0,1.0,0.5];
+var shaderCounter=0;
+var vertexColorVector = [1.0,1.0,0.5,1.0];
 var mvMatrix = mat4.create();
 var mvInverseMatrix = mat4.create();
 var mvInverseTransposeMatrix = mat4.create();
@@ -130,7 +131,8 @@ function mvPopMatrix() {
 }
 
 function setMatrixUniforms() {
-	gl.uniform3fv (shaderProgram.vertexColorAttribute, vertexColorVector);
+	gl.uniform1f (shaderProgram.counter, shaderCounter);
+	gl.uniform4fv (shaderProgram.vertexColorAttribute, vertexColorVector);
 	gl.uniform3fv (shaderProgram.lightWorldPosition, [0.0,0.0,0.0]);
 
 	mat4.invert(mvInverseMatrix,mvMatrix);

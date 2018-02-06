@@ -12,20 +12,34 @@
 
 
 
-<script id="shader-fs" type="x-shader/x-fragment">
-    precision highp float;
+<script id="shader-fs" type="x-shader/x-fragment">  
+     precision highp float;
     
-    varying vec3 v_normal;    
-    uniform vec3 uVertexColor;
+    varying vec3 v_normal;   
+    varying vec4 v_position;     
+    uniform vec4 uVertexColor;   
+    uniform float uCounter;
     
     void main() {
-      float light = dot(v_normal , vec3(0.0,1.0,0.0));
+      float light;
+      if (v_position.y < -29.99 )
+      {
+        float dist = sqrt(v_position.x*v_position.x + v_position.z*v_position.z);
+      float x = sin((dist+ 2.0*uCounter)/17.0)/2.0+ 0.50 + sin((dist+ 3.0*uCounter)/35.0)/2.0+ 0.50 + sin((v_position.x + 10.0*uCounter)/60.0)/2.0+0.50;
+      float z = cos((dist+ uCounter)/7.0)/2.0+ 0.50 + cos((dist+ 4.0*uCounter)/15.0)/2.0+0.50 + cos((dist+ 6.0*uCounter)/35.0)/2.0+ 0.50 +  cos((v_position.x + 10.0*uCounter)/60.0)/2.0+0.50;
+      light = dot(normalize(vec3(x,8.0,z)), vec3(0.0,1.0,0.0));
+      }
+      else
+      {
 
-      gl_FragColor = vec4(0.1,0.1,0.1,1.0) ;
+       light = dot(v_normal, vec3(0.0,1.0,0.0));
+      }
+
+      gl_FragColor = vec4(0.1,0.1,0.1,uVertexColor.a);
       
       if (light > 0.0)
       {
-        gl_FragColor += vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,0) ;
+        gl_FragColor += vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,0.0) ;
       } 
     }
 </script>
@@ -35,11 +49,13 @@
     uniform mat4 uMVMatrix;
     uniform mat4 uPMatrix;
     uniform mat4 uMVInverseTransposeMatrix;    
-    varying vec3 v_normal;    
+    varying vec3 v_normal;   
+    varying vec4 v_position;    
     
     void main() {
 
       // Multiply the position by the matrix.
+      v_position = uMVMatrix * aVertexPosition;
       gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
     
       // orient the normals and pass to the fragment shader
