@@ -9,7 +9,6 @@ var gLife=0;
 var gElapsed=0;
 var gAnim=0;
 var gBulletList = [];
-var gEnemieList = [];
 
 var gFireTimer=0;
 
@@ -43,14 +42,7 @@ function mediaSetMouseDownFct(event){
 
 
 
-function addEnemies()
-{
-	if (gEnemieList.length < 8)
-	{	
-		angle = Math.random()*2*Math.PI;
-		gEnemieList.push([[Math.cos(angle)*100,20,Math.sin(angle)*100],[0,0,0],10,[0,0,0],[0,0,0]]);
-	}
-}
+
 
 // ######### Init ##############// 
 
@@ -62,7 +54,6 @@ function initGame() {
 	gSpeed = [0,0,0];
 	gLife = 10;
 	gBulletList = [];
-	gEnemieList = [];	
 	// gl init
 	gl.clearColor(0x00, 0xbf, 0xff, 1.0);	
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -71,14 +62,13 @@ function initGame() {
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
 	// init gl object
+	squareInit();
 	cubeInit();
+	enemiesInit(10);
 	groundInit();
 		  	
 	// Animation init
-	gLastTime = new Date().getTime();
-	
-	addEnemies();
-	setInterval(addEnemies,1000);
+	gLastTime = new Date().getTime();	
 
 }
 
@@ -134,16 +124,18 @@ function drawGame() {
 	gPos[1]=groundGetY(gPos[0],gPos[2]) + 10.0;
 	gSpeed = [0,0,0];
 
+
+
 	// Bullets And Enemies And Hero Collisions
 	for (var i=gBulletList.length-1;i>=0;i--){	 		
 		bulletPos = gBulletList[i][0];
-		for (var y=gEnemieList.length-1;y>=0;y--){
-			enemiePos = gEnemieList[y][0];
+		for (var y=gEnemiesList.length-1;y>=0;y--){
+			enemiePos = gEnemiesList[y][0];
 			if 	((Math.abs(bulletPos[0]-enemiePos[0]) < 1.0) &&
 				(Math.abs(bulletPos[1]-enemiePos[1]) < 1.0) &&
 				(Math.abs(bulletPos[2]-enemiePos[2]) < 1.0)){
 					gBulletList.splice(i,1);
-					gEnemieList.splice(y,1);
+					gEnemiesList.splice(y,1);
 					break;
 			}			
 		}
@@ -156,66 +148,28 @@ function drawGame() {
 		}
 	}	
 
-	// Enemies Position
-	for (var i=0;i<gEnemieList.length;i++)
-	{
-		enemiePos = gEnemieList[i][0];
-		enemieDir = gEnemieList[i][1];
-		enemieSpeed = gEnemieList[i][2];
-		animCounter = gEnemieList[i][3];
-		vec3.subtract(enemieDir,gPos,enemiePos);
-		dist = vec3.length(enemieDir);
-		vec3.normalize(enemieDir,enemieDir);
-
-		collision=false
-		for (var y=0;y<gEnemieList.length;y++)
-		{
-			if (i==y) continue;
-			distVect = vec3.create();
-			vec3.subtract(distVect,gEnemieList[i][0],gEnemieList[y][0]);
-			distEn1En2 = vec3.length(distVect);
-			vec3.subtract(distVect,gPos,gEnemieList[y][0]);		
-			distPosEn2 = vec3.length(distVect);	
-			vec3.subtract(distVect,gPos,gEnemieList[i][0]);		
-			distPosEn1 = vec3.length(distVect);	
-			if(distEn1En2 <4 && distPosEn1>distPosEn2) collision=true ;
-
-		}
-
-		if(collision) continue;
-		
-		if (dist > 20)
-		{
-			enemieSpeed = 10;
-			animCounter[0] += gElapsed*100
-		}
-		else
-		{			
-			enemieSpeed = 0;
-			animCounter[1] += gElapsed*200;
-			animCounter[2] += gElapsed;
-			if (animCounter[2] > 1)
-			{
-				animCounter[2]=0;
-				gBulletList.push([[enemiePos[0]+enemieDir[0]*2,enemiePos[1]+enemieDir[1]*2,enemiePos[2]+enemieDir[2]*2],enemieDir]);
-			}
-
-		}
-		
-		enemiePos[0] += gElapsed*enemieSpeed*enemieDir[0];
-		enemiePos[1] += gElapsed*enemieSpeed*enemieDir[1];
-		enemiePos[2] += gElapsed*enemieSpeed*enemieDir[2];
-		enemiePosGroundY = groundGetY(enemiePos[0] ,enemiePos[2]) + 10.0;
-		if (enemiePos[1] < enemiePosGroundY) enemiePos[1]= enemiePosGroundY;
-	}	
+	enemiesUpdate();
 
 	//Ortho proj
-	mat4.ortho(pMatrix, -2.0, 10.0, -10.0, 0.5, -1.0, 1.0);	
 
-	// Life Bar Display
+	// Cross Display
+	mat4.ortho(pMatrix, 0.0, gl.viewportWidth , 0.0, gl.viewportHeight, -1.0, 1.0);			
+	vertexColorVector = [1.0,1.0,1.0,1.0];
+	if(enemiesColision(gPos,gDir)) vertexColorVector = [1.0,0.0,0.0,1.0];
+	mat4.identity(mvMatrix)
+	mat4.translate(mvMatrix,mvMatrix, [ gl.viewportWidth/2.0,gl.viewportHeight/2.0,0.0]);
+	mat4.scale(mvMatrix,mvMatrix,[2.0,2.0,1.0]);
+	setMatrixUniforms();
+	squareDraw();			
+	
+
+	// Life Bar Display			
+	vertexColorVector = [1.0,1.0,1.0,1.0];
+	mat4.ortho(pMatrix, -2.0, 10.0, -10.0, 0.5, -1.0, 1.0);	
+	mat4.identity(mvMatrix)
 	mat4.scale(mvMatrix,mvMatrix,[gLife/10,0.1,0.1]);
 	setMatrixUniforms();
-	cubeDraw();
+	squareDraw();
 
 	//Perceptive projection
 	mat4.perspective(pMatrix,45, gl.viewportWidth / gl.viewportHeight, 1.0, 1000.0);
@@ -231,13 +185,13 @@ function drawGame() {
 	mat4.scale(mvMatrix,mvMatrix,[0.2,2.0,0.2]);
 	setMatrixUniforms();
 	mat4.identity(mvMatrix)
-	gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
+	cubeDraw();
 	mat4.translate(mvMatrix,mvMatrix, [-2,-1,-2]);
 	mat4.rotate(mvMatrix,mvMatrix, degToRad(-80), [1, 0, 0]);
 	mat4.rotate(mvMatrix,mvMatrix, degToRad(-gAnim*gunSpeed), [0, 1, 0]);
 	mat4.scale(mvMatrix,mvMatrix,[0.2,2.0,0.2]);
 	setMatrixUniforms();
-	gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
+	cubeDraw();
 
 	// Camera managment
 	var lookAtMatrix = mat4.create();
@@ -256,18 +210,16 @@ function drawGame() {
 	groundDraw();
 	mvPopMatrix();		
 	
-	// Water ;
-	
-	//gl.enable(gl.BLEND);
+	// Water 
+	gl.enable(gl.BLEND);
 	mvPushMatrix();
 	mat4.identity(mvMatrix)
-	mat4.translate(mvMatrix,mvMatrix, [0.0,-40.0,0.0]);
-	vertexColorVector = [28.0/255,107.0/255,160.0/255,1.0];		
+	mat4.translate(mvMatrix,mvMatrix, [0.0,-40.0,0.0]);	
 	mat4.scale(mvMatrix,mvMatrix,[2000.0,10.0,2000.0]);
 	setMatrixUniforms();
 	cubeDraw();
 	mvPopMatrix();	
-//	gl.disable(gl.BLEND);
+	gl.disable(gl.BLEND);
 	
 	//  Bullets		
 	vertexColorVector = [1.0,1.0,1.0,1.0];
@@ -285,53 +237,7 @@ function drawGame() {
 		cubeDraw();
 		mvPopMatrix();
 	}
+	enemiesDraw();
 
-	// Ennemies draw 	
-	vertexColorVector = [0.4,0.4,0.4,1.0];
-	for (var id in gEnemieList) {
-		enemiePos = gEnemieList[id][0];
-		enemieDir = gEnemieList[id][1];
-		animCounter = gEnemieList[id][3];
-
-		mvPushMatrix();
-		mat4.translate(mvMatrix,mvMatrix, enemiePos);
-		mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],enemieDir,[0,1,0]);
-		mat4.invert(lookAtMatrix,lookAtMatrix);
-		mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
-		// mat4.rotate(mvMatrix, degToRad(-angleX), [1, 0, 0]);
-		setMatrixUniforms();
-
-		mvPushMatrix();
-		mat4.translate(mvMatrix,mvMatrix, [1.25, 0, 0]);	
-		mat4.rotate(mvMatrix,mvMatrix, degToRad(animCounter[1]), [0, 0, 1]);	
-		mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);
-		mat4.scale(mvMatrix,mvMatrix,[0.25,2.0,0.25]);
-		setMatrixUniforms();
-		cubeDraw();
-		mvPopMatrix();
-
-		mvPushMatrix();
-		mat4.translate(mvMatrix,mvMatrix, [-1.25, 0, 0]);			
-		mat4.rotate(mvMatrix,mvMatrix, degToRad(-animCounter[1]), [0, 0, 1]);	
-		mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);
-		mat4.scale(mvMatrix,mvMatrix,[0.25,2.0,0.25]);
-		setMatrixUniforms();
-		cubeDraw();
-		mvPopMatrix();
-		
-		mvPushMatrix();
-		
-		mat4.translate(mvMatrix,mvMatrix, [0, 0, 0.5]);	
-		mat4.rotate(mvMatrix,mvMatrix, degToRad(animCounter[0]), [1, 0, 0]);	
-		mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);	
-		mat4.scale(mvMatrix,mvMatrix,[1.0,1.0,1.0]);	
-		setMatrixUniforms();
-		cubeDraw();
-		mvPopMatrix();		
-		
-		
-		mvPopMatrix();
-		
-	}
 
 }
