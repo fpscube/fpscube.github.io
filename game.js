@@ -8,9 +8,7 @@ var gLastTime=0;
 var gLife=0;
 var gElapsed=0;
 var gAnim=0;
-var gBulletList = [];
 
-var gFireTimer=0;
 
 // ######### Event Handler ##############// 
 
@@ -42,8 +40,6 @@ function mediaSetMouseDownFct(event){
 
 
 
-
-
 // ######### Init ##############// 
 
 function initGame() {
@@ -53,7 +49,8 @@ function initGame() {
 	gDir = [0,0,-1];
 	gSpeed = [0,0,0];
 	gLife = 10;
-	gBulletList = [];
+	shaderWaterY=-1000;
+
 	// gl init
 	gl.clearColor(0x00, 0xbf, 0xff, 1.0);	
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -62,10 +59,14 @@ function initGame() {
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
 	// init gl object
+	orthoInit();
 	squareInit();
 	cubeInit();
 	enemiesInit(10);
 	groundInit();
+	gunsInit();
+	waterInit();
+	bulletsInit();
 		  	
 	// Animation init
 	gLastTime = new Date().getTime();	
@@ -73,9 +74,7 @@ function initGame() {
 }
 
 
-// ######### Draw ##############// 
-
-function drawGame() {
+function updateGame() {
 
 	//Time counter update
 	var timeNow =  new Date().getTime();
@@ -83,11 +82,8 @@ function drawGame() {
 	gLastTime = timeNow; 	
 	gAnim += 100 * gElapsed;
 	shaderCounter += 10* gElapsed;
-
-	// Clear Display
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	
-	// Deplacement
+	// Deplacement update
 	mvVector =  vec3.create();
 	vec3.cross(mvVector,gDir,[0,1,0]);	
 	if(mediaIsKey("-")) 	gSpeedCoef -=1;	
@@ -99,22 +95,7 @@ function drawGame() {
 	
 
 	// Fire Object
-
-	if (mediaIsKey("Fire")) 
-	{
-		
-		gFireTimer += gElapsed*50;
-		if (gFireTimer > 10) 
-		{
-			gFireTimer=0;
-			mvVector =  vec3.create();
-			vec3.cross(mvVector,gDir,[0,1,0]);
-			gBulletList.push([[gPos[0] + gDir[0]*6 + mvVector[0]*2,gPos[1]+gDir[1]*6 ,gPos[2]+gDir[2]*6  + mvVector[2]*2],[gDir[0],gDir[1],gDir[2]]]);
-			gBulletList.push([[gPos[0] + gDir[0]*6 - mvVector[0]*2,gPos[1]+gDir[1]*6 ,gPos[2]+gDir[2]*6  - mvVector[2]*2],[gDir[0],gDir[1],gDir[2]]]);
-
-			if (gBulletList.length > 20) { gBulletList.shift(); gBulletList.shift();}
-		}
-	}
+	if (mediaIsKey("Fire")) bulletsNew();
 	
 	// Gravity
 	//if (gPos[0] > 50 || gPos[0] < -50  || gPos[2] < -50  || gPos[2] > 50  )  gSpeed[1] = -1000*gElapsed ; 
@@ -123,7 +104,6 @@ function drawGame() {
 	gPos[2] += gSpeed[2]*gElapsed;	
 	gPos[1]=groundGetY(gPos[0],gPos[2]) + 10.0;
 	gSpeed = [0,0,0];
-
 
 
 	// Bullets And Enemies And Hero Collisions
@@ -149,49 +129,21 @@ function drawGame() {
 	}	
 
 	enemiesUpdate();
+}
 
-	//Ortho proj
-
-	// Cross Display
-	mat4.ortho(pMatrix, 0.0, gl.viewportWidth , 0.0, gl.viewportHeight, -1.0, 1.0);			
-	vertexColorVector = [1.0,1.0,1.0,1.0];
-	if(enemiesColision(gPos,gDir)) vertexColorVector = [1.0,0.0,0.0,1.0];
-	mat4.identity(mvMatrix)
-	mat4.translate(mvMatrix,mvMatrix, [ gl.viewportWidth/2.0,gl.viewportHeight/2.0,0.0]);
-	mat4.scale(mvMatrix,mvMatrix,[2.0,2.0,1.0]);
-	setMatrixUniforms();
-	squareDraw();			
+function drawGame() {
 	
+	updateGame();
 
-	// Life Bar Display			
-	vertexColorVector = [1.0,1.0,1.0,1.0];
-	mat4.ortho(pMatrix, -2.0, 10.0, -10.0, 0.5, -1.0, 1.0);	
-	mat4.identity(mvMatrix)
-	mat4.scale(mvMatrix,mvMatrix,[gLife/10,0.1,0.1]);
-	setMatrixUniforms();
-	squareDraw();
+	// Clear Display
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+	//Ortho Draw
+	orthoCrossDisplay(enemiesColision(gPos,gDir) ? [1.0,0.0,0.0,1.0]: [1.0,1.0,1.0,1.0]);
+	orthoLifeBarDisplay();
 
 	//Perceptive projection
 	mat4.perspective(pMatrix,45, gl.viewportWidth / gl.viewportHeight, 1.0, 1000.0);
-
-	//Gun Display	
-	vertexColorVector = [0.2,0.1,0.2,1.0];
-	gunSpeed = 0;
-	if(mediaIsKey("Fire")) gunSpeed=5;
-	mat4.identity(mvMatrix)
-	mat4.translate(mvMatrix,mvMatrix, [2,-1,-2]);
-	mat4.rotate(mvMatrix,mvMatrix, degToRad(-80), [1, 0, 0]);
-	mat4.rotate(mvMatrix,mvMatrix, degToRad(gAnim*gunSpeed), [0, 1, 0]);
-	mat4.scale(mvMatrix,mvMatrix,[0.2,2.0,0.2]);
-	setMatrixUniforms();
-	mat4.identity(mvMatrix)
-	cubeDraw();
-	mat4.translate(mvMatrix,mvMatrix, [-2,-1,-2]);
-	mat4.rotate(mvMatrix,mvMatrix, degToRad(-80), [1, 0, 0]);
-	mat4.rotate(mvMatrix,mvMatrix, degToRad(-gAnim*gunSpeed), [0, 1, 0]);
-	mat4.scale(mvMatrix,mvMatrix,[0.2,2.0,0.2]);
-	setMatrixUniforms();
-	cubeDraw();
 
 	// Camera managment
 	var lookAtMatrix = mat4.create();
@@ -199,44 +151,10 @@ function drawGame() {
 	mat4.lookAt(lookAtMatrix,gPos,viewPos,[0,1,0]);
 	mat4.multiply(pMatrix,pMatrix,lookAtMatrix)
 
-	// init mvMAtrix
-	mat4.identity(mvMatrix)
-	setMatrixUniforms();	
-
-	// Ground		
-	vertexColorVector = [1.0,1.0,0.5,1.0];
-	mvPushMatrix();	
-	setMatrixUniforms();
+	gunsDraw(gPos,gDir);	
 	groundDraw();
-	mvPopMatrix();		
-	
-	// Water 
-	gl.enable(gl.BLEND);
-	mvPushMatrix();
-	mat4.identity(mvMatrix)
-	mat4.translate(mvMatrix,mvMatrix, [0.0,-40.0,0.0]);	
-	mat4.scale(mvMatrix,mvMatrix,[2000.0,10.0,2000.0]);
-	setMatrixUniforms();
-	cubeDraw();
-	mvPopMatrix();	
-	gl.disable(gl.BLEND);
-	
-	//  Bullets		
-	vertexColorVector = [1.0,1.0,1.0,1.0];
-	for (var id in gBulletList) {
-		bulletPos = gBulletList[id][0];
-		bulletDir = gBulletList[id][1];
-		bulletPos[0] += gElapsed*100*bulletDir[0];
-		bulletPos[1] += gElapsed*100*bulletDir[1];
-		bulletPos[2] += gElapsed*100*bulletDir[2];
-		mvPushMatrix()	;
-		mat4.translate(mvMatrix,mvMatrix, bulletPos);
-		mat4.rotate(mvMatrix,mvMatrix, degToRad(gAnim)*5, [1, 1, 1]);
-		mat4.scale(mvMatrix,mvMatrix,[0.2,0.2,0.2]);
-		setMatrixUniforms();;
-		cubeDraw();
-		mvPopMatrix();
-	}
+	waterDraw();
+	bulletsDraw();	
 	enemiesDraw();
 
 

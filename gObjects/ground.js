@@ -32,10 +32,9 @@ function groundGetNormalVec(x,z)
 
 function groundInit()
 {
-  sizeX = 2000;
-  sizeZ = 2000;
+  sizeX = 2500;
+  sizeZ = 2500;
   res = 100;
-
 
   
  groundPositions=[];
@@ -99,7 +98,12 @@ function groundInit()
 
 function groundDraw()
 {
-
+    shaderWaterY = -28.5;
+    shaderVertexColorVector = [1.0,1.0,0.5,1.0];
+  	mat4.identity(mvMatrix)
+    setMatrixUniforms();
+    shaderWaterY = -1000;
+  
     gl.bindBuffer(gl.ARRAY_BUFFER, groundVertexBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 

@@ -102,8 +102,9 @@ function enemiesDraw()
 {
 
 	// Ennemies draw 
+	mat4.identity(mvMatrix)
 	var lookAtMatrix = mat4.create();	
-	vertexColorVector = [0.4,0.4,0.4,1.0];
+	shaderVertexColorVector = [0.4,0.4,0.4,1.0];
 	for (var id in gEnemiesList) {
 		enemiePos = gEnemiesList[id][0];
 		enemieDir = gEnemiesList[id][1];
