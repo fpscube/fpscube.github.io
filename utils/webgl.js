@@ -41,30 +41,9 @@ function smallScreen(){
 }
  
 
-function getShader(gl, id) {
-	var shaderScript = document.getElementById(id);
-	if (!shaderScript) {
-		return null;
-	}
+function shaderCompil(str,shaderType) {
 
-	var str = "";
-	var k = shaderScript.firstChild;
-	while (k) {
-		if (k.nodeType == 3) {
-			str += k.textContent;
-		}
-		k = k.nextSibling;
-	}
-
-	var shader;
-	if (shaderScript.type == "x-shader/x-fragment") {
-		shader = gl.createShader(gl.FRAGMENT_SHADER);
-	} else if (shaderScript.type == "x-shader/x-vertex") {
-		shader = gl.createShader(gl.VERTEX_SHADER);
-	} else {
-		return null;
-	}
-
+	shader = gl.createShader(shaderType);
 	gl.shaderSource(shader, str);
 	gl.compileShader(shader);
 
@@ -72,42 +51,126 @@ function getShader(gl, id) {
 		alert(gl.getShaderInfoLog(shader));
 		return null;
 	}
-
 	return shader;
 }
 
 
+var fragmentShader1 = `
+    precision lowp float;
+    
+    varying vec3 v_normal;   
+    varying vec4 v_position;     
+    uniform vec4 uVertexColor;    
+    uniform float uCounter; 
+    uniform float uWaterY;
+    
+    void main() {
+      float light;
+      float lightWater;
+      float waterIndex=0.0;
+      vec4 colorGround;
+      vec4 colorWater;
+
+      waterIndex = 0.0 -(v_position.y - uWaterY) ;
+      if (waterIndex>1.0) waterIndex = 1.0;
+      if (waterIndex<0.0) waterIndex = 0.0;
+
+      float dist = sqrt(v_position.x*v_position.x + v_position.z*v_position.z);
+      float x = sin((dist+ 2.0*uCounter)/17.0)/2.0+ 0.50 + sin((dist+ 3.0*uCounter)/35.0)/2.0+ 0.50 + sin((v_position.x + 10.0*uCounter)/60.0)/2.0+0.50;
+      float z = cos((dist+ uCounter)/7.0)/2.0+ 0.50 + cos((dist+ 4.0*uCounter)/15.0)/2.0+0.50 + cos((dist+ 6.0*uCounter)/35.0)/2.0+ 0.50 +  cos((v_position.x + 10.0*uCounter)/60.0)/2.0+0.50;
+      lightWater = dot(normalize(vec3(x,8.0,z)), vec3(0.0,1.0,0.0));
+  
+      light = dot(v_normal, vec3(0.0,1.0,0.0)); 
+      
+      colorGround = vec4(0.1,0.1,0.1,uVertexColor.a); 
+      colorWater = vec4(0.1,0.1,0.1,1.0); 
+      
+      if (light > 0.0)
+      {
+        colorGround += vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,0.0) ;
+        colorWater += vec4(0.108*lightWater,0.409*lightWater,0.627*lightWater,0.0) ;
+      } 
+
+      
+      gl_FragColor = mix(colorGround,colorWater,waterIndex);
+    }
+`;
+
+var vertexShader1 = `    
+	attribute vec4 aVertexPosition;
+	attribute vec3 aVertexNormal;
+	uniform mat4 uMVMatrix;
+	uniform mat4 uPMatrix;
+	uniform mat4 uMVInverseTransposeMatrix;    
+	varying vec3 v_normal;   
+	varying vec4 v_position; 
+	void main() {
+
+	// Multiply the position by the matrix.
+	v_position = uMVMatrix * aVertexPosition;
+	gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
+
+	// orient the normals and pass to the fragment shader
+	v_normal =normalize( mat3(uMVInverseTransposeMatrix) * aVertexNormal);
+
+	}
+`;
+
+var fragmentShader2 = `
+
+precision lowp float;
+    
+varying vec3 v_normal;   
+varying vec4 v_position;     
+uniform vec4 uVertexColor;    
+uniform float uCounter; 
+uniform float uWaterY;
+
+void main()
+{
+  float dist1 = v_position.y*v_position.y*30.0 + v_position.x*v_position.x;
+  float dist2 = v_position.y*v_position.y + v_position.x*v_position.x*30.0;
+ 
+  
+   gl_FragColor = vec4(cos(uCounter*1000.0)*0.5-dist1,cos(uCounter*1000.0)*0.5-dist2,0.0,0.1- dist1);
+  
+}`;
+
 var shaderProgram;
+var shaderProgram2;
 
-function initShaders() {
-	var fragmentShader = getShader(gl, "shader-fs");
-	var vertexShader = getShader(gl, "shader-vs");
+function initShaders(vertexShaderStr,fragmentShaderStr) {
 
-	shaderProgram = gl.createProgram();
-	gl.attachShader(shaderProgram, vertexShader);
-	gl.attachShader(shaderProgram, fragmentShader);
-	gl.linkProgram(shaderProgram);
+	var vertexShader = shaderCompil(vertexShaderStr,gl.VERTEX_SHADER);
+	var fragmentShader = shaderCompil(fragmentShaderStr,gl.FRAGMENT_SHADER);
 
-	if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+	var outShaderProgram = gl.createProgram();
+	gl.attachShader(outShaderProgram, vertexShader);
+	gl.attachShader(outShaderProgram, fragmentShader);
+	gl.linkProgram(outShaderProgram);
+
+	if (!gl.getProgramParameter(outShaderProgram, gl.LINK_STATUS)) {
 		alert("Could not initialise shaders");
 	}
 
-	gl.useProgram(shaderProgram);
+	gl.useProgram(outShaderProgram);
 
-	shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-	gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+	outShaderProgram.vertexPositionAttribute = gl.getAttribLocation(outShaderProgram, "aVertexPosition");
+	gl.enableVertexAttribArray(outShaderProgram.vertexPositionAttribute);
 
-	shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
-	gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
+	outShaderProgram.vertexNormalAttribute = gl.getAttribLocation(outShaderProgram, "aVertexNormal");
+	gl.enableVertexAttribArray(outShaderProgram.vertexNormalAttribute);
 
-	shaderProgram.vertexColorAttribute = gl.getUniformLocation(shaderProgram, "uVertexColor");
-	shaderProgram.counter = gl.getUniformLocation(shaderProgram, "uCounter");
-	shaderProgram.waterY = gl.getUniformLocation(shaderProgram, "uWaterY");
-	shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-	shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-	shaderProgram.worldMatrix = gl.getUniformLocation(shaderProgram, "uWorldMatrix");
-	shaderProgram.mvInverseTransposeMatrix = gl.getUniformLocation(shaderProgram, "uMVInverseTransposeMatrix");
-	shaderProgram.lightWorldPosition = gl.getUniformLocation(shaderProgram, "uLightWorldPosition");
+	outShaderProgram.vertexColorAttribute = gl.getUniformLocation(outShaderProgram, "uVertexColor");
+	outShaderProgram.counter = gl.getUniformLocation(outShaderProgram, "uCounter");
+	outShaderProgram.waterY = gl.getUniformLocation(outShaderProgram, "uWaterY");
+	outShaderProgram.pMatrixUniform = gl.getUniformLocation(outShaderProgram, "uPMatrix");
+	outShaderProgram.mvMatrixUniform = gl.getUniformLocation(outShaderProgram, "uMVMatrix");
+	outShaderProgram.worldMatrix = gl.getUniformLocation(outShaderProgram, "uWorldMatrix");
+	outShaderProgram.mvInverseTransposeMatrix = gl.getUniformLocation(outShaderProgram, "uMVInverseTransposeMatrix");
+	outShaderProgram.lightWorldPosition = gl.getUniformLocation(outShaderProgram, "uLightWorldPosition");
+
+	return outShaderProgram;
 }
 
 var shaderCounter=0;
@@ -132,25 +195,21 @@ function mvPopMatrix() {
 	mvMatrix = mvMatrixStack.pop();
 }
 
-function setMatrixUniforms() {
-	gl.uniform1f (shaderProgram.counter, shaderCounter);
-	gl.uniform1f (shaderProgram.waterY, shaderWaterY);
-	gl.uniform4fv (shaderProgram.vertexColorAttribute, shaderVertexColorVector);
-	gl.uniform3fv (shaderProgram.lightWorldPosition, [0.0,0.0,0.0]);
+function setMatrixUniforms(pShaderProgram) {
+	gl.uniform1f (pShaderProgram.counter, shaderCounter);
+	gl.uniform1f (pShaderProgram.waterY, shaderWaterY);
+	gl.uniform4fv (pShaderProgram.vertexColorAttribute, shaderVertexColorVector);
+	gl.uniform3fv (pShaderProgram.lightWorldPosition, [0.0,0.0,0.0]);
 
 	mat4.invert(mvInverseMatrix,mvMatrix);
 	mat4.transpose(mvInverseTransposeMatrix,mvInverseMatrix);
-	
 
-
-	gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-	gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
-	gl.uniformMatrix4fv(shaderProgram.mvInverseTransposeMatrix, false, mvInverseTransposeMatrix);
-
+	gl.uniformMatrix4fv(pShaderProgram.pMatrixUniform, false, pMatrix);
+	gl.uniformMatrix4fv(pShaderProgram.mvMatrixUniform, false, mvMatrix);
+	gl.uniformMatrix4fv(pShaderProgram.mvInverseTransposeMatrix, false, mvInverseTransposeMatrix);
 }
 
 function degToRad(degrees) {return degrees * Math.PI / 180;}
-
 
 function tick() {
 	requestAnimFrame(tick);
@@ -160,7 +219,8 @@ function tick() {
 function webGLStart() {
 	var canvas = document.getElementById("canvas");
 	initGL(canvas);
-	initShaders();
+	shaderProgram = initShaders(vertexShader1,fragmentShader1);
+	shaderProgram2 = initShaders(vertexShader1,fragmentShader2);
 	initGame();
 	tick();
 }

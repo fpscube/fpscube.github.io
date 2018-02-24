@@ -116,14 +116,12 @@ function enemiesDraw()
 		mat4.invert(lookAtMatrix,lookAtMatrix);
 		mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
 		// mat4.rotate(mvMatrix, degToRad(-angleX), [1, 0, 0]);
-		setMatrixUniforms();
 
 		mvPushMatrix();
 		mat4.translate(mvMatrix,mvMatrix, [1.25, 0, 0]);	
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(animCounter[1]), [0, 0, 1]);	
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);
 		mat4.scale(mvMatrix,mvMatrix,[0.25,2.0,0.25]);
-		setMatrixUniforms();
 		cubeDraw();
 		mvPopMatrix();
 
@@ -132,7 +130,6 @@ function enemiesDraw()
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(-animCounter[1]), [0, 0, 1]);	
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);
 		mat4.scale(mvMatrix,mvMatrix,[0.25,2.0,0.25]);
-		setMatrixUniforms();
 		cubeDraw();
 		mvPopMatrix();
 		
@@ -142,7 +139,6 @@ function enemiesDraw()
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(animCounter[0]), [1, 0, 0]);	
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);	
 		mat4.scale(mvMatrix,mvMatrix,[1.0,1.0,1.0]);	
-		setMatrixUniforms();
 		cubeDraw();
 		mvPopMatrix();		
 		

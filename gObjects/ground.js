@@ -74,6 +74,8 @@ function groundInit()
     }
   }
 
+  
+  gl.useProgram(shaderProgram);
 
   // Vertex Buffer
   groundVertexBuffer = gl.createBuffer();
@@ -101,8 +103,8 @@ function groundDraw()
     shaderWaterY = -28.5;
     shaderVertexColorVector = [1.0,1.0,0.5,1.0];
   	mat4.identity(mvMatrix)
-    setMatrixUniforms();
-    shaderWaterY = -1000;
+  
+    
   
     gl.bindBuffer(gl.ARRAY_BUFFER, groundVertexBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
@@ -112,6 +114,10 @@ function groundDraw()
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, groundIndiceBuffer);
 
+    
+    gl.useProgram(shaderProgram);
+    setMatrixUniforms(shaderProgram);
+    
     gl.drawElements(gl.TRIANGLES,groundIndices.length, gl.UNSIGNED_SHORT,0);
   
    // gl.drawElements(gl.LINES,groundIndices.length, gl.UNSIGNED_SHORT,0);

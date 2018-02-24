@@ -26,7 +26,7 @@ function bulletsNew()
 
 function bulletsDraw()
 {
-	vertexColorVector = [1.0,1.0,1.0,1.0];
+	shaderVertexColorVector = [1.0,1.0,1.0,1.0];
 	for (var id in gBulletList) {
 		bulletPos = gBulletList[id][0];
 		bulletDir = gBulletList[id][1];
@@ -37,7 +37,6 @@ function bulletsDraw()
 		mat4.translate(mvMatrix,mvMatrix, bulletPos);
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(gAnim)*5, [1, 1, 1]);
 		mat4.scale(mvMatrix,mvMatrix,[0.2,0.2,0.2]);
-		setMatrixUniforms();;
 		cubeDraw();
 	}
 }

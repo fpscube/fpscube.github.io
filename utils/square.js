@@ -53,6 +53,9 @@ function squareInit()
 function squareDraw()
 {
 
+    gl.useProgram(shaderProgram);
+	  setMatrixUniforms(shaderProgram);
+    
     gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
 

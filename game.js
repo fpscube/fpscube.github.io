@@ -49,7 +49,6 @@ function initGame() {
 	gDir = [0,0,-1];
 	gSpeed = [0,0,0];
 	gLife = 10;
-	shaderWaterY=-1000;
 
 	// gl init
 	gl.clearColor(0x00, 0xbf, 0xff, 1.0);	
