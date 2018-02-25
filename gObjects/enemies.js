@@ -57,7 +57,7 @@ function enemiesUpdate()
 		if (mediaIsKey("Fire") && (lifes[1]<=0))
 		{
 			lifes[0]-=1;
-			lifes[1]=0.3;
+			lifes[1]=0.2;
 			// delete enemie if no more life
 			if (lifes[0]<0)	gEnemiesList.splice(i,1);	
 		}
