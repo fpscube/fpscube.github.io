@@ -1,9 +1,9 @@
 var squarePositions = [
     // Front face
-    -1.0, -1.0,  1.0,
-     1.0, -1.0,  1.0,
-     1.0,  1.0,  1.0,
-    -1.0,  1.0,  1.0,
+    -1.0, -1.0,  0.0,
+     1.0, -1.0,  0.0,
+     1.0,  1.0,  0.0,
+    -1.0,  1.0,  0.0,
   ];
 
 
@@ -50,17 +50,17 @@ function squareInit()
 }
 
 
-function squareDraw()
+function squareDraw(pShaderProgram)
 {
 
-    gl.useProgram(shaderProgram);
-	  setMatrixUniforms(shaderProgram);
+    gl.useProgram(pShaderProgram);
+    setMatrixUniforms(pShaderProgram);
     
     gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(pShaderProgram.vertexPositionAttribute, squareVertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, squareNormalBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, squareNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(pShaderProgram.vertexNormalAttribute, squareNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareIndiceBuffer);
 

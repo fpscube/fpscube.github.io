@@ -14,7 +14,8 @@ function gunsInit()
 
 function gunsDraw(pPos,pDir)
 {
-	
+
+
 	mat4.identity(mvMatrix)
 	var lookAtMatrix = mat4.create();
 	mat4.translate(mvMatrix,mvMatrix, pPos);
@@ -33,7 +34,36 @@ function gunsDraw(pPos,pDir)
 			gGunsFireTimer=0;
 
 		}
+
+
+
+		mvPushMatrix();	
+		mat4.translate(mvMatrix,mvMatrix, [2.0,-0.6,-4.1]);
+		mat4.scale(mvMatrix,mvMatrix,[0.25,1.0,1.0]);
+		squareDraw(shaderProgram2);	
+		mvPopMatrix();
+		
+		mvPushMatrix();	
+		mat4.translate(mvMatrix,mvMatrix, [2.0,-0.6,-4.0]);
+		mat4.scale(mvMatrix,mvMatrix,[1.2,0.15,1.2]);
+		squareDraw(shaderProgram2);	
+		mvPopMatrix();
+	
+		mvPushMatrix();	
+		mat4.translate(mvMatrix,mvMatrix, [-2.0,-0.6,-4.1]);
+		mat4.scale(mvMatrix,mvMatrix,[0.25,1.0,1.5]);
+		squareDraw(shaderProgram2);	
+		mvPopMatrix();
+		
+		mvPushMatrix();	
+		mat4.translate(mvMatrix,mvMatrix, [-2.0,-0.6,-4.0]);
+		mat4.scale(mvMatrix,mvMatrix,[1.2,0.15,1.2]);
+		squareDraw(shaderProgram2);	
+		mvPopMatrix();
+
+
 	}
+
 
 
 	
@@ -41,16 +71,16 @@ function gunsDraw(pPos,pDir)
 	mvPushMatrix();
 	mat4.translate(mvMatrix,mvMatrix, [2,-1,-2]);
 	mat4.rotate(mvMatrix,mvMatrix, degToRad(-80), [1, 0, 0]);
-	mat4.rotate(mvMatrix,mvMatrix, degToRad(gAnim*gunSpeed), [0, 1, 0]);
+	mat4.rotate(mvMatrix,mvMatrix, degToRad(gAnim*gunSpeed*2.0), [0, 1, 0]);
 	mat4.scale(mvMatrix,mvMatrix,[0.2,2.0,0.2]);
-	cubeDraw();	
+	cubeDraw(shaderProgram);	
 	mvPopMatrix();
 
 	mvPushMatrix();
 	mat4.translate(mvMatrix,mvMatrix, [-2,-1,-2]);
 	mat4.rotate(mvMatrix,mvMatrix, degToRad(-80), [1, 0, 0]);
-	mat4.rotate(mvMatrix,mvMatrix, degToRad(-gAnim*gunSpeed), [0, 1, 0]);
+	mat4.rotate(mvMatrix,mvMatrix, degToRad(-gAnim*gunSpeed*2.0), [0, 1, 0]);
 	mat4.scale(mvMatrix,mvMatrix,[0.2,2.0,0.2]);
-	cubeDraw();
+	cubeDraw(shaderProgram);
 	mvPopMatrix(); 
 }

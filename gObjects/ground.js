@@ -34,7 +34,7 @@ function groundInit()
 {
   sizeX = 2500;
   sizeZ = 2500;
-  res = 100;
+  res = 100  ;
 
   
  groundPositions=[];

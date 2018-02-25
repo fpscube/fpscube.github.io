@@ -2,13 +2,15 @@
 
 var gEnemiesList = [];
 var gEnemiesMax = 10;
+var gEnemiesCollisionId = -1;
+var gEnemiesCollisionDist = -1;
 
 function _enemiesAdd()
 {
 	if (gEnemiesList.length < gEnemiesMax)
 	{	
 		angle = Math.random()*2*Math.PI;
-		gEnemiesList.push([[Math.cos(angle)*100,20,Math.sin(angle)*100],[0,0,0],10,[0,0,0],[0,0,0]]);
+		gEnemiesList.push([[Math.cos(angle)*100,20,Math.sin(angle)*100],[0,0,0],10,[0,0,0],[3,0]]);
 	}
 }
 
@@ -21,30 +23,49 @@ function enemiesInit(pMaxEnemies)
 	setInterval(_enemiesAdd,1000);	
 }
 
-function enemiesColision(pPos,pDir)
+function enemiesGetCollisionId()
+{
+	return gEnemiesCollisionId;
+}
+
+function enemiesUpdate()
 {
 	//Enemies ray collision
-	collision = false
+	gEnemiesCollisionId = -1;
+	gEnemiesCollisionDist = 0xFFFFFFF;
 	for (var i=gEnemiesList.length-1;i>=0;i--){
 		enemiePos = gEnemiesList[i][0];		
 		enemieVector =  vec3.create();	
 		fireVector =  vec3.create();
 		distVector  =  vec3.create();
-		vec3.subtract(enemieVector,enemiePos,pPos);
-		fireDist = vec3.dot(enemieVector,pDir);
-		enemieDist = vec3.distance(enemiePos,pPos);		
+		vec3.subtract(enemieVector,enemiePos,gPos);
+		fireDist = vec3.dot(enemieVector,gDir);
+		enemieDist = vec3.distance(enemiePos,gPos);		
 		dist = Math.sqrt(enemieDist**2 - fireDist**2);   
-		if (dist < 1) collision=true
+		if (dist < 1 && enemieDist<gEnemiesCollisionDist) gEnemiesCollisionId = i;
 	}
-	return collision;
-}	
+
+	for (var i=gEnemiesList.length-1;i>=0;i--){
+		//enemies damage
+		lifes = gEnemiesList[i][4];
+		if (lifes[1]>0)
+		{			
+			lifes[1]-= gElapsed;
+		}
+		
+		if(i!=gEnemiesCollisionId) continue;
+		if (mediaIsKey("Fire") && (lifes[1]<=0))
+		{
+			lifes[0]-=1;
+			lifes[1]=0.3;
+			// delete enemie if no more life
+			if (lifes[0]<0)	gEnemiesList.splice(i,1);	
+		}
+	}
 
 
-function enemiesUpdate()
-{
 	// Enemies Position
-	for (var i=0;i<gEnemiesList.length;i++)
-	{
+	for (var i=gEnemiesList.length-1;i>=0;i--){
 		enemiePos = gEnemiesList[i][0];
 		enemieDir = gEnemiesList[i][1];
 		enemieSpeed = gEnemiesList[i][2];
@@ -93,6 +114,7 @@ function enemiesUpdate()
 		enemiePos[2] += gElapsed*enemieSpeed*enemieDir[2];
 		enemiePosGroundY = groundGetY(enemiePos[0] ,enemiePos[2]) + 10.0;
 		if (enemiePos[1] < enemiePosGroundY) enemiePos[1]= enemiePosGroundY;
+
 	}
 
 }
@@ -100,15 +122,26 @@ function enemiesUpdate()
 
 function enemiesDraw()
 {
+	
+	setMatrixUniforms(shaderProgram);
 
 	// Ennemies draw 
 	mat4.identity(mvMatrix)
 	var lookAtMatrix = mat4.create();	
-	shaderVertexColorVector = [0.4,0.4,0.4,1.0];
 	for (var id in gEnemiesList) {
 		enemiePos = gEnemiesList[id][0];
 		enemieDir = gEnemiesList[id][1];
 		animCounter = gEnemiesList[id][3];
+		damageCounter = gEnemiesList[id][4][1];
+		
+		if (damageCounter<=0)
+		{
+			shaderVertexColorVector = [0.4,0.4,0.4,1.0];
+		}
+		else
+		{
+			shaderVertexColorVector = [1.0,0.0,0.0,0.8];
+		}
 
 		mvPushMatrix();
 		mat4.translate(mvMatrix,mvMatrix, enemiePos);
@@ -122,7 +155,7 @@ function enemiesDraw()
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(animCounter[1]), [0, 0, 1]);	
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);
 		mat4.scale(mvMatrix,mvMatrix,[0.25,2.0,0.25]);
-		cubeDraw();
+		cubeDraw(shaderProgram);
 		mvPopMatrix();
 
 		mvPushMatrix();
@@ -130,7 +163,7 @@ function enemiesDraw()
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(-animCounter[1]), [0, 0, 1]);	
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);
 		mat4.scale(mvMatrix,mvMatrix,[0.25,2.0,0.25]);
-		cubeDraw();
+		cubeDraw(shaderProgram);
 		mvPopMatrix();
 		
 		mvPushMatrix();
@@ -139,7 +172,7 @@ function enemiesDraw()
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(animCounter[0]), [1, 0, 0]);	
 		mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);	
 		mat4.scale(mvMatrix,mvMatrix,[1.0,1.0,1.0]);	
-		cubeDraw();
+		cubeDraw(shaderProgram);
 		mvPopMatrix();		
 		
 		

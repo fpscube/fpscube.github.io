@@ -53,7 +53,7 @@ function initGame() {
 	// gl init
 	gl.clearColor(0x00, 0xbf, 0xff, 1.0);	
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-	gl.disable(gl.BLEND);
+	gl.enable(gl.BLEND);
 	gl.enable(gl.DEPTH_TEST);      
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
@@ -94,7 +94,7 @@ function updateGame() {
 	
 
 	// Fire Object
-	if (mediaIsKey("Fire")) bulletsNew();
+	//if (mediaIsKey("Fire")) bulletsNew();
 	
 	// Gravity
 	//if (gPos[0] > 50 || gPos[0] < -50  || gPos[2] < -50  || gPos[2] > 50  )  gSpeed[1] = -1000*gElapsed ; 
@@ -138,7 +138,7 @@ function drawGame() {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 	//Ortho Draw
-	orthoCrossDisplay(enemiesColision(gPos,gDir) ? [1.0,0.0,0.0,1.0]: [1.0,1.0,1.0,1.0]);
+	orthoCrossDisplay((enemiesGetCollisionId() >= 0)? [1.0,0.0,0.0,1.0]: [1.0,1.0,1.0,1.0]);
 	orthoLifeBarDisplay();
 
 	//Perceptive projection
@@ -149,12 +149,12 @@ function drawGame() {
 	viewPos = [gPos[0] + gDir[0],gPos[1] + gDir[1],gPos[2] + gDir[2]];
 	mat4.lookAt(lookAtMatrix,gPos,viewPos,[0,1,0]);
 	mat4.multiply(pMatrix,pMatrix,lookAtMatrix)
-
-	gunsDraw(gPos,gDir);	
+	
 	groundDraw();
-	waterDraw();
-	bulletsDraw();	
+	waterDraw();	
 	enemiesDraw();
+	gunsDraw(gPos,gDir);
+	bulletsDraw();	
 
 
 }

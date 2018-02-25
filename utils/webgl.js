@@ -55,11 +55,35 @@ function shaderCompil(str,shaderType) {
 }
 
 
+
+var vertexShader1 = `    
+	attribute vec4 aVertexPosition;
+	attribute vec3 aVertexNormal;
+	uniform mat4 uMVMatrix;
+	uniform mat4 uPMatrix;
+	uniform mat4 uMVInverseTransposeMatrix;    
+	varying vec3 v_normal; 
+	varying vec4 a_position;   
+	varying vec4 v_position; 
+	void main() {
+
+	a_position= aVertexPosition;
+
+	// Multiply the position by the matrix.
+	v_position = uMVMatrix * aVertexPosition;
+	gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
+
+	// orient the normals and pass to the fragment shader
+	v_normal =normalize( mat3(uMVInverseTransposeMatrix) * aVertexNormal);
+
+	}
+`;
 var fragmentShader1 = `
     precision lowp float;
     
     varying vec3 v_normal;   
-    varying vec4 v_position;     
+    varying vec4 v_position;   
+	varying vec4 a_position;    
     uniform vec4 uVertexColor;    
     uniform float uCounter; 
     uniform float uWaterY;
@@ -83,7 +107,7 @@ var fragmentShader1 = `
       light = dot(v_normal, vec3(0.0,1.0,0.0)); 
       
       colorGround = vec4(0.1,0.1,0.1,uVertexColor.a); 
-      colorWater = vec4(0.1,0.1,0.1,1.0); 
+      colorWater = vec4(0.1,0.1,0.1,uVertexColor.a); 
       
       if (light > 0.0)
       {
@@ -96,45 +120,26 @@ var fragmentShader1 = `
     }
 `;
 
-var vertexShader1 = `    
-	attribute vec4 aVertexPosition;
-	attribute vec3 aVertexNormal;
-	uniform mat4 uMVMatrix;
-	uniform mat4 uPMatrix;
-	uniform mat4 uMVInverseTransposeMatrix;    
-	varying vec3 v_normal;   
-	varying vec4 v_position; 
-	void main() {
-
-	// Multiply the position by the matrix.
-	v_position = uMVMatrix * aVertexPosition;
-	gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
-
-	// orient the normals and pass to the fragment shader
-	v_normal =normalize( mat3(uMVInverseTransposeMatrix) * aVertexNormal);
-
-	}
-`;
-
 var fragmentShader2 = `
 
 precision lowp float;
-    
-varying vec3 v_normal;   
-varying vec4 v_position;     
+      
+varying vec4 v_position; 
+varying vec4 a_position;      
 uniform vec4 uVertexColor;    
 uniform float uCounter; 
 uniform float uWaterY;
 
 void main()
 {
-  float dist1 = v_position.y*v_position.y*30.0 + v_position.x*v_position.x;
-  float dist2 = v_position.y*v_position.y + v_position.x*v_position.x*30.0;
- 
-  
-   gl_FragColor = vec4(cos(uCounter*1000.0)*0.5-dist1,cos(uCounter*1000.0)*0.5-dist2,0.0,0.1- dist1);
+  float dist = a_position.y*a_position.y + a_position.x*a_position.x;
+  gl_FragColor = vec4(1.0-dist,1.0-dist,0.0,cos(uCounter*6.0)-dist );
   
 }`;
+
+
+
+
 
 var shaderProgram;
 var shaderProgram2;
@@ -153,22 +158,18 @@ function initShaders(vertexShaderStr,fragmentShaderStr) {
 		alert("Could not initialise shaders");
 	}
 
-	gl.useProgram(outShaderProgram);
-
 	outShaderProgram.vertexPositionAttribute = gl.getAttribLocation(outShaderProgram, "aVertexPosition");
 	gl.enableVertexAttribArray(outShaderProgram.vertexPositionAttribute);
 
 	outShaderProgram.vertexNormalAttribute = gl.getAttribLocation(outShaderProgram, "aVertexNormal");
 	gl.enableVertexAttribArray(outShaderProgram.vertexNormalAttribute);
 
-	outShaderProgram.vertexColorAttribute = gl.getUniformLocation(outShaderProgram, "uVertexColor");
+    outShaderProgram.vertexColorAttribute = gl.getUniformLocation(outShaderProgram, "uVertexColor");
 	outShaderProgram.counter = gl.getUniformLocation(outShaderProgram, "uCounter");
 	outShaderProgram.waterY = gl.getUniformLocation(outShaderProgram, "uWaterY");
 	outShaderProgram.pMatrixUniform = gl.getUniformLocation(outShaderProgram, "uPMatrix");
 	outShaderProgram.mvMatrixUniform = gl.getUniformLocation(outShaderProgram, "uMVMatrix");
-	outShaderProgram.worldMatrix = gl.getUniformLocation(outShaderProgram, "uWorldMatrix");
 	outShaderProgram.mvInverseTransposeMatrix = gl.getUniformLocation(outShaderProgram, "uMVInverseTransposeMatrix");
-	outShaderProgram.lightWorldPosition = gl.getUniformLocation(outShaderProgram, "uLightWorldPosition");
 
 	return outShaderProgram;
 }
@@ -196,10 +197,10 @@ function mvPopMatrix() {
 }
 
 function setMatrixUniforms(pShaderProgram) {
+		
 	gl.uniform1f (pShaderProgram.counter, shaderCounter);
-	gl.uniform1f (pShaderProgram.waterY, shaderWaterY);
-	gl.uniform4fv (pShaderProgram.vertexColorAttribute, shaderVertexColorVector);
-	gl.uniform3fv (pShaderProgram.lightWorldPosition, [0.0,0.0,0.0]);
+	 gl.uniform1f (pShaderProgram.waterY, shaderWaterY);
+	 gl.uniform4fv (pShaderProgram.vertexColorAttribute, shaderVertexColorVector);
 
 	mat4.invert(mvInverseMatrix,mvMatrix);
 	mat4.transpose(mvInverseTransposeMatrix,mvInverseMatrix);
@@ -219,7 +220,7 @@ function tick() {
 function webGLStart() {
 	var canvas = document.getElementById("canvas");
 	initGL(canvas);
-	shaderProgram = initShaders(vertexShader1,fragmentShader1);
+	shaderProgram = initShaders(vertexShader1,fragmentShader1); 
 	shaderProgram2 = initShaders(vertexShader1,fragmentShader2);
 	initGame();
 	tick();

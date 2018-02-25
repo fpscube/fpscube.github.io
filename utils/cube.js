@@ -114,17 +114,17 @@ function cubeInit()
 }
 
 
-function cubeDraw()
+function cubeDraw(pShaderProgram)
 {
 
-    gl.useProgram(shaderProgram);
-	  setMatrixUniforms(shaderProgram);
+    gl.useProgram(pShaderProgram);
+	  setMatrixUniforms(pShaderProgram);
     
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(pShaderProgram.vertexPositionAttribute, cubeVertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeNormalBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, cubeNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(pShaderProgram.vertexNormalAttribute, cubeNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeIndiceBuffer);
 
