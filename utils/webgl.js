@@ -133,7 +133,7 @@ uniform float uWaterY;
 void main()
 {
   float dist = a_position.y*a_position.y + a_position.x*a_position.x;
-  gl_FragColor = vec4(1.0-dist,1.0-dist,0.0,cos(uCounter*6.0)-dist );
+  gl_FragColor = vec4(1.0-dist,1.0-dist,0.0,cos(uCounter*6.0)-dist ); 
   
 }`;
 

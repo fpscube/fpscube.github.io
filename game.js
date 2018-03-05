@@ -155,6 +155,7 @@ function drawGame() {
 	enemiesDraw();
 	gunsDraw(gPos,gDir);
 	bulletsDraw();	
+	humanDraw();	
 
 
 }

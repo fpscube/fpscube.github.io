@@ -29,18 +29,18 @@ function enemiesGetCollisionId()
 }
 
 function enemiesUpdate()
-{
+{;
 	//Enemies ray collision
 	gEnemiesCollisionId = -1;
 	gEnemiesCollisionDist = 0xFFFFFFF;
 	for (var i=gEnemiesList.length-1;i>=0;i--){
-		enemiePos = gEnemiesList[i][0];		
-		enemieVector =  vec3.create();	
-		fireVector =  vec3.create();
-		distVector  =  vec3.create();
+		var enemiePos = gEnemiesList[i][0];		
+		var enemieVector =  vec3.create();	
+		var fireVector =  vec3.create();
+		var distVector  =  vec3.create();
 		vec3.subtract(enemieVector,enemiePos,gPos);
-		fireDist = vec3.dot(enemieVector,gDir);
-		enemieDist = vec3.distance(enemiePos,gPos);		
+		var fireDist = vec3.dot(enemieVector,gDir);
+		var enemieDist = vec3.distance(enemiePos,gPos);		
 		dist = Math.sqrt(enemieDist**2 - fireDist**2);   
 		if (dist < 1 && enemieDist<gEnemiesCollisionDist) gEnemiesCollisionId = i;
 	}
@@ -66,12 +66,12 @@ function enemiesUpdate()
 
 	// Enemies Position
 	for (var i=gEnemiesList.length-1;i>=0;i--){
-		enemiePos = gEnemiesList[i][0];
-		enemieDir = gEnemiesList[i][1];
-		enemieSpeed = gEnemiesList[i][2];
-		animCounter = gEnemiesList[i][3];
+		var enemiePos = gEnemiesList[i][0];
+		var enemieDir = gEnemiesList[i][1];
+		var enemieSpeed = gEnemiesList[i][2];
+		var animCounter = gEnemiesList[i][3];
 		vec3.subtract(enemieDir,gPos,enemiePos);
-		dist = vec3.length(enemieDir);
+		var dist = vec3.length(enemieDir);
 		vec3.normalize(enemieDir,enemieDir);
 
 		collision=false 
@@ -122,17 +122,16 @@ function enemiesUpdate()
 
 function enemiesDraw()
 {
-	
 	setMatrixUniforms(shaderProgram);
 
 	// Ennemies draw 
 	mat4.identity(mvMatrix)
 	var lookAtMatrix = mat4.create();	
 	for (var id in gEnemiesList) {
-		enemiePos = gEnemiesList[id][0];
-		enemieDir = gEnemiesList[id][1];
-		animCounter = gEnemiesList[id][3];
-		damageCounter = gEnemiesList[id][4][1];
+		var enemiePos = gEnemiesList[id][0];
+		var enemieDir = gEnemiesList[id][1];
+		var animCounter = gEnemiesList[id][3];
+		var damageCounter = gEnemiesList[id][4][1];
 		
 		if (damageCounter<=0)
 		{
