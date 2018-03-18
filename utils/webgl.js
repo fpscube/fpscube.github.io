@@ -109,11 +109,10 @@ var fragmentShader1 = `
       colorGround = vec4(0.1,0.1,0.1,uVertexColor.a); 
       colorWater = vec4(0.1,0.1,0.1,uVertexColor.a); 
       
-      if (light > 0.0)
-      {
+     
         colorGround += vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,0.0) ;
         colorWater += vec4(0.108*lightWater,0.409*lightWater,0.627*lightWater,0.0) ;
-      } 
+      
 
       
       gl_FragColor = mix(colorGround,colorWater,waterIndex);

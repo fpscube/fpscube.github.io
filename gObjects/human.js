@@ -14,33 +14,60 @@ function humanUpdate()
 
 
 
-function humanArmDraw(pX,pY,pAnimCounter,pAngleRange)
+function humanArmDraw(pX,pY,pAnimCounter,pAngleRange,hasGun)
 {
   
-    //cuisse
+    
+    //ArmUp
     mvPushMatrix();  
     mat4.translate(mvMatrix,mvMatrix, [pX,pY,0]);
     mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.sin(pAnimCounter)*pAngleRange*6.0), [1, 0, 0]);
-    mat4.translate(mvMatrix,mvMatrix, [0,-1.0,0]);
+    mat4.translate(mvMatrix,mvMatrix, [0,-0.9,0]);
     mvPushMatrix();
-    mat4.scale(mvMatrix,mvMatrix,[0.3,1.0,0.3]);
+    mat4.scale(mvMatrix,mvMatrix,[0.3,0.9,0.3]);
     cubeDraw(shaderProgram);
     mvPopMatrix();    
-    //Molet
-    mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0]);
+    
+    //ArmDown
+    mat4.translate(mvMatrix,mvMatrix, [0.0,-0.8,0]);
     mat4.rotate(mvMatrix,mvMatrix,  degToRad((Math.sin(pAnimCounter + Math.PI/2)-1.0)*pAngleRange*3.0), [1, 0, 0]);
-    mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0]);
+    mat4.translate(mvMatrix,mvMatrix, [0.0,-0.8,0]);
     mvPushMatrix();
-    mat4.scale(mvMatrix,mvMatrix,[0.3,1.0,0.3]);
+    mat4.scale(mvMatrix,mvMatrix,[0.3,0.8,0.3]);
     cubeDraw(shaderProgram);
     mvPopMatrix();
-    //Foot       
+    //Hand    
+    shaderVertexColorVector = [0.99,0.76,0.67,1.0];  
     mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0.0]);
-    mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.cos(pAnimCounter)*pAngleRange*3.0), [1, 0, 0]);
+    //mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.cos(pAnimCounter)*pAngleRange*3.0), [1, 0, 0]);
     mvPushMatrix();
     mat4.scale(mvMatrix,mvMatrix,[0.3,0.2,0.3]);
     cubeDraw(shaderProgram);
     mvPopMatrix();   
+
+    //Gun
+    if (hasGun)
+    {
+        
+        shaderVertexColorVector = [1.0,1.0,1.0,1.0];
+        mat4.translate(mvMatrix,mvMatrix, [0.0,-0.7,0.6]);
+        mvPushMatrix();
+        mat4.scale(mvMatrix,mvMatrix,[0.2,1.0,0.2]);
+        cubeDraw(shaderProgram);
+        mvPopMatrix();
+        mvPushMatrix();
+        mat4.translate(mvMatrix,mvMatrix, [0.0,0.4,-0.5]);
+        mat4.scale(mvMatrix,mvMatrix,[0.2,0.2,0.6]);        
+        cubeDraw(shaderProgram);
+        mvPopMatrix();   
+        shaderVertexColorVector = [0.99,0.76,0.67,1.0];  
+        
+        
+    }
+
+
+
+
 
     mvPopMatrix();
 
@@ -68,7 +95,7 @@ function humanLegDraw(pX,pY,pAnimCounter,pAngleRange)
     mat4.scale(mvMatrix,mvMatrix,[0.3,1.0,0.3]);
     cubeDraw(shaderProgram);
     mvPopMatrix();
-    //Chaussure       
+    //Shoes       
     mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0.0]);
     mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.cos(pAnimCounter)*pAngleRange*3.0), [1, 0, 0]);
     mat4.translate(mvMatrix,mvMatrix, [0.0,0.0,0.3]);
@@ -95,7 +122,8 @@ function humanLegDraw(pX,pY,pAnimCounter,pAngleRange)
 var animCounter=0;
 function humanDraw()
 {
-    speed = 6.0;
+    speed = 5.0;
+    // gHumanPosX=0;
   //  animCounter = gAnim/50.0*speed + 10.0;
     animCounter  += 8.0*gElapsed;
     if (animCounter > 10.0 * Math.PI)  animCounter = 10.0 * Math.PI - animCounter;
@@ -104,7 +132,7 @@ function humanDraw()
 	mat4.identity(mvMatrix);
 
     
-    shaderVertexColorVector = [0.4,0.2,0.1,1.0];
+    shaderVertexColorVector = [0.99,0.76,0.67,1.0];
     //body movement
     mat4.translate(mvMatrix,mvMatrix, [0.0,groundGetY(0.0,gHumanPosX)+5.5,gHumanPosX]);
 
@@ -114,16 +142,16 @@ function humanDraw()
     mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.sin(animCounter)*angleRange*0.5), [0, 0, 1]);
 
     // body
-    mvPushMatrix();
-	    mat4.scale(mvMatrix,mvMatrix,[0.6,2.0,0.5]);
+    mvPushMatrix();  
+	    mat4.scale(mvMatrix,mvMatrix,[0.8,2.0,0.4]);
         cubeDraw(shaderProgram);           
     mvPopMatrix();
  
     //shouldern
-    mvPushMatrix();
+    mvPushMatrix();    
         mat4.translate(mvMatrix,mvMatrix, [0,1.7,0]);
-        mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [0, 1, 0  ]);
-        mat4.scale(mvMatrix,mvMatrix,[0.3,0.3,1.4]);
+        mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [0, 1, 0 ]);
+        mat4.scale(mvMatrix,mvMatrix,[0.4,0.3,0.9]);
         cubeDraw(shaderProgram);       
     mvPopMatrix(); 
 
@@ -136,18 +164,18 @@ function humanDraw()
 
     
     //head
-    mvPushMatrix();
+    mvPushMatrix(); 
         mat4.translate(mvMatrix,mvMatrix, [0,3.0,0]);
         mat4.scale(mvMatrix,mvMatrix,[0.5,0.5,0.4]);
         cubeDraw(shaderProgram);       
     mvPopMatrix(); 
 
-    //Arms
-    humanArmDraw(-1.2,1.7,animCounter,angleRange);
-    humanArmDraw(1.2,1.7,animCounter  +  Math.PI ,angleRange);
     //Legs
-    humanLegDraw(0.6,-1.5,animCounter,angleRange);
-    humanLegDraw(-0.6,-1.5,animCounter  +  Math.PI ,angleRange);
+    humanLegDraw(0.5,-1.5,animCounter,angleRange);
+    humanLegDraw(-0.5,-1.5,animCounter  +  Math.PI ,angleRange);
+    //Arms
+    humanArmDraw(-1.2,2.0,animCounter,angleRange,true);
+    humanArmDraw(1.2,2.0,animCounter  +  Math.PI ,angleRange,true);
     
 
 	mat4.identity(mvMatrix)

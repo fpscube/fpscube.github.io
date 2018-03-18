@@ -106,7 +106,8 @@ function cubeInit()
   gl.bindBuffer(gl.ARRAY_BUFFER, cubeNormalBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubeNormals), gl.STATIC_DRAW);	
   gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, cubeNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
-    
+  
+    cubePositions
   // Index Buffer
   cubeIndiceBuffer = gl.createBuffer ();
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeIndiceBuffer);

@@ -127,7 +127,7 @@ function updateGame() {
 		}
 	}	
 
-	enemiesUpdate();
+	//enemiesUpdate();
 }
 
 function drawGame() {
@@ -153,9 +153,9 @@ function drawGame() {
 	groundDraw();
 	waterDraw();	
 	enemiesDraw();
+	humanDraw();	
 	gunsDraw(gPos,gDir);
 	bulletsDraw();	
-	humanDraw();	
 
 
 }
