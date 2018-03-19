@@ -127,7 +127,8 @@ function updateGame() {
 		}
 	}	
 
-	enemiesUpdate();
+	//enemiesUpdate();
+	humanUpdate();
 }
 
 function drawGame() {
