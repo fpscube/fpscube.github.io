@@ -8,7 +8,6 @@ var gHumanAngleRange=0
 
 function humanUpdate()
 {
-    // cos (angle max between legs)* (size legs) * 2.0gPos
 
     elapsedFactor = ( 8.0*gElapsed)/Math.PI;
 
@@ -18,14 +17,19 @@ function humanUpdate()
     gHumanSpeedZ = distFeet * elapsedFactor;
 
     gHumanPos[2] += gHumanSpeedZ*2.0;
-
     gHumanPos[0]=0.0;
     gHumanPos[1]=groundGetY(0.0,gHumanPos[2])+5.5 ;
 
-    vec3.subtract(gHumanHeadDir,gHumanPos,gPos);
-    vec3.normalize(gHumanHeadDir,gHumanHeadDir);
+    targetPos = []
+    targetPos = [gPos[0],gPos[1]-3.5,gPos[2]];
 
-}
+    vec3.subtract(gHumanHeadDir,targetPos,gHumanPos);
+    vec3.normalize(gHumanHeadDir,gHumanHeadDir);
+    dotProd =vec3.dot(gHumanHeadDir,[0,0,1.0]);
+    turnFactor = (dotProd + 1.0) /2.0;
+    gHumanHeadDir = [gHumanHeadDir[0]*turnFactor,gHumanHeadDir[1]*turnFactor,gHumanHeadDir[2]*turnFactor + 1.0 - turnFactor];
+
+};
 
 
 
@@ -125,8 +129,7 @@ var animCounter=0;
 function humanDraw()
 {
     speed = 5.0;
-    // gHumanPos[0]=0;
-  //  animCounter = gAnim/50.0*speed + 10.0;
+    
     animCounter  += 8.0*gElapsed;
     if (animCounter > 10.0 * Math.PI)  animCounter = 10.0 * Math.PI - animCounter;
     gHumanAngleRange = speed;
@@ -140,7 +143,6 @@ function humanDraw()
 
     mat4.rotate(mvMatrix,mvMatrix,  degToRad(gHumanAngleRange*1.0), [1, 0, 0]);
     mat4.translate(mvMatrix,mvMatrix, [0,Math.sin(animCounter*2.0)*gHumanAngleRange/40.0,0]);
-    
     mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.sin(animCounter)*gHumanAngleRange*0.5), [0, 0, 1]);
 
     // body
@@ -168,16 +170,40 @@ function humanDraw()
     //head
     mvPushMatrix(); 
         mat4.translate(mvMatrix,mvMatrix, [0,3.0,0]);
-        mat4.scale(mvMatrix,mvMatrix,[0.5,0.5,0.4]);
         
 	    var lookAtMatrix = mat4.create();
 		mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],gHumanHeadDir,[0,1,0]);
 		mat4.invert(lookAtMatrix,lookAtMatrix);
         mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
-        console.log(gHumanHeadDir)
-       cubeDraw(shaderProgram);       
+        mvPushMatrix();
+        	mat4.scale(mvMatrix,mvMatrix,[0.5,0.5,0.4]); 
+        	cubeDraw(shaderProgram);    
+    	mvPopMatrix();
+		//ears
+        mvPushMatrix();
+   			shaderVertexColorVector = [1.0,1.0,1.0,1.0];
+        	mat4.scale(mvMatrix,mvMatrix,[0.6,0.2,0.2]); 
+        	cubeDraw(shaderProgram);    
+    	mvPopMatrix();
+		//eyes
+       		mat4.translate(mvMatrix,mvMatrix, [0.0,0.2,-0.5]);
+        mvPushMatrix();
+             shaderVertexColorVector = [0.8,0.8,0.8,1.0];
+       		mat4.translate(mvMatrix,mvMatrix, [-0.3,0.0,0.0]);
+        	mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.05]); 
+			cubeDraw(shaderProgram3);   
+    	mvPopMatrix();
+        mvPushMatrix();
+            shaderVertexColorVector = [0.8,0.8,0.8,1.0];
+       		mat4.translate(mvMatrix,mvMatrix, [0.3,0.0,0.0]);
+        	mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.05]); 
+			cubeDraw(shaderProgram3);   
+    	mvPopMatrix();
+
+
     mvPopMatrix(); 
 
+    shaderVertexColorVector = [0.99,0.76,0.67,1.0];
     //Legs
     humanLegDraw(0.5,-1.5,animCounter);
     humanLegDraw(-0.5,-1.5,animCounter  +  Math.PI );

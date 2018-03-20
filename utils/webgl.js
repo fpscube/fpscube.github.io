@@ -137,11 +137,27 @@ void main()
 }`;
 
 
+var fragmentShader3 = `
 
+precision lowp float;
+      
+varying vec4 v_position; 
+varying vec4 a_position;      
+uniform vec4 uVertexColor;    
+uniform float uCounter; 
+uniform float uWaterY;
+
+void main()
+{
+  float dist = a_position.y*a_position.y + a_position.x*a_position.x;
+  gl_FragColor = vec4(uVertexColor.x,uVertexColor.y,uVertexColor.z,1.0-dist); 
+  
+}`;
 
 
 var shaderProgram;
 var shaderProgram2;
+var shaderProgram3;
 
 function initShaders(vertexShaderStr,fragmentShaderStr) {
 
@@ -221,6 +237,7 @@ function webGLStart() {
 	initGL(canvas);
 	shaderProgram = initShaders(vertexShader1,fragmentShader1); 
 	shaderProgram2 = initShaders(vertexShader1,fragmentShader2);
+	shaderProgram3 = initShaders(vertexShader1,fragmentShader3);
 	initGame();
 	tick();
 }
