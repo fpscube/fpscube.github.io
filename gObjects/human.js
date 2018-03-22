@@ -4,23 +4,35 @@ var gHumanDir=[-1,0,1];
 var gHumanHeadDir=[0,0,0];
 var gHumanSpeedFactor=2.0;
 var gHumanAngleRange=0
+var gHumanDirAnimSpeed=5;
+var gHumanDirAnimCounter=100;
+var gHumanDirAnimStart=[-1,0,1];
+var gHumanDirAnimEnd=[-1,0,1];
 
 var gHumanAcc=1;
 
 function humanUpdate()
 {
     
-    if (gHumanSpeedFactor> 8.0)
+    if (gHumanSpeedFactor> 8.0)  gHumanAcc=-1;
+    if (gHumanSpeedFactor< 1.0)  gHumanAcc=1;
+    gHumanSpeedFactor += gElapsed*gHumanAcc;
+
+    
+     gHumanDirAnimCounter += gElapsed*gHumanDirAnimSpeed;
+    if (gHumanDirAnimCounter>=100)
     {
-        gHumanAcc=-1;
-    } 
-    if (gHumanSpeedFactor< 1.0)
-    {
-        gHumanAcc=1;
-        gHumanDir=[Math.random()-0.5,0.0,Math.random()-0.5];
-        vec3.normalize(gHumanDir,gHumanDir);
-    } 
-     gHumanSpeedFactor += gElapsed*gHumanAcc;
+         gHumanDirAnimCounter=0; 
+         gHumanDirAnimStart=[gHumanDir[0],gHumanDir[1],gHumanDir[2]];
+         gHumanDirAnimEnd=[Math.random()-0.5,0.0,Math.random()-0.5];
+         vec3.normalize(gHumanDirAnimEnd,gHumanDirAnimEnd);
+    }
+
+    coefEnd = gHumanDirAnimCounter/100.0;
+    coefStart = 1-coefEnd;
+    gHumanDir = [gHumanDirAnimStart[0]*coefStart + gHumanDirAnimEnd[0]*coefEnd,gHumanDirAnimStart[1]*coefStart+ gHumanDirAnimEnd[1]*coefEnd,gHumanDirAnimStart[2]*coefStart+ gHumanDirAnimEnd[2]*coefEnd];
+    vec3.normalize(gHumanDir,gHumanDir);
+
 
     gHumanAngleRange = gHumanSpeedFactor;
 
