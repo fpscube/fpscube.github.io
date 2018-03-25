@@ -2,12 +2,14 @@
 var gHumanPos=[0,0,0];
 var gHumanDir=[-1,0,1];
 var gHumanHeadDir=[0,0,0];
+var gHumanGunDir=[0,0,0];
 var gHumanSpeedFactor=2.0;
 var gHumanAngleRange=0
 var gHumanDirAnimSpeed=5;
 var gHumanDirAnimCounter=100;
 var gHumanDirAnimStart=[-1,0,1];
 var gHumanDirAnimEnd=[-1,0,1];
+var gHumanFire=false
 
 var gHumanAcc=1;
 
@@ -47,7 +49,6 @@ function humanUpdate()
     gHumanPos[0] -= speed * 2.0 * gHumanDir[0];
     gHumanPos[1] = groundGetY(gHumanPos[0],gHumanPos[2])+5.5 ;
 
-
     targetPos = []
     targetPos = [gPos[0],gPos[1]-3.5,gPos[2]];
 
@@ -55,6 +56,9 @@ function humanUpdate()
     vec3.normalize(gHumanHeadDir,gHumanHeadDir);
     dotProd =vec3.dot(gHumanHeadDir,gHumanDir);
     turnFactor = (dotProd + 1.0) /2.0;
+    gHumanFire=(dotProd> 0.5);
+
+    vec3.copy(gHumanGunDir,gHumanHeadDir);
     gHumanHeadDir = [gHumanHeadDir[0]*turnFactor+ (1.0 - turnFactor)*gHumanDir[0],gHumanHeadDir[1]*turnFactor+ (1.0 - turnFactor)*gHumanDir[1],gHumanHeadDir[2]*turnFactor + (1.0 - turnFactor)*gHumanDir[2]];
 
 };
@@ -67,9 +71,16 @@ function humanArmDraw(pX,pY,pAnimCounter,hasGun)
     
     //ArmUp
     mvPushMatrix();  
-    mat4.translate(mvMatrix,mvMatrix, [pX,pY,0]);
-    mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.sin(pAnimCounter)*gHumanAngleRange*6.0), [1, 0, 0]);
-    mat4.translate(mvMatrix,mvMatrix, [0,-0.9,0]);
+    mat4.translate(mvMatrix,mvMatrix, [pX,pY,0.0,0]);
+    if (gHumanFire)
+    {
+       mat4.rotate(mvMatrix,mvMatrix,  degToRad(-86), [1, 0, 0]);
+    }
+    else
+    {
+      mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.sin(pAnimCounter)*gHumanAngleRange*6.0), [1, 0, 0]);
+    }   
+    mat4.translate(mvMatrix,mvMatrix, [0,-0.6,0]);
     mvPushMatrix();
     mat4.scale(mvMatrix,mvMatrix,[0.3,0.9,0.3]);
     cubeDraw(shaderProgram);
@@ -240,8 +251,17 @@ function humanDraw()
     humanLegDraw(0.5,-1.5,animCounter);
     humanLegDraw(-0.5,-1.5,animCounter  +  Math.PI );
     //Arms
-    humanArmDraw(-1.2,2.0,animCounter,true);
-    humanArmDraw(1.2,2.0,animCounter  +  Math.PI ,true);
+
+    if (gHumanFire)
+    {
+        mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],gHumanDir,[0,1,0]);
+        mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
+        mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],gHumanGunDir,[0,1,0]);
+        mat4.invert(lookAtMatrix,lookAtMatrix);
+        mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
+    }
+    humanArmDraw(-1.2,1.7,animCounter,true);
+    humanArmDraw(1.2,1.7,animCounter  +  Math.PI,true );
     
 
 	mat4.identity(mvMatrix)
