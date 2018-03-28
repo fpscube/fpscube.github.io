@@ -119,6 +119,25 @@ function humanArmDraw(pX,pY,pAnimCounter,hasGun)
         cubeDraw(shaderProgram);
         mvPopMatrix();   
         shaderVertexColorVector = [0.99,0.76,0.67,1.0];  
+
+
+        if(gHumanFire)
+		{
+			mvPushMatrix();	
+			mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
+			mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [1, 0, 0]);
+			mat4.scale(mvMatrix,mvMatrix,[0.25,1.0,1.0]);
+			squareDraw(shaderProgram2);	
+			mvPopMatrix();
+
+			mvPushMatrix();	
+			mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
+			 mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [1, 0, 0]);
+			mat4.scale(mvMatrix,mvMatrix,[1.2,0.15,1.2]);
+			squareDraw(shaderProgram2);	
+			mvPopMatrix();
+		}
+
         
         
     }
