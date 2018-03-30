@@ -234,9 +234,9 @@ function tick() {
 
 function webGLStart() {
 	var canvas = document.getElementById("canvas");
-	var el = document.getElementsByTagName("canvas")[0];
-	el.addEventListener("touchstart", mediaSetMouseDownFct, false);
-	el.addEventListener("touchend", mediaSetMouseUpFct, false);
+	canvas.addEventListener("touchstart", mediaSetMouseDownFct, false);
+	canvas.addEventListener("touchmove", mediaSetMouseDownFct, false);
+	canvas.addEventListener("touchend", mediaSetMouseUpFct, false);
 	initGL(canvas);
 	shaderProgram = initShaders(vertexShader1,fragmentShader1); 
 	shaderProgram2 = initShaders(vertexShader1,fragmentShader2);
