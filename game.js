@@ -4,11 +4,7 @@ var gDir=[];
 var gSpeed=[]; 
 var gSpeedCoef=50;
 var gKeyPressed={};
-var gLastTime=0;
 var gLife=0;
-var gElapsed=0;
-var gAnim=0;
-
 
 // ######### Event Handler ##############// 
 
@@ -32,10 +28,13 @@ function mediaSetKeyUpFct(event){gKeyPressed[event.key]=0;}
 function mediaIsKey(name){return (gKeyPressed[name]==1);}
 
 function mediaSetMouseUpFct(event){
-	if (event.button==0) gKeyPressed["Fire"]=0;
+	//if (event.button==0) 
+	gKeyPressed["Fire"]=0;
 }
+
 function mediaSetMouseDownFct(event){	
-	if (event.button==0) gKeyPressed["Fire"]=1;
+	//if (event.button==0)
+	 gKeyPressed["Fire"]=1;
 }
 
 
@@ -43,6 +42,9 @@ function mediaSetMouseDownFct(event){
 // ######### Init ##############// 
 
 function initGame() {
+
+	// init time utils
+	timeInit();
 
 	// game data Init
 	gPos = [0,0,10]; 
@@ -61,6 +63,7 @@ function initGame() {
 	orthoInit();
 	squareInit();
 	cubeInit();
+	humanInit();
 	enemiesInit(10);
 	groundInit();
 	gunsInit();
@@ -72,16 +75,15 @@ function initGame() {
 
 }
 
-
 function updateGame() {
 
-	//Time counter update
-	var timeNow =  new Date().getTime();
-	gElapsed = (timeNow - gLastTime)/1000; 
-	gLastTime = timeNow; 	
-	gAnim += 100 * gElapsed;
-	shaderCounter += 10* gElapsed;
-	
+	//update time animation
+	timeUpdate();
+
+	var gElapsed = timeGetElapsedInS();
+
+	shaderCounter = timeGetCurrentInS()*10;
+
 	// Deplacement update
 	mvVector =  vec3.create();
 	vec3.cross(mvVector,gDir,[0,1,0]);	

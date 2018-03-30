@@ -29,7 +29,10 @@ function enemiesGetCollisionId()
 }
 
 function enemiesUpdate()
-{;
+{
+	
+	var gElapsed = timeGetElapsedInS();
+	
 	//Enemies ray collision
 	gEnemiesCollisionId = -1;
 	gEnemiesCollisionDist = 0xFFFFFFF;

@@ -11,6 +11,8 @@ function bulletsInit()
 
 function bulletsNew()
 {
+	var gElapsed = timeGetElapsedInS();
+
     gBulleFireTimer += gElapsed*50;
     if (gBulleFireTimer > 10) 
     {
@@ -27,6 +29,9 @@ function bulletsNew()
 function bulletsDraw()
 {
 	
+	var gElapsed = timeGetElapsedInS();
+	var timeS = timeGetCurrentInS();
+	
 	shaderVertexColorVector = [1.0,1.0,1.0,1.0];
 	for (var id in gBulletList) {
 		bulletPos = gBulletList[id][0];
@@ -36,7 +41,7 @@ function bulletsDraw()
 		bulletPos[2] += gElapsed*100*bulletDir[2];
         mat4.identity(mvMatrix)
 		mat4.translate(mvMatrix,mvMatrix, bulletPos);
-		mat4.rotate(mvMatrix,mvMatrix, degToRad(gAnim)*5, [1, 1, 1]);
+		mat4.rotate(mvMatrix,mvMatrix, degToRad(timeS)*5, [1, 1, 1]);
 		mat4.scale(mvMatrix,mvMatrix,[0.2,0.2,0.2]);
 		cubeDraw(shaderProgram);
 	}

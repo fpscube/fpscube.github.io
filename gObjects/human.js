@@ -1,40 +1,45 @@
 
-var gHumanPos=[0,0,0];
-var gHumanDir=[-1,0,1];
-var gHumanHeadDir=[0,0,0];
-var gHumanGunDir=[0,0,0];
-var gHumanSpeedFactor=2.0;
-var gHumanAngleRange=0
-var gHumanDirAnimSpeed=5;
-var gHumanDirAnimCounter=100;
-var gHumanDirAnimStart=[-1,0,1];
-var gHumanDirAnimEnd=[-1,0,1];
-var gHumanFire=false
+var gHumanPos;
+var gHumanDir;
+var gHumanHeadDir;
+var gHumanGunDir;
+var gHumanSpeedFactor;
+var gHumanAngleRange;
+var gHumanFire;
+var gHumanAcc;
 
-var gHumanAcc=1;
+function humanInit()
+{
+     timeAnimInit("HumanDir");
+     gHumanPos=[0,0,0];
+     gHumanDir=[-1,0,1];
+     gHumanHeadDir=[0,0,0];
+     gHumanGunDir=[0,0,0];
+     gHumanSpeedFactor=2.0;
+     gHumanAngleRange=0
+     gHumanAcc=1;
+     gHumanFire="false";
+}
 
 function humanUpdate()
 {
+    
+    var gElapsed = timeGetElapsedInS();
     
     if (gHumanSpeedFactor> 8.0)  gHumanAcc=-1;
     if (gHumanSpeedFactor< 1.0)  gHumanAcc=1;
     gHumanSpeedFactor += gElapsed*gHumanAcc;
 
-    
-     gHumanDirAnimCounter += gElapsed*gHumanDirAnimSpeed;
-    if (gHumanDirAnimCounter>=100)
+    if (!timeAnimIsRunning("HumanDir"))
     {
-         gHumanDirAnimCounter=0; 
-         gHumanDirAnimStart=[gHumanDir[0],gHumanDir[1],gHumanDir[2]];
-         gHumanDirAnimEnd=[Math.random()-0.5,0.0,Math.random()-0.5];
-         vec3.normalize(gHumanDirAnimEnd,gHumanDirAnimEnd);
+        animStart=[gHumanDir[0],gHumanDir[1],gHumanDir[2]];
+        animEnd=[Math.random()-0.5,0.0,Math.random()-0.5];
+        animDuration = 10000 + Math.random()*10000;
+        timeAnimStart("HumanDir",animDuration,animStart,animEnd);
     }
 
-    coefEnd = gHumanDirAnimCounter/100.0;
-    coefStart = 1-coefEnd;
-    gHumanDir = [gHumanDirAnimStart[0]*coefStart + gHumanDirAnimEnd[0]*coefEnd,gHumanDirAnimStart[1]*coefStart+ gHumanDirAnimEnd[1]*coefEnd,gHumanDirAnimStart[2]*coefStart+ gHumanDirAnimEnd[2]*coefEnd];
+    gHumanDir = timeAnimGetVec3Value("HumanDir");
     vec3.normalize(gHumanDir,gHumanDir);
-
 
     gHumanAngleRange = gHumanSpeedFactor;
 
@@ -187,6 +192,7 @@ var animCounter=0;
 function humanDraw()
 {
     
+    var gElapsed = timeGetElapsedInS();
     var lookAtMatrix = mat4.create();
 
     animCounter  += 8.0*gElapsed;
