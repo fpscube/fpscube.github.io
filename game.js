@@ -1,9 +1,7 @@
 // Game Model
 var gPos=[] ;
 var gDir=[];
-var gSpeed=[]; 
 var gSpeedCoef=50;
-var gKeyPressed={};
 var gLife=0;
 
 // ######### Event Handler ##############// 
@@ -23,19 +21,6 @@ function updatePosition(e) {
 	}
 }
 
-function mediaSetKeyDownFct(event){gKeyPressed[event.key]=1;}
-function mediaSetKeyUpFct(event){gKeyPressed[event.key]=0;}
-function mediaIsKey(name){return (gKeyPressed[name]==1);}
-
-function mediaSetMouseUpFct(event){
-	//if (event.button==0) 
-	gKeyPressed["Fire"]=0;
-}
-
-function mediaSetMouseDownFct(event){	
-	//if (event.button==0)
-	 gKeyPressed["Fire"]=1;
-}
 
 
 
@@ -83,28 +68,22 @@ function updateGame() {
 	var gElapsed = timeGetElapsedInS();
 
 	shaderCounter = timeGetCurrentInS()*10;
-
+	
 	// Deplacement update
-	mvVector =  vec3.create();
-	vec3.cross(mvVector,gDir,[0,1,0]);	
 	if(mediaIsKey("-")) 	gSpeedCoef -=1;	
 	if(mediaIsKey("+") )	gSpeedCoef +=1;	
-	if(mediaIsKey("ArrowLeft") || mediaIsKey("Left")  || mediaIsKey("q")){gSpeed[0]=-gSpeedCoef*mvVector[0];gSpeed[2]=-gSpeedCoef*mvVector[2];}
-	if(mediaIsKey("ArrowRight") || mediaIsKey("Right")  || mediaIsKey("d")){gSpeed[0]=gSpeedCoef*mvVector[0];gSpeed[2]=gSpeedCoef*mvVector[2];}
-	if(mediaIsKey("ArrowUp") || mediaIsKey("Up")  || mediaIsKey("z")){gSpeed[0]=gSpeedCoef*gDir[0];gSpeed[2]=gSpeedCoef*gDir[2];}
-	if(mediaIsKey("ArrowDown") || mediaIsKey("Down")  || mediaIsKey("s")){gSpeed[0]=-gSpeedCoef*gDir[0];gSpeed[2]=-gSpeedCoef*gDir[2];}	
-	
 
-	// Fire Object
-	//if (mediaIsKey("Fire")) bulletsNew();
+	if (mediaIsRunning())
+	{
+		var mvVector =  vec3.create();
+		var runAngle = mediaGetRunAngle()
+		vec3.rotateY(mvVector,gDir,[0,0,0],runAngle);
+		console.log(runAngle);
+		gPos[0] += gSpeedCoef*gElapsed*mvVector[0];
+		gPos[2] += gSpeedCoef*gElapsed*mvVector[2];	
+	}
 	
-	// Gravity
-	//if (gPos[0] > 50 || gPos[0] < -50  || gPos[2] < -50  || gPos[2] > 50  )  gSpeed[1] = -1000*gElapsed ; 
-	gPos[0] += gSpeed[0]*gElapsed;
-	gPos[1] += gSpeed[1]*gElapsed;
-	gPos[2] += gSpeed[2]*gElapsed;	
 	gPos[1]=groundGetY(gPos[0],gPos[2]) + 10.0;
-	gSpeed = [0,0,0];
 
 
 	// Bullets And Enemies And Hero Collisions

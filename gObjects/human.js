@@ -29,7 +29,7 @@ function humanUpdate()
     if (gHumanSpeedFactor> 8.0)  gHumanAcc=-1;
     if (gHumanSpeedFactor< 1.0)  gHumanAcc=1;
     gHumanSpeedFactor += gElapsed*gHumanAcc;
-
+ 
     if (!timeAnimIsRunning("HumanDir"))
     {
         animStart=[gHumanDir[0],gHumanDir[1],gHumanDir[2]];
