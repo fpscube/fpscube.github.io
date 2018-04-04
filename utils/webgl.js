@@ -2,9 +2,9 @@ var gl;
 
 function lockChangeAlert() {
 	if (document.pointerLockElement === canvas ||  document.mozPointerLockElement === canvas) {
-		document.addEventListener("mousemove", updatePosition, false);} 
+		document.addEventListener("mousemove", mediaMouseMove, false);} 
 	else {   
-		document.removeEventListener("mousemove", updatePosition, false); }
+		document.removeEventListener("mousemove", mediaMouseMove, false); }
 }
 
 function initGL(canvas) {

@@ -1,8 +1,21 @@
 
 var gMediaKeyPressed={};
-var gMediaTouchStartPos=[];
-var gMediaTouchAngle=0;
-var gMediaTouchInProgress=0;
+var gMediaTouchStartPos={};
+var gMediaMouseCamMvVec=[0,0];
+var gMediaTouchCamMvVec=[0,0];
+var gMediaTouchMvInProgress=0;
+
+// ######### Event Handler ##############// 
+
+function mediaMouseMove(event) {
+	var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+	if (!isChrome || ( Math.abs(event.movementX) < 150 && Math.abs(event.movementY)< 150))
+	{
+        speedCoef = 2.5
+        gMediaMouseCamMvVec[0] += speedCoef*event.movementX/screen.width;
+		gMediaMouseCamMvVec[1] += speedCoef*event.movementY/screen.height;
+	}
+}
 
 function mediaSetKeyDownFct(event)
 {
@@ -49,17 +62,29 @@ function mediaSetMouseDownFct(event){
     gMediaKeyPressed["Fire"]=1;
 }
 
+function mediaGetMouseCamMvVector()
+{
+    var out = gMediaMouseCamMvVec;
+    gMediaMouseCamMvVec=[0,0];
+    return out;
+}
 
-function mediaIsRunning(event){
+function mediaGetTouchCamMvVector()
+{
+    return gMediaTouchCamMvVec;
+}
+
+function mediaIsRunning(){
 
     return (
         gMediaKeyPressed["Up"]==1 || 
         gMediaKeyPressed["Down"]==1 ||
         gMediaKeyPressed["Right"]==1 || 
         gMediaKeyPressed["Left"]==1 ||
-        gMediaTouchInProgress
+        gMediaTouchMvInProgress
     );
 }
+
 
 function mediaGetRunAngle()
 {
@@ -72,25 +97,54 @@ function mediaGetRunAngle()
     else if (gMediaKeyPressed["Down"]) {angle = Math.PI;}
     else if (gMediaKeyPressed["Left"]) {angle = Math.PI/2;}
     else if (gMediaKeyPressed["Right"]) {angle = -Math.PI/2;}
-    else if (gMediaTouchInProgress) {angle = gMediaTouchAngle;}
+    else if (gMediaTouchMvInProgress) {angle = gMediaTouchMvAngle;}
     return angle;
 }
 
-function mediaSetTouchStart(event){	
-    gMediaTouchStartPos[0] = event.touches[0].clientX;
-    gMediaTouchStartPos[1] = event.touches[0].clientY;
+function mediaSetTouchStart(evt){	
+    var touches = evt.changedTouches;
+    for (var i=0; i<touches.length; i++) {
+      var id = touches[i].identifier;
+      gMediaTouchStartPos[id] = [touches[i].pageX,touches[i].pageY];
+    }
 }
 
 
-function mediaSetTouchMove(event){	
-    gMediaTouchInProgress=1;
-    touchVector=[event.touches[0].clientX-gMediaTouchStartPos[0],event.touches[0].clientY-gMediaTouchStartPos[1]];
-
-    gMediaTouchAngle = Math.atan2(-touchVector[0],-touchVector[1]);
+function mediaSetTouchMove(evt){	
+    var touches = evt.changedTouches;
+    for (var i=0; i<touches.length; i++) {
+        var id = touches[i].identifier;
+        var startPos = gMediaTouchStartPos[id];
+        var touchDir =[event.touches[0].clientX-startPos[0],event.touches[0].clientY-startPos[1]];
+        if (startPos[0]>(screen.width/2))
+        { 
+            gMediaTouchMvInProgress=1;
+            gMediaTouchMvAngle = Math.atan2(-touchDir[0],-touchDir[1]);
+        }
+        else
+        {
+            
+            speedCoef = 10;
+            gMediaTouchCamMvVec[0] = speedCoef*touchDir[0]/screen.width;
+		    gMediaTouchCamMvVec[1] = speedCoef*touchDir[1]/screen.height;
+        }
+    }
 }
 
-function mediaSetTouchEnd(event){	
-    gMediaTouchInProgress=0;
+function mediaSetTouchEnd(evt){	
+    var touches = evt.changedTouches;
+    for (var i=0; i<touches.length; i++) {
+        var id = touches[i].identifier;
+        var startPos = gMediaTouchStartPos[id];
+        if (startPos[0]>(screen.width/2))
+        { 
+            gMediaTouchMvInProgress=0;
+        }
+        else
+        {
+            gMediaTouchCamMvVec=[0,0];
+        }
+    }
 }
 
 

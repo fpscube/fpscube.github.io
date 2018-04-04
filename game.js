@@ -4,26 +4,6 @@ var gDir=[];
 var gSpeedCoef=50;
 var gLife=0;
 
-// ######### Event Handler ##############// 
-
-function updatePosition(e) {
-	var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-	if (!isChrome || ( Math.abs(e.movementX) < 150 && Math.abs(e.movementY)< 150))
-	{
-		mvVector =  vec3.create();
-		vec3.cross(mvVector,gDir,[0,1,0]);
-
-		speedCoef = 2.5
-		gDir[0] += mvVector[0]*speedCoef*e.movementX/screen.width;
-		gDir[1] -= speedCoef*e.movementY/screen.height;
-		gDir[2] += mvVector[2]*speedCoef*e.movementX/screen.width;
-		vec3.normalize(gDir,gDir);
-	}
-}
-
-
-
-
 // ######### Init ##############// 
 
 function initGame() {
@@ -64,21 +44,27 @@ function updateGame() {
 
 	//update time animation
 	timeUpdate();
-
 	var gElapsed = timeGetElapsedInS();
-
 	shaderCounter = timeGetCurrentInS()*10;
 	
-	// Deplacement update
+	// Media camera movement
+	var camMouseMvVec = mediaGetMouseCamMvVector();
+	var camTouchMvVec = mediaGetTouchCamMvVector();
+	mvVector =  vec3.create();
+	vec3.cross(mvVector,gDir,[0,1,0]);
+	gDir[0] += mvVector[0]*(camMouseMvVec[0] + camTouchMvVec[0]*gElapsed);
+	gDir[1] -= camMouseMvVec[1] + camTouchMvVec[1]*gElapsed;
+	gDir[2] += mvVector[2]*(camMouseMvVec[0] + camTouchMvVec[0]*gElapsed);
+	vec3.normalize(gDir,gDir);
+
+	// Media running movement
 	if(mediaIsKey("-")) 	gSpeedCoef -=1;	
 	if(mediaIsKey("+") )	gSpeedCoef +=1;	
-
 	if (mediaIsRunning())
 	{
 		var mvVector =  vec3.create();
 		var runAngle = mediaGetRunAngle()
 		vec3.rotateY(mvVector,gDir,[0,0,0],runAngle);
-		console.log(runAngle);
 		gPos[0] += gSpeedCoef*gElapsed*mvVector[0];
 		gPos[2] += gSpeedCoef*gElapsed*mvVector[2];	
 	}
