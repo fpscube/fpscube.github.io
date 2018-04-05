@@ -3,6 +3,7 @@ var gMediaKeyPressed={};
 var gMediaTouchStartPos={};
 var gMediaCamMvVec=[0,0];
 var gMediaTouchMvInProgress=0;
+var gMediaFireTouch=0;
 
 // ######### evt Handler ##############// 
 
@@ -48,12 +49,12 @@ function mediaSetKeyUpFct(evt)
 
 function mediaIsKey(name)
 {
-    return (gMediaKeyPressed[name]==1);
+    return (gMediaKeyPressed[name]>0);
 }
 
 function mediaSetMouseUpFct(evt){
 	if (evt.button==0) 
-	gMediaKeyPressed["Fire"]=0;
+	gMediaKeyPressed["Fire"]=gMediaFireTouch;
 }
 
 function mediaSetMouseDownFct(evt){	
@@ -101,6 +102,11 @@ function mediaSetTouchStart(evt){
     for (var i=0; i<touches.length; i++) {
       var id = touches[i].identifier;
       gMediaTouchStartPos[id] = [ touches[i].pageX,touches[i].pageY];
+      if (touches[i].pageY<(screen.height*0.20))
+      {
+        gMediaFireTouch = !gMediaFireTouch;
+        gMediaKeyPressed["Fire"]=gMediaFireTouch;
+      }
     }
 }
 
