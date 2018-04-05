@@ -1,50 +1,49 @@
 
 var gMediaKeyPressed={};
 var gMediaTouchStartPos={};
-var gMediaMouseCamMvVec=[0,0];
-var gMediaTouchCamMvVec=[0,0];
+var gMediaCamMvVec=[0,0];
 var gMediaTouchMvInProgress=0;
 
-// ######### Event Handler ##############// 
+// ######### evt Handler ##############// 
 
-function mediaMouseMove(event) {
+function mediaMouseMove(evt) {
 	var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-	if (!isChrome || ( Math.abs(event.movementX) < 150 && Math.abs(event.movementY)< 150))
+	if (!isChrome || ( Math.abs(evt.movementX) < 150 && Math.abs(evt.movementY)< 150))
 	{
         speedCoef = 2.5
-        gMediaMouseCamMvVec[0] += speedCoef*event.movementX/screen.width;
-		gMediaMouseCamMvVec[1] += speedCoef*event.movementY/screen.height;
+        gMediaCamMvVec[0] += speedCoef*evt.movementX/screen.width;
+		gMediaCamMvVec[1] += speedCoef*evt.movementY/screen.height;
 	}
 }
 
-function mediaSetKeyDownFct(event)
+function mediaSetKeyDownFct(evt)
 {
-    if (event.key=="ArrowUp" || event.key=="z" ){
+    if (evt.key=="ArrowUp" || evt.key=="z" ){
       gMediaKeyPressed["Up"]=1;
       gMediaKeyPressed["Down"]=0;
     }
-    else if (event.key=="ArrowDown" || event.key=="s" ){
+    else if (evt.key=="ArrowDown" || evt.key=="s" ){
         gMediaKeyPressed["Up"]=0;
         gMediaKeyPressed["Down"]=1;
     }
-    else if (event.key=="ArrowRight" || event.key=="d" ){
+    else if (evt.key=="ArrowRight" || evt.key=="d" ){
         gMediaKeyPressed["Left"]=0;
         gMediaKeyPressed["Right"]=1;
     }
-    else if (event.key=="ArrowLeft" || event.key=="q" ){
+    else if (evt.key=="ArrowLeft" || evt.key=="q" ){
         gMediaKeyPressed["Left"]=1;
         gMediaKeyPressed["Right"]=0;
     }
-    gMediaKeyPressed[event.key]=1;
+    gMediaKeyPressed[evt.key]=1;
 }
 
-function mediaSetKeyUpFct(event)
+function mediaSetKeyUpFct(evt)
 {
-    if (event.key=="ArrowUp" || event.key=="z" ){gMediaKeyPressed["Up"]=0;}
-    else if (event.key=="ArrowDown" || event.key=="s" ){gMediaKeyPressed["Down"]=0;}
-    else if (event.key=="ArrowRight" || event.key=="d" ){gMediaKeyPressed["Right"]=0;}
-    else if (event.key=="ArrowLeft" || event.key=="q" ){gMediaKeyPressed["Left"]=0;}
-    gMediaKeyPressed[event.key]=0;
+    if (evt.key=="ArrowUp" || evt.key=="z" ){gMediaKeyPressed["Up"]=0;}
+    else if (evt.key=="ArrowDown" || evt.key=="s" ){gMediaKeyPressed["Down"]=0;}
+    else if (evt.key=="ArrowRight" || evt.key=="d" ){gMediaKeyPressed["Right"]=0;}
+    else if (evt.key=="ArrowLeft" || evt.key=="q" ){gMediaKeyPressed["Left"]=0;}
+    gMediaKeyPressed[evt.key]=0;
 }
 
 function mediaIsKey(name)
@@ -52,27 +51,23 @@ function mediaIsKey(name)
     return (gMediaKeyPressed[name]==1);
 }
 
-function mediaSetMouseUpFct(event){
-	if (event.button==0) 
+function mediaSetMouseUpFct(evt){
+	if (evt.button==0) 
 	gMediaKeyPressed["Fire"]=0;
 }
 
-function mediaSetMouseDownFct(event){	
-	if (event.button==0)
+function mediaSetMouseDownFct(evt){	
+	if (evt.button==0)
     gMediaKeyPressed["Fire"]=1;
 }
 
-function mediaGetMouseCamMvVector()
+function mediaGetCamMvVector()
 {
-    var out = gMediaMouseCamMvVec;
-    gMediaMouseCamMvVec=[0,0];
+    var out = gMediaCamMvVec;
+    gMediaCamMvVec=[0,0];
     return out;
 }
 
-function mediaGetTouchCamMvVector()
-{
-    return gMediaTouchCamMvVec;
-}
 
 function mediaIsRunning(){
 
@@ -105,7 +100,7 @@ function mediaSetTouchStart(evt){
     var touches = evt.changedTouches;
     for (var i=0; i<touches.length; i++) {
       var id = touches[i].identifier;
-      gMediaTouchStartPos[id] = [touches[i].pageX,touches[i].pageY];
+      gMediaTouchStartPos[id] = [ touches[i].pageX,touches[i].pageY];
     }
 }
 
@@ -120,13 +115,14 @@ function mediaSetTouchMove(evt){
         {
             gMediaTouchMvInProgress=1;
             gMediaTouchMvAngle = Math.atan2(-touchDir[0],-touchDir[1]);
+            
         }
         else
         {
-            
             speedCoef = 10;
-            gMediaTouchCamMvVec[0] = speedCoef*touchDir[0]/screen.width;
-		    gMediaTouchCamMvVec[1] = speedCoef*touchDir[1]/screen.height;
+            gMediaCamMvVec[0] += speedCoef*touchDir[0]/screen.width;
+            gMediaCamMvVec[1] += speedCoef*touchDir[1]/screen.height;    
+            gMediaTouchStartPos[id] = [ touches[i].pageX,touches[i].pageY];
         }
     }
 }

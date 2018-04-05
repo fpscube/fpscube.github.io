@@ -48,13 +48,12 @@ function updateGame() {
 	shaderCounter = timeGetCurrentInS()*10;
 	
 	// Media camera movement
-	var camMouseMvVec = mediaGetMouseCamMvVector();
-	var camTouchMvVec = mediaGetTouchCamMvVector();
+	var camMvVec = mediaGetCamMvVector();
 	mvVector =  vec3.create();
 	vec3.cross(mvVector,gDir,[0,1,0]);
-	gDir[0] += mvVector[0]*(camMouseMvVec[0] + camTouchMvVec[0]*gElapsed);
-	gDir[1] -= camMouseMvVec[1] + camTouchMvVec[1]*gElapsed;
-	gDir[2] += mvVector[2]*(camMouseMvVec[0] + camTouchMvVec[0]*gElapsed);
+	gDir[0] += mvVector[0]*camMvVec[0];
+	gDir[1] -= camMvVec[1] ;
+	gDir[2] += mvVector[2]*camMvVec[0];
 	vec3.normalize(gDir,gDir);
 
 	// Media running movement
