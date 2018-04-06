@@ -15,9 +15,10 @@ function initGame() {
 
 	// game data Init
 	gPos = [0,0,10]; 
+	gPosHist =[];
 	gPos200ms = [0,0,10]; 
+	gSpeedCoef=50;
 	gDir = [0,0,-1];
-	gSpeed = [0,0,0];
 	gLife = 10;
 
 	// gl init

@@ -24,11 +24,12 @@ function humanInit()
 function humanUpdate()
 {
     
-    var elapsed = timeGetElapsedInS();
+    var elapsed =timeGetElapsedInS();
     
-    if (gHumanSpeedFactor> 8.0)  gHumanAcc=-1;
-    if (gHumanSpeedFactor< 1.0)  gHumanAcc=1;
     gHumanSpeedFactor += elapsed*gHumanAcc;
+    
+    if (gHumanSpeedFactor> 8.0) { gHumanSpeedFactor=8.0; gHumanAcc=-1;}
+    if (gHumanSpeedFactor< 1.0) { gHumanSpeedFactor=1.0; gHumanAcc=1;}
  
     if (!timeAnimIsRunning("HumanDir"))
     {
