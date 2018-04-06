@@ -7,6 +7,7 @@ var gHumanSpeedFactor;
 var gHumanAngleRange;
 var gHumanFire;
 var gHumanAcc;
+var gHumanTargetHist=[];
 
 function humanInit()
 {
@@ -19,6 +20,7 @@ function humanInit()
      gHumanAngleRange=0
      gHumanAcc=1;
      gHumanFire="false";
+     gHumanTargetHist=[];
 }
 
 function humanUpdate()
@@ -55,7 +57,11 @@ function humanUpdate()
     gHumanPos[0] -= speed * 2.0 * gHumanDir[0];
     gHumanPos[1] = groundGetY(gHumanPos[0],gHumanPos[2])+5.5 ;
 
-    targetPos = [gPos200ms[0] ,gPos200ms[1]-3.5,gPos200ms[2]];
+    //Process history of target position to simulate reaction time of 0,3s
+    var targetPos=[gPos[0],gPos[1],gPos[2]];
+	gHumanTargetHist.push([timeGetCurrentInS(),targetPos]);
+	if ( timeGetCurrentInS() - gHumanTargetHist[0][0] > 0.3) targetPos = gHumanTargetHist.shift()[1];
+    targetPos = [targetPos[0] ,targetPos[1]-3.5,targetPos[2]];
 
     vec3.subtract(gHumanHeadDir,gHumanPos,targetPos);
     vec3.normalize(gHumanHeadDir,gHumanHeadDir);
