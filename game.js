@@ -1,5 +1,7 @@
 // Game Model
 var gPos=[] ;
+var gPosHist=[];
+var gPos200ms=[];
 var gDir=[];
 var gSpeedCoef=50;
 var gLife=0;
@@ -13,6 +15,7 @@ function initGame() {
 
 	// game data Init
 	gPos = [0,0,10]; 
+	gPos200ms = [0,0,10]; 
 	gDir = [0,0,-1];
 	gSpeed = [0,0,0];
 	gLife = 10;
@@ -69,7 +72,8 @@ function updateGame() {
 	}
 	
 	gPos[1]=groundGetY(gPos[0],gPos[2]) + 10.0;
-
+	gPosHist.push([timeGetCurrentInS(),[gPos[0],gPos[1],gPos[2]]]);
+	if ( timeGetCurrentInS() - gPosHist[0][0] > 0.3) gPos200ms = gPosHist.shift()[1];
 
 	// Bullets And Enemies And Hero Collisions
 	for (var i=gBulletList.length-1;i>=0;i--){	 		

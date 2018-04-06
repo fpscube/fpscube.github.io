@@ -41,9 +41,9 @@ function enemiesUpdate()
 		var enemieVector =  vec3.create();	
 		var fireVector =  vec3.create();
 		var distVector  =  vec3.create();
-		vec3.subtract(enemieVector,enemiePos,gPos);
+		vec3.subtract(enemieVector,enemiePos,gPos200ms);
 		var fireDist = vec3.dot(enemieVector,gDir);
-		var enemieDist = vec3.distance(enemiePos,gPos);		
+		var enemieDist = vec3.distance(enemiePos,gPos200ms);		
 		dist = Math.sqrt(enemieDist**2 - fireDist**2);   
 		if (dist < 1 && enemieDist<gEnemiesCollisionDist) gEnemiesCollisionId = i;
 	}
@@ -73,7 +73,7 @@ function enemiesUpdate()
 		var enemieDir = gEnemiesList[i][1];
 		var enemieSpeed = gEnemiesList[i][2];
 		var animCounter = gEnemiesList[i][3];
-		vec3.subtract(enemieDir,gPos,enemiePos);
+		vec3.subtract(enemieDir,gPos200ms,enemiePos);
 		var dist = vec3.length(enemieDir);
 		vec3.normalize(enemieDir,enemieDir);
 
@@ -84,9 +84,9 @@ function enemiesUpdate()
 			distVect = vec3.create();
 			vec3.subtract(distVect,gEnemiesList[i][0],gEnemiesList[y][0]);
 			distEn1En2 = vec3.length(distVect);
-			vec3.subtract(distVect,gPos,gEnemiesList[y][0]);		
+			vec3.subtract(distVect,gPos200ms,gEnemiesList[y][0]);		
 			distPosEn2 = vec3.length(distVect);	
-			vec3.subtract(distVect,gPos,gEnemiesList[i][0]);		
+			vec3.subtract(distVect,gPos200ms,gEnemiesList[i][0]);		
 			distPosEn1 = vec3.length(distVect);	
 			if(distEn1En2 <4 && distPosEn1>distPosEn2) collision=true ;
 
