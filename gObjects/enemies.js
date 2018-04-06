@@ -20,7 +20,6 @@ function enemiesInit(pMaxEnemies)
 {
 	gEnemiesMax = pMaxEnemies;
 	gEnemiesList = [];
-	gEnemiesTargetHist = [];
 	_enemiesAdd();
 	setInterval(_enemiesAdd,1000);	
 }
@@ -77,9 +76,11 @@ function enemiesUpdate()
 		var animCounter = gEnemiesList[i][3];
 
 		//Process history of target position to simulate reaction time of 3s
-		var targetPos=[gPos[0],gPos[1],gPos[2]];
-		gEnemiesTargetHist.push([timeGetCurrentInS(),targetPos]);
-		if ( timeGetCurrentInS() - gEnemiesTargetHist[0][0] > 3) targetPos = gEnemiesTargetHist.shift()[1];
+		gEnemiesTargetHist.push([timeGetCurrentInS(),[gPos[0],gPos[1],gPos[2]]]);		
+		var targetPos=gEnemiesTargetHist[0][1];
+		while (( timeGetCurrentInS() - gEnemiesTargetHist[0][0]) > 3){
+			targetPos = gEnemiesTargetHist.shift()[1];
+		}
 	
 		vec3.subtract(enemieDir,targetPos,enemiePos);
 		var dist = vec3.length(enemieDir);

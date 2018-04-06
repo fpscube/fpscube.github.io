@@ -58,9 +58,12 @@ function humanUpdate()
     gHumanPos[1] = groundGetY(gHumanPos[0],gHumanPos[2])+5.5 ;
 
     //Process history of target position to simulate reaction time of 0,3s
-    var targetPos=[gPos[0],gPos[1],gPos[2]];
-	gHumanTargetHist.push([timeGetCurrentInS(),targetPos]);
-	if ( timeGetCurrentInS() - gHumanTargetHist[0][0] > 0.3) targetPos = gHumanTargetHist.shift()[1];
+	gHumanTargetHist.push([timeGetCurrentInS(),[gPos[0],gPos[1],gPos[2]]]);	
+    var targetPos=gHumanTargetHist[0][1];
+	while (( timeGetCurrentInS() - gHumanTargetHist[0][0]) > 0.3){
+        targetPos = gHumanTargetHist.shift()[1];
+    } 
+
     targetPos = [targetPos[0] ,targetPos[1]-3.5,targetPos[2]];
 
     vec3.subtract(gHumanHeadDir,gHumanPos,targetPos);
