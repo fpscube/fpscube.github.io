@@ -125,7 +125,7 @@ function mediaSetTouchMove(evt){
         }
         else
         {
-            speedCoef = 2.5;
+            speedCoef = 3.5;
             gMediaCamMvVec[0] += speedCoef*touchDir[0]/screen.width;
             gMediaCamMvVec[1] += speedCoef*touchDir[1]/screen.height;    
             gMediaTouchStartPos[id] = [ touches[i].pageX,touches[i].pageY];
