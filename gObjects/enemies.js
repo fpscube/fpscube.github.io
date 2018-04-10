@@ -20,6 +20,10 @@ function enemiesInit(pMaxEnemies)
 {
 	gEnemiesMax = pMaxEnemies;
 	gEnemiesList = [];
+	gEnemiesCollisionId = -1;
+    gEnemiesCollisionDist = -1;
+    gEnemiesTargetHist = [];
+	
 	_enemiesAdd();
 	setInterval(_enemiesAdd,1000);	
 }

@@ -1,17 +1,25 @@
 
-var gTimeDateInitMs=0;
-var gTimeElapsedS=0;
-var gTimeElapsedMs=0;
-var gTimeMs=0;
-var gTimeS=0;
-var gTimeLastMs=0;
-var gTimeAnimDeg=0;
-var gTimeAnimRad=0;
-var gTimeAnimCounter={};
+var gTimeDateInitMs;
+var gTimeElapsedS;
+var gTimeElapsedMs;
+var gTimeMs;
+var gTimeS;
+var gTimeLastMs;
+var gTimeAnimDeg;
+var gTimeAnimRad;
+var gTimeAnimCounter;
 
 function timeInit()
 {
 	gTimeDateInitMs=  new Date().getTime();
+	gTimeElapsedS=0;
+	gTimeElapsedMs=0;
+	gTimeMs=0;
+	gTimeS=0;
+	gTimeLastMs=0;
+	gTimeAnimDeg=0;
+	gTimeAnimRad=0;
+	gTimeAnimCounter={};
 }
 
 function timeUpdate()
@@ -69,7 +77,7 @@ function timeAnimGetCoef(timeAnimName)
 }
 
 
-function timeAnimGetIntValue(timeAnimName)
+function timeAnimGetValue(timeAnimName)
 {
 	counter = gTimeAnimCounter[timeAnimName];
 	coef = counter["coef"];

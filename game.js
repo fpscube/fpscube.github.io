@@ -25,7 +25,7 @@ function initGame() {
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
 	// init gl object
-	orthoInit();
+	info2DInit();
 	squareInit();
 	cubeInit();
 	humanInit();
@@ -70,6 +70,7 @@ function updateGame() {
 	
 	gPos[1]=groundGetY(gPos[0],gPos[2]) + 10.0;
 
+	var injury=false;
 	// Bullets And Enemies And Hero Collisions
 	for (var i=gBulletList.length-1;i>=0;i--){	 		
 		bulletPos = gBulletList[i][0];
@@ -87,11 +88,14 @@ function updateGame() {
 		(Math.abs(bulletPos[1]-gPos[1]) < 1.0) &&
 		(Math.abs(bulletPos[2]-gPos[2]) < 1.0)){
 			gLife--;
+			injury=true;
+			
 			if (gLife<0)initGame();
 			break;
 		}
 	}	
 
+	info2DUpdate(enemiesGetCollisionId() >= 0,injury,gLife);
 	enemiesUpdate();
 	humanUpdate();
 }
@@ -103,9 +107,7 @@ function drawGame() {
 	// Clear Display
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	//Ortho Draw
-	orthoCrossDisplay((enemiesGetCollisionId() >= 0)? [1.0,0.0,0.0,1.0]: [1.0,1.0,1.0,1.0]);
-	orthoLifeBarDisplay();
+
 
 	//Perceptive projection
 	mat4.perspective(pMatrix,45, gl.viewportWidth / gl.viewportHeight, 1.0, 1000.0);
@@ -122,6 +124,9 @@ function drawGame() {
 	humanDraw();	
 	gunsDraw(gPos,gDir);
 	bulletsDraw();	
+
+	//Draw Info 2D
+	info2DDraw();
 
 
 }

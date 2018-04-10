@@ -8,6 +8,41 @@ var gHumanAngleRange;
 var gHumanFire;
 var gHumanAcc;
 var gHumanTargetHist=[];
+var gHumanFireShaderProgram;
+
+
+var gHumanFragmentShaderFire= `
+precision lowp float;
+      
+varying vec4 v_position; 
+varying vec4 a_position;      
+uniform vec4 uVertexColor;    
+uniform float uCounter; 
+uniform float uWaterY;
+
+void main()
+{
+  float dist = a_position.y*a_position.y + a_position.x*a_position.x;
+  gl_FragColor = vec4(uVertexColor.x,uVertexColor.y,uVertexColor.z,1.0-dist); 
+  
+}`;
+
+var gHumanfragmentShaderEyes= `
+precision lowp float;
+      
+varying vec4 v_position; 
+varying vec4 a_position;      
+uniform vec4 uVertexColor;    
+uniform float uCounter; 
+uniform float uWaterY;
+
+void main()
+{
+  float dist = a_position.y*a_position.y + a_position.x*a_position.x;
+  gl_FragColor = vec4(uVertexColor.x,uVertexColor.y,uVertexColor.z,1.0-dist); 
+  
+}`;
+
 
 function humanInit()
 {
@@ -21,6 +56,8 @@ function humanInit()
      gHumanAcc=1;
      gHumanFire="false";
      gHumanTargetHist=[];
+     gHumanFireShaderProgram =  initShaders(vertexShader1,gHumanFragmentShaderFire);
+     gHumanEyesShaderProgram =  initShaders(vertexShader1,gHumanfragmentShaderEyes);
 }
 
 function humanUpdate()
@@ -97,8 +134,9 @@ function humanArmDraw(pAnimCounter,hasGun)
     mvPopMatrix();    
     
     //ArmDown
+    armDownAngle = (Math.sin(pAnimCounter + Math.PI/2)-1.0)*gHumanAngleRange*3.0;
     mat4.translate(mvMatrix,mvMatrix, [0.0,-0.8,0]);
-    mat4.rotate(mvMatrix,mvMatrix,  degToRad((Math.sin(pAnimCounter + Math.PI/2)-1.0)*gHumanAngleRange*3.0), [1, 0, 0]);
+    mat4.rotate(mvMatrix,mvMatrix, degToRad(armDownAngle), [1, 0, 0]);
     mat4.translate(mvMatrix,mvMatrix, [0.0,-0.8,0]);
     mvPushMatrix();
     mat4.scale(mvMatrix,mvMatrix,[0.3,0.8,0.3]);
@@ -131,20 +169,20 @@ function humanArmDraw(pAnimCounter,hasGun)
         shaderVertexColorVector = [0.99,0.76,0.67,1.0];  
 
 
-        if(gHumanFire)
+        if(gHumanFire && (armDownAngle > -1))
 		{
 			mvPushMatrix();	
 			mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
 			mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [1, 0, 0]);
 			mat4.scale(mvMatrix,mvMatrix,[0.25,1.0,1.0]);
-			squareDraw(shaderProgram2);	
+			squareDraw(gHumanFireShaderProgram);	
 			mvPopMatrix();
 
 			mvPushMatrix();	
 			mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
 			 mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [1, 0, 0]);
 			mat4.scale(mvMatrix,mvMatrix,[1.2,0.15,1.2]);
-			squareDraw(shaderProgram2);	
+			squareDraw(gHumanFireShaderProgram);	
 			mvPopMatrix();
 		}
 
