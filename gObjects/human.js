@@ -9,6 +9,7 @@ var gHumanFire;
 var gHumanAcc;
 var gHumanTargetHist=[];
 var gHumanFireShaderProgram;
+var gHumanFireSucced;
 
 
 var gHumanFragmentShaderFire= `
@@ -46,19 +47,24 @@ void main()
 
 function humanInit()
 {
-     timeAnimInit("HumanDir");
-     gHumanPos=[0,0,0];
-     gHumanDir=[-1,0,1];
-     gHumanHeadDir=[0,0,0];
-     gHumanGunDir=[0,0,0];
-     gHumanSpeedFactor=2.0;
-     gHumanAngleRange=0
-     gHumanAcc=1;
-     gHumanFire="false";
-     gHumanTargetHist=[];
-     gHumanFireShaderProgram =  initShaders(vertexShader1,gHumanFragmentShaderFire);
-     gHumanEyesShaderProgram =  initShaders(vertexShader1,gHumanfragmentShaderEyes);
+    timeAnimInit("HumanDir");
+    timeAnimInit("HumanArmFire");
+    timeAnimInit("HumanBulletFire");
+    gHumanPos=[0,0,0];
+    gHumanDir=[-1,0,1];
+    gHumanHeadDir=[0,0,0];
+    gHumanGunDir=[0,0,0];
+    gHumanSpeedFactor=2.0;
+    gHumanAngleRange=0
+    gHumanAcc=1;
+    gHumanState="Running";
+    gHumanTargetHist=[];
+    gHumanFireShaderProgram =  initShaders(vertexShader1,gHumanFragmentShaderFire);
+    gHumanEyesShaderProgram =  initShaders(vertexShader1,gHumanfragmentShaderEyes);
+    gHumanFireSucced = false;
 }
+
+function humanHasFireSucced(){ return gHumanFireSucced;}
 
 function humanUpdate()
 {
@@ -96,22 +102,52 @@ function humanUpdate()
 
     //Process history of target position to simulate reaction time of 0,3s
 	gHumanTargetHist.push([timeGetCurrentInS(),[gPos[0],gPos[1],gPos[2]]]);	
-    var targetPos=gHumanTargetHist[0][1];
+    var gunTargetPos=gHumanTargetHist[0][1];
 	while (( timeGetCurrentInS() - gHumanTargetHist[0][0]) > 0.3){
-        targetPos = gHumanTargetHist.shift()[1];
+        gunTargetPos = gHumanTargetHist.shift()[1];
     } 
 
-    targetPos = [targetPos[0] ,targetPos[1]-3.5,targetPos[2]];
+    gunTargetPos = [gunTargetPos[0] ,gunTargetPos[1]-3.5,gunTargetPos[2]];
 
-    vec3.subtract(gHumanHeadDir,gHumanPos,targetPos);
-    vec3.normalize(gHumanHeadDir,gHumanHeadDir);
-    dotProd =vec3.dot(gHumanHeadDir,gHumanDir);
+    vec3.subtract(gHumanGunDir,gHumanPos,gunTargetPos);
+    vec3.normalize(gHumanGunDir,gHumanGunDir);
+    dotProd =vec3.dot(gHumanGunDir,gHumanDir);
     turnFactor = (dotProd + 1.0) /2.0;
-    gHumanFire=(dotProd> 0.5);
+    vec3.copy(gHumanHeadDir,gHumanGunDir);
+    gHumanHeadDir = [gHumanGunDir[0]*turnFactor+ (1.0 - turnFactor)*gHumanDir[0],gHumanGunDir[1]*turnFactor+ (1.0 - turnFactor)*gHumanDir[1],gHumanGunDir[2]*turnFactor + (1.0 - turnFactor)*gHumanDir[2]];
 
-    vec3.copy(gHumanGunDir,gHumanHeadDir);
-    gHumanHeadDir = [gHumanHeadDir[0]*turnFactor+ (1.0 - turnFactor)*gHumanDir[0],gHumanHeadDir[1]*turnFactor+ (1.0 - turnFactor)*gHumanDir[1],gHumanHeadDir[2]*turnFactor + (1.0 - turnFactor)*gHumanDir[2]];
+    
+    if (dotProd> 0.5 )
+    {
+        if( !timeAnimIsRunning("HumanArmFire")) 
+        {            
+            gHumanState = "Fire";
+            timeAnimStart("HumanArmFire",500,0,2*3.14);
+            timeAnimStart("HumanBulletFire",100,0,100);
+            var targetDir =  vec3.create();	
+            var fireVector =  vec3.create();
+            var distVector  =  vec3.create();
+            var targetPos = [gPos[0] ,gPos[1]-3.5,gPos[2]];
+            vec3.subtract(targetDir,gHumanPos,targetPos);
+            var fireDist = vec3.dot(targetDir,gHumanGunDir);
+            var enemieDist = vec3.distance(gHumanPos,targetPos);		
+            dist = Math.sqrt(enemieDist**2 - fireDist**2);   
+            if (dist < 1 || isNaN(dist)) gHumanFireSucced = true;
 
+            console.log(dist);
+
+        }
+        else
+        {            
+            gHumanState = "PrepareFire";
+            gHumanFireSucced = false;
+        }
+    }
+    else
+    {
+        
+        gHumanState = "Running";
+    }
 };
 
 
@@ -119,13 +155,15 @@ function humanUpdate()
 function humanArmDraw(pAnimCounter,hasGun)
 {
     //ArmUp
-    if (gHumanFire)
+    if (gHumanState != "Running")
     {
-       mat4.rotate(mvMatrix,mvMatrix,  degToRad(-86), [1, 0, 0]);
+        mat4.rotate(mvMatrix,mvMatrix,  degToRad(-86), [1, 0, 0]);
+        armDownAngle = (Math.sin( timeAnimGetValue("HumanArmFire") + Math.PI/2)-1.0)*gHumanAngleRange*3.0;
     }
     else
     {
-      mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.sin(pAnimCounter)*gHumanAngleRange*6.0), [1, 0, 0]);
+        mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.sin(pAnimCounter)*gHumanAngleRange*6.0), [1, 0, 0]);
+        armDownAngle = (Math.sin(pAnimCounter + Math.PI/2)-1.0)*gHumanAngleRange*3.0;
     }   
     mat4.translate(mvMatrix,mvMatrix, [0,-0.6,0]);
     mvPushMatrix();
@@ -133,8 +171,7 @@ function humanArmDraw(pAnimCounter,hasGun)
     cubeDraw(shaderProgram);
     mvPopMatrix();    
     
-    //ArmDown
-    armDownAngle = (Math.sin(pAnimCounter + Math.PI/2)-1.0)*gHumanAngleRange*3.0;
+    //ArmDown    
     mat4.translate(mvMatrix,mvMatrix, [0.0,-0.8,0]);
     mat4.rotate(mvMatrix,mvMatrix, degToRad(armDownAngle), [1, 0, 0]);
     mat4.translate(mvMatrix,mvMatrix, [0.0,-0.8,0]);
@@ -169,7 +206,7 @@ function humanArmDraw(pAnimCounter,hasGun)
         shaderVertexColorVector = [0.99,0.76,0.67,1.0];  
 
 
-        if(gHumanFire && (armDownAngle > -1))
+        if(gHumanState == "Fire")
 		{
 			mvPushMatrix();	
 			mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
@@ -318,7 +355,7 @@ function humanDraw()
     
     mvPushMatrix();  
     mat4.translate(mvMatrix,mvMatrix, [-1.2,1.7,0.0]);
-    if (gHumanFire)
+    if(gHumanState != "Running")
     {
         mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],gHumanDir,[0,1,0]);
         mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
@@ -332,7 +369,7 @@ function humanDraw()
         
     mvPushMatrix();  
     mat4.translate(mvMatrix,mvMatrix, [1.2,1.7,0.0]);
-    if (gHumanFire)
+    if(gHumanState != "Running" )
     {
         mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],gHumanDir,[0,1,0]);
         mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);

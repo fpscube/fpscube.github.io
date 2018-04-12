@@ -87,16 +87,17 @@ function updateGame() {
 		if 	((Math.abs(bulletPos[0]-gPos[0]) < 1.0) &&
 		(Math.abs(bulletPos[1]-gPos[1]) < 1.0) &&
 		(Math.abs(bulletPos[2]-gPos[2]) < 1.0)){
-			gLife--;
-			injury=true;
-			
-			if (gLife<0)initGame();
+			injury=true;			
 			break;
 		}
 	}	
 
+	if (!injury) injury = humanHasFireSucced();
+	if (injury) gLife--;
+	if (gLife<0) initGame();
+
 	info2DUpdate(enemiesGetCollisionId() >= 0,injury,gLife);
-	enemiesUpdate();
+	//enemiesUpdate();
 	humanUpdate();
 }
 
@@ -106,8 +107,6 @@ function drawGame() {
 
 	// Clear Display
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-
 
 	//Perceptive projection
 	mat4.perspective(pMatrix,45, gl.viewportWidth / gl.viewportHeight, 1.0, 1000.0);
