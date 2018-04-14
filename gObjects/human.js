@@ -10,6 +10,7 @@ var gHumanAcc;
 var gHumanTargetHist=[];
 var gHumanFireShaderProgram;
 var gHumanFireSucced;
+var gHumanHeadMvMatrix;
 
 
 var gHumanFragmentShaderFire= `
@@ -62,12 +63,72 @@ function humanInit()
     gHumanFireShaderProgram =  initShaders(vertexShader1,gHumanFragmentShaderFire);
     gHumanEyesShaderProgram =  initShaders(vertexShader1,gHumanfragmentShaderEyes);
     gHumanFireSucced = false;
+    gHumanHeadMvMatrix = mat4.create();
 }
 
 function humanHasFireSucced(){ return gHumanFireSucced;}
 
+function humanIsInGunTarget(){
+    tranformGunPos = vec3.create();
+    tranformGunNexPos = vec3.create();
+    tranformGunDir = vec3.create();
+    gHumanHeadMvMatrixInverse = mat4.create();
+    mat4.invert(gHumanHeadMvMatrixInverse,gHumanHeadMvMatrix);
+    vec3.transformMat4(tranformGunPos,gPos,gHumanHeadMvMatrixInverse);
+    vec3.transformMat4(tranformGunNexPos,[gPos[0]+gDir[0],gPos[1]+gDir[1],gPos[2]+gDir[2]],gHumanHeadMvMatrixInverse);
+    vec3.subtract(tranformGunDir,tranformGunNexPos,tranformGunPos);
+    vec3.normalize(tranformGunDir,tranformGunDir);
+
+    xb=tranformGunPos[0];
+    yb=tranformGunPos[1];
+    zb=tranformGunPos[2];
+
+    xa=tranformGunDir[0];
+    ya=tranformGunDir[1];
+    za=tranformGunDir[2];    
+    
+    z = 1;
+    t = ((z-zb)/za);
+    x = xa * t + xb;
+    y = ya * t + yb;
+    c0 = (x>-1 && x<1 && y>-1 && y<1);
+    
+    z = -1;
+    t = ((z-zb)/za);
+    x = xa * t + xb;
+    y = ya * t + yb;
+    c1 = (x>-1 && x<1 && y>-1 && y<1);
+    
+    y = 1;
+    t = ((y-yb)/ya);
+    x = xa * t + xb;
+    z = za * t + zb;
+    c2 = (x>-1 && x<1 && z>-1 && z<1);
+    
+    y = -1;
+    t = ((y-yb)/ya);
+    x = xa * t + xb;
+    z = za * t + zb;
+    c3 = (x>-1 && x<1 && z>-1 && z<1);
+    
+    x = 1;
+    t = ((x-xb)/xa);
+    y = ya * t + yb;
+    z = za * t + zb;
+    c4 = (y>-1 && y<1 && z>-1 && z<1);
+    
+    x = -1;
+    t = ((x-xb)/xa);
+    y = ya * t + yb;
+    z = za * t + zb;
+    c5 = (y>-1 && y<1 && z>-1 && z<1);
+
+    return ( c0 || c1 || c2 || c3 || c4 || c5 );
+}
+
 function humanUpdate()
 {
+
     
     var elapsed =timeGetElapsedInS();
     
@@ -319,7 +380,8 @@ function humanDraw()
 		mat4.invert(lookAtMatrix,lookAtMatrix);
         mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
         mvPushMatrix();
-        	mat4.scale(mvMatrix,mvMatrix,[0.5,0.5,0.4]); 
+            mat4.scale(mvMatrix,mvMatrix,[0.5,0.5,0.4]); 
+            mat4.copy(gHumanHeadMvMatrix,mvMatrix);
         	cubeDraw(shaderProgram);    
     	mvPopMatrix();
 		//ears

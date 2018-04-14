@@ -96,8 +96,8 @@ function updateGame() {
 	if (injury) gLife--;
 	if (gLife<0) initGame();
 
-	info2DUpdate(enemiesGetCollisionId() >= 0,injury,gLife);
-	//enemiesUpdate();
+	info2DUpdate((enemiesGetCollisionId() >= 0) || humanIsInGunTarget(),injury,gLife);
+	enemiesUpdate();
 	humanUpdate();
 }
 
