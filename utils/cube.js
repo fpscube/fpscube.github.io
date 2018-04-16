@@ -132,3 +132,63 @@ function cubeDraw(pShaderProgram)
     
     gl.drawElements(gl.TRIANGLES,36, gl.UNSIGNED_SHORT,0);
 }
+
+function cubeIsRayCollisionDetected(rayPoint,rayDir,mvMatrix)
+{
+    tranformRayPoint1 = vec3.create();
+    tranformRayPoint2 = vec3.create();
+    tranformRayDir = vec3.create();
+    mvMatrixInv = mat4.create();
+    mat4.invert(mvMatrixInv,mvMatrix);
+    vec3.transformMat4(tranformRayPoint1,rayPoint,mvMatrixInv);
+    vec3.transformMat4(tranformRayPoint2,[rayPoint[0]+rayDir[0],rayPoint[1]+rayDir[1],rayPoint[2]+rayDir[2]],mvMatrixInv);
+    vec3.subtract(tranformRayDir,tranformRayPoint2,tranformRayPoint1);
+    vec3.normalize(tranformRayDir,tranformRayDir);
+
+    xb=tranformRayPoint1[0];
+    yb=tranformRayPoint1[1];
+    zb=tranformRayPoint1[2];
+
+    xa=tranformRayDir[0];
+    ya=tranformRayDir[1];
+    za=tranformRayDir[2];    
+    
+    z = 1;
+    t = ((z-zb)/za);
+    x = xa * t + xb;
+    y = ya * t + yb;
+    c0 = (x>-1 && x<1 && y>-1 && y<1);
+    
+    z = -1;
+    t = ((z-zb)/za);
+    x = xa * t + xb;
+    y = ya * t + yb;
+    c1 = (x>-1 && x<1 && y>-1 && y<1);
+    
+    y = 1;
+    t = ((y-yb)/ya);
+    x = xa * t + xb;
+    z = za * t + zb;
+    c2 = (x>-1 && x<1 && z>-1 && z<1);
+    
+    y = -1;
+    t = ((y-yb)/ya);
+    x = xa * t + xb;
+    z = za * t + zb;
+    c3 = (x>-1 && x<1 && z>-1 && z<1);
+    
+    x = 1;
+    t = ((x-xb)/xa);
+    y = ya * t + yb;
+    z = za * t + zb;
+    c4 = (y>-1 && y<1 && z>-1 && z<1);
+    
+    x = -1;
+    t = ((x-xb)/xa);
+    y = ya * t + yb;
+    z = za * t + zb;
+    c5 = (y>-1 && y<1 && z>-1 && z<1);
+
+    return ( c0 || c1 || c2 || c3 || c4 || c5 );
+
+}
