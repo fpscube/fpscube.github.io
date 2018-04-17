@@ -92,13 +92,13 @@ function updateGame() {
 		}
 	}	
 
-	if (!injury) injury = humanHasFireSucced();
+
+	enemiesUpdate();
+	humanUpdate(mediaIsKey("Fire"));
+	if (!injury) injury = humanHitTarget();
 	if (injury) gLife--;
 	if (gLife<0) initGame();
-
-	info2DUpdate((enemiesGetCollisionId() >= 0) || humanIsInGunTarget(),injury,gLife);
-	enemiesUpdate();
-	humanUpdate();
+	info2DUpdate((enemiesGetCollisionId() >= 0) || humanIsInTarget(),injury,gLife);
 }
 
 function drawGame() {
