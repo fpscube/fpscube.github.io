@@ -2,13 +2,15 @@
 var gInfo2DCrossColor;
 var gInfo2DInjuryAlpha;
 var gInfo2DLifeQt;
+var gInfo2DAnim;
 
 function info2DInit()
 {
 	gInfo2DCrossColor= [1.0,1.0,1.0,1.0];
 	gInfo2DInjuryAlpha = 0.0;
 	gInfo2DLifeQt = 1.0;
-	timeAnimInit("Info2DInjuryAlphaAnim");
+	gInfo2DAnim = new CTimeAnim();
+	
 }
 
 function info2DUpdate(pEnemieTarget,pInjury,pNbLife)
@@ -16,8 +18,8 @@ function info2DUpdate(pEnemieTarget,pInjury,pNbLife)
 
 	gInfo2DCrossColor =((pEnemieTarget) ?  [1.0,0.0,0.0,1.0]: [1.0,1.0,1.0,1.0]);
 	gInfo2DLifeQt = pNbLife;
-	if (pInjury) timeAnimStart("Info2DInjuryAlphaAnim",200,0.7,0.0);
-	gInfo2DInjuryAlpha = timeAnimGetValue("Info2DInjuryAlphaAnim");
+	if (pInjury) gInfo2DAnim.start(200,0.7,0.0);
+	gInfo2DInjuryAlpha = gInfo2DAnim.getValue();
 }
 
 function info2DDraw()

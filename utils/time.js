@@ -7,7 +7,7 @@ var gTimeS;
 var gTimeLastMs;
 var gTimeAnimDeg;
 var gTimeAnimRad;
-var gTimeAnimCounter;
+var gTimeAnimTab=[];
 
 function timeInit()
 {
@@ -19,7 +19,7 @@ function timeInit()
 	gTimeLastMs=0;
 	gTimeAnimDeg=0;
 	gTimeAnimRad=0;
-	gTimeAnimCounter={};
+	gTimeAnimTab=[];
 }
 
 function timeUpdate()
@@ -33,68 +33,25 @@ function timeUpdate()
 	gTimeAnimDeg = (gTimeAnimDeg + gTimeElapsedS )% 360;
 	gTimeAnimRad = (gTimeAnimRad + gTimeElapsedS )% (2*Math.PI);
 
-	for (var counterName in gTimeAnimCounter)
+	for (var id in gTimeAnimTab)
 	{
-		var counter = gTimeAnimCounter[counterName]
-		if (counter["running"])
+		var timeAnimInst = gTimeAnimTab[id];
+		if (timeAnimInst.running)
 		{
-			coef = (gTimeMs-counter["startTimeMs"])/counter["duration"];
+			var coef = (gTimeMs-timeAnimInst.startTimeMs)/timeAnimInst.duration;
 			if (coef > 1.0)
 			{
-				counter["running"] = false;
-				counter["coef"] = 1.0;
+				timeAnimInst.running = false;
+				timeAnimInst.coef= 1.0;
 			}
 			else
 			{
 				
-				counter["coef"] = coef;
+				timeAnimInst.coef= coef;
 			}
 		}
 	}
 }
-
-function timeAnimInit(timeAnimName)
-{
-	/* Time Start ,Duration (gTimeMs,timeAnimDurationInMs)*/
-	gTimeAnimCounter[timeAnimName] = {"running":false,"coef":1.0,"startTimeMs":0,"duration":0};
-}
-
-
-function timeAnimStart(timeAnimName,timeAnimDurationInMs,startValue,endValue)
-{
-	/* Time Start ,Duration (gTimeMs,timeAnimDurationInMs)*/
-	gTimeAnimCounter[timeAnimName]= {"running":true,"coef":0.0,"startTimeMs":gTimeMs,"duration":timeAnimDurationInMs,"startValue":startValue,"endValue":endValue};
-}
-
-function timeAnimIsRunning(timeAnimName)
-{
-	return gTimeAnimCounter[timeAnimName]["running"];
-}
-
-function timeAnimGetCoef(timeAnimName)
-{
-	return gTimeAnimCounter[timeAnimName]["coef"];
-}
-
-
-function timeAnimGetValue(timeAnimName)
-{
-	counter = gTimeAnimCounter[timeAnimName];
-	coef = counter["coef"];
-	valStart = counter["startValue"];
-	valEnd = counter["endValue"];
-	return (valStart * (1-coef) + valEnd * coef);
-}
-
-function timeAnimGetVec3Value(timeAnimName)
-{
-	counter = gTimeAnimCounter[timeAnimName];
-	coef = counter["coef"];
-	vecStart = counter["startValue"];
-	vecEnd = counter["endValue"];
-	return [vecStart[0] * (1-coef) + vecEnd[0] * coef,vecStart[1] * (1-coef) + vecEnd[1] * coef, vecStart[2] * (1-coef) + vecEnd[2] * coef];
-}
-
 
 
 function timeGetAnimDeg() {return gTimeAnimDeg;}
@@ -103,3 +60,47 @@ function timeGetCurrentInMs() {return gTimeMs;}
 function timeGetCurrentInS() {return gTimeS;}
 function timeGetElapsedInMs() {return gTimeElapsedMs;}
 function timeGetElapsedInS() {return gTimeElapsedS;}
+
+
+
+
+class CTimeAnim
+{
+
+	constructor() {
+		this.running = false;
+		this.coef = 1.0;
+		this.startTimeMs = 0;
+		this.duration = 0;
+		this.startVal = 0;
+		this.endVal = 0;
+		gTimeAnimTab.push(this);
+	}
+
+	start(pAnimDurationInMs,pStartValue,pEndValue)
+	{
+		this.running = true;
+		this.coef = 0.0;
+		this.startTimeMs = gTimeMs;
+		this.duration = pAnimDurationInMs;
+		this.startVal = pStartValue;
+		this.endVal = pEndValue;
+	}
+
+	getValue()
+	{
+		var coef = this.coef;
+		var start = this.startVal;
+		var end =  this.endVal ;
+		return (start * (1-coef) + end * coef);
+	}
+
+	getVec3Value()
+	{
+		var coef = this.coef;
+		var vecStart = this.startVal;
+		var vecEnd =  this.endVal ;
+		return [vecStart[0] * (1-coef) + vecEnd[0] * coef,vecStart[1] * (1-coef) + vecEnd[1] * coef, vecStart[2] * (1-coef) + vecEnd[2] * coef];
+	}
+
+}

@@ -4,6 +4,8 @@ var gDir=[];
 var gSpeedCoef=50;
 var gLife=0;
 
+var gHuman=[];
+
 // ######### Init ##############// 
 
 function initGame() {
@@ -15,7 +17,7 @@ function initGame() {
 	gPos = [0,0,10]; 
 	gSpeedCoef=50;
 	gDir = [0,0,-1];
-	gLife = 10;
+	gLife = 100;
 
 	// gl init
 	gl.clearColor(0x00, 0xbf, 0xff, 1.0);	
@@ -28,8 +30,11 @@ function initGame() {
 	info2DInit();
 	squareInit();
 	cubeInit();
-	humanInit();
-	enemiesInit(10);
+
+	gHuman=[];
+	for(var i =0 ;i<30;i++){
+		gHuman.push(new CHuman([i*10,0,0]));
+	}	
 	groundInit();
 	gunsInit();
 	waterInit();
@@ -70,35 +75,17 @@ function updateGame() {
 	
 	gPos[1]=groundGetY(gPos[0],gPos[2]) + 10.0;
 
-	var injury=false;
-	// Bullets And Enemies And Hero Collisions
-	for (var i=gBulletList.length-1;i>=0;i--){	 		
-		bulletPos = gBulletList[i][0];
-		for (var y=gEnemiesList.length-1;y>=0;y--){
-			enemiePos = gEnemiesList[y][0];
-			if 	((Math.abs(bulletPos[0]-enemiePos[0]) < 1.0) &&
-				(Math.abs(bulletPos[1]-enemiePos[1]) < 1.0) &&
-				(Math.abs(bulletPos[2]-enemiePos[2]) < 1.0)){
-					gBulletList.splice(i,1);
-					gEnemiesList.splice(y,1);
-					break;
-			}			
-		}
-		if 	((Math.abs(bulletPos[0]-gPos[0]) < 1.0) &&
-		(Math.abs(bulletPos[1]-gPos[1]) < 1.0) &&
-		(Math.abs(bulletPos[2]-gPos[2]) < 1.0)){
-			injury=true;			
-			break;
-		}
+	var hitTarget=false;
+	var isInTarget=false;
+	for(var i =0 ;i<gHuman.length;i++){
+		var fire = mediaIsKey("Fire");
+		gHuman[i].Update(fire);
+		hitTarget =hitTarget || gHuman[i].HitTarget;
+		isInTarget = isInTarget || gHuman[i].IsInTarget;
 	}	
-
-
-	enemiesUpdate();
-	humanUpdate(mediaIsKey("Fire"));
-	if (!injury) injury = humanHitTarget();
-	if (injury) gLife--;
+	if (hitTarget) gLife--;
 	if (gLife<0) initGame();
-	info2DUpdate((enemiesGetCollisionId() >= 0) || humanIsInTarget(),injury,gLife);
+	info2DUpdate(isInTarget,hitTarget,gLife/10);
 }
 
 function drawGame() {
@@ -119,8 +106,10 @@ function drawGame() {
 	
 	groundDraw();
 	waterDraw();	
-	enemiesDraw();
-	humanDraw();	
+	//enemiesDraw();
+	for(var i =0 ;i<gHuman.length;i++){
+		gHuman[i].Draw();
+	}	
 	gunsDraw(gPos,gDir);
 	bulletsDraw();	
 

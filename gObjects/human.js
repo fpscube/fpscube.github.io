@@ -1,203 +1,177 @@
-
-var gHumanPos;
-var gHumanDir;
-var gHumanHeadDir;
-var gHumanGunDir;
-var gHumanAngleRange;
-var gHumanFire;
-var gHumanIsTouched;
-var gHumanAcc;
-var gHumanTargetHist=[];
-var gHumanFireShaderProgram;
-var gHumanHitTarget;
-var gHumanIsInTarget;
-var gHumanAnimCounter;
-
-//Collision Matrix
-var gHumanMvMatrix_Box; 
-var gHumanMvMatrix_Head; 
-var gHumanMvMatrix_Neck; 
-var gHumanMvMatrix_Body; 
-var gHumanMvMatrix_Shouldern; 
-var gHumanMvMatrix_LeftArmP1; 
-var gHumanMvMatrix_LeftArmP2; 
-var gHumanMvMatrix_LeftHand; 
-var gHumanMvMatrix_LeftLegP1; 
-var gHumanMvMatrix_LeftLegP2; 
-var gHumanMvMatrix_LeftLegP3; 
-var gHumanMvMatrix_RightArmP1; 
-var gHumanMvMatrix_RightArmP2; 
-var gHumanMvMatrix_RightHand; 
-var gHumanMvMatrix_RightLegP1; 
-var gHumanMvMatrix_RightLegP2; 
-var gHumanMvMatrix_RightLegP3; 
-
-var gHumanFragmentShaderFire= `
-precision lowp float;
-      
-varying vec4 v_position; 
-varying vec4 a_position;      
-uniform vec4 uVertexColor;    
-uniform float uCounter; 
-uniform float uWaterY;
-
-void main()
+class CHuman
 {
-  float dist = a_position.y*a_position.y + a_position.x*a_position.x;
-  gl_FragColor = vec4(uVertexColor.x,uVertexColor.y,uVertexColor.z,1.0-dist); 
-  
-}`;
 
-var gHumanfragmentShaderEyes= `
-precision lowp float;
-      
-varying vec4 v_position; 
-varying vec4 a_position;      
-uniform vec4 uVertexColor;    
-uniform float uCounter; 
-uniform float uWaterY;
+constructor(pPos) {
 
-void main()
-{
-  float dist = a_position.y*a_position.y + a_position.x*a_position.x;
-  gl_FragColor = vec4(uVertexColor.x,uVertexColor.y,uVertexColor.z,1.0-dist); 
-  
-}`;
+    
+    var fragmentShaderFire= `
+        precision lowp float;
+            
+        varying vec4 v_position; 
+        varying vec4 a_position;      
+        uniform vec4 uVertexColor;    
+        uniform float uCounter; 
+        uniform float uWaterY;
 
-function humanInit()
-{
-    timeAnimInit("HumanDirAnim");
-    timeAnimInit("HumanReloadAnim");
-    timeAnimInit("HumanSpeedFallAnim");
-    timeAnimInit("HumanBodyFallAnim");
-    timeAnimInit("HumanDeadAnim");
-    gHumanPos=[0,0,0];
-    gHumanDir=[-1,0,1];
-    gHumanHeadDir=[0,0,0];
-    gHumanGunDir=[0,0,0];
-    gHumanSpeed=2.0;
-    gHumanAcc=1;
-    gHumanAngleRange=0
-    gHumanState="Running";
-    gHumanTargetHist=[];
-    gHumanFireShaderProgram =  initShaders(vertexShader1,gHumanFragmentShaderFire);
-    gHumanEyesShaderProgram =  initShaders(vertexShader1,gHumanfragmentShaderEyes);
-    gHumanHitTarget = false;
-    gHumanIsTouched = false;
-    gHumanAnimCounter=0;
+        void main()
+        {
+        float dist = a_position.y*a_position.y + a_position.x*a_position.x;
+        gl_FragColor = vec4(uVertexColor.x,uVertexColor.y,uVertexColor.z,1.0-dist); 
+        
+        }`;
 
-    gHumanMvMatrix_Box = mat4.create(); 
-    gHumanMvMatrix_Head = mat4.create(); 
-    gHumanMvMatrix_Neck = mat4.create(); 
-    gHumanMvMatrix_Body = mat4.create(); 
-    gHumanMvMatrix_Shouldern = mat4.create(); 
-    gHumanMvMatrix_LeftArmP1 = mat4.create(); 
-    gHumanMvMatrix_LeftArmP2 = mat4.create(); 
-    gHumanMvMatrix_LeftHand = mat4.create(); 
-    gHumanMvMatrix_LeftLegP1 = mat4.create(); 
-    gHumanMvMatrix_LeftLegP2 = mat4.create(); 
-    gHumanMvMatrix_LeftLegP3 = mat4.create(); 
-    gHumanMvMatrix_RightArmP1 = mat4.create(); 
-    gHumanMvMatrix_RightArmP2 = mat4.create(); 
-    gHumanMvMatrix_RightHand = mat4.create(); 
-    gHumanMvMatrix_RightLegP1 = mat4.create(); 
-    gHumanMvMatrix_RightLegP2 = mat4.create(); 
-    gHumanMvMatrix_RightLegP3 = mat4.create(); 
+    var fragmentShaderEyes= `
+        precision lowp float;
+            
+        varying vec4 v_position; 
+        varying vec4 a_position;      
+        uniform vec4 uVertexColor;    
+        uniform float uCounter; 
+        uniform float uWaterY;
+
+        void main()
+        {
+        float dist = a_position.y*a_position.y + a_position.x*a_position.x;
+        gl_FragColor = vec4(uVertexColor.x,uVertexColor.y,uVertexColor.z,1.0-dist); 
+        
+        }`;
+
+    this.Pos=pPos;
+    this.Dir=[-1,0,1];
+    this.HeadDir=[0,0,0];
+    this.GunDir=[0,0,0];
+    this.Speed=2.0;
+    this.Acc=1;
+    this.AngleRange=0
+    this.State="Running";
+    this.TargetHist=[];
+    this.FireShaderProgram =  initShaders(vertexShader1,fragmentShaderFire);
+    this.EyesShaderProgram =  initShaders(vertexShader1,fragmentShaderEyes);
+    this.HitTarget = false;
+    this.IsTouched = false;
+    this.AnimCounter=0;
+    
+    this.AnimDir = new CTimeAnim();
+    this.AnimReload = new CTimeAnim();
+    this.AnimSpeedFall=  new CTimeAnim();
+    this.AnimBodyFall = new CTimeAnim();
+    this.AnimDead = new CTimeAnim();
+
+    this.MvMatrix_Box = mat4.create(); 
+    this.MvMatrix_Head = mat4.create(); 
+    this.MvMatrix_Neck = mat4.create(); 
+    this.MvMatrix_Body = mat4.create(); 
+    this.MvMatrix_Shouldern = mat4.create(); 
+    this.MvMatrix_LeftArmP1 = mat4.create(); 
+    this.MvMatrix_LeftArmP2 = mat4.create(); 
+    this.MvMatrix_LeftHand = mat4.create(); 
+    this.MvMatrix_LeftLegP1 = mat4.create(); 
+    this.MvMatrix_LeftLegP2 = mat4.create(); 
+    this.MvMatrix_LeftLegP3 = mat4.create(); 
+    this.MvMatrix_RightArmP1 = mat4.create(); 
+    this.MvMatrix_RightArmP2 = mat4.create(); 
+    this.MvMatrix_RightHand = mat4.create(); 
+    this.MvMatrix_RightLegP1 = mat4.create(); 
+    this.MvMatrix_RightLegP2 = mat4.create(); 
+    this.MvMatrix_RightLegP3 = mat4.create(); 
+
+    this.sqrDist = vec3.squaredDistance(this.Pos,gPos);
 
 }
 
-function humanHitTarget(){ return gHumanHitTarget;}
-function humanIsInTarget(){ return gHumanIsInTarget;}
 
-function humanUpdate(pFire)
+Update(pFire)
 {
 
     var elapsed = timeGetElapsedInS();
 
     //Human collision Detection
-    gHumanIsInTarget =  cubeIsRayCollisionDetected(gPos,gDir,gHumanMvMatrix_Box) &&  
+    this.IsInTarget =  cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_Box) &&  
     (    
-        cubeIsRayCollisionDetected(gPos,gDir,gHumanMvMatrix_Head) ||  
-        cubeIsRayCollisionDetected(gPos,gDir,gHumanMvMatrix_Neck) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,gHumanMvMatrix_Body) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,gHumanMvMatrix_Shouldern) ||  
-        cubeIsRayCollisionDetected(gPos,gDir,gHumanMvMatrix_LeftArmP1) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,gHumanMvMatrix_LeftArmP2) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,gHumanMvMatrix_LeftHand) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,gHumanMvMatrix_LeftLegP1) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,gHumanMvMatrix_LeftLegP2) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,gHumanMvMatrix_LeftLegP3) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,gHumanMvMatrix_RightArmP1) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,gHumanMvMatrix_RightArmP2) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,gHumanMvMatrix_RightHand) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,gHumanMvMatrix_RightLegP1) ||  
-        cubeIsRayCollisionDetected(gPos,gDir,gHumanMvMatrix_RightLegP2) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,gHumanMvMatrix_RightLegP3)
+        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_Head) ||  
+        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_Neck) ||   
+        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_Body) ||   
+        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_Shouldern) ||  
+        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_LeftArmP1) ||   
+        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_LeftArmP2) ||   
+        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_LeftHand) ||   
+        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_LeftLegP1) ||   
+        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_LeftLegP2) ||   
+        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_LeftLegP3) ||   
+        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_RightArmP1) ||   
+        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_RightArmP2) ||   
+        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_RightHand) ||   
+        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_RightLegP1) ||  
+        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_RightLegP2) ||   
+        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_RightLegP3)
     ) ;
     
-    if (gHumanState!="Dead")
+    if (this.State!="Dead")
     {
         //  Speed 
-        gHumanSpeed += elapsed*gHumanAcc;
-        if (gHumanSpeed> 8.0) { gHumanSpeed=8.0; gHumanAcc=-1;}
-        if (gHumanSpeed< 1.0) { gHumanSpeed=1.0; gHumanAcc=1;}
+        this.Speed += elapsed*this.Acc;
+        if (this.Speed> 8.0) { this.Speed=8.0; this.Acc=-1;}
+        if (this.Speed< 1.0) { this.Speed=1.0; this.Acc=1;}
     
         //  Dir 
-        if (!timeAnimIsRunning("HumanDirAnim") && gHumanState!="Dead" )
+        if (!this.AnimDir.running && this.State!="Dead" )
         {
-            animStart=[gHumanDir[0],gHumanDir[1],gHumanDir[2]];
-            animEnd=[Math.random()-0.5,0.0,Math.random()-0.5];
-            animDuration = 10000 + Math.random()*10000;
-            timeAnimStart("HumanDirAnim",animDuration,animStart,animEnd);
+            var animStart=[this.Dir[0],this.Dir[1],this.Dir[2]];
+            var animEnd=[Math.random()-0.5,0.0,Math.random()-0.5];
+            var animDuration = 10000 + Math.random()*10000;
+            this.AnimDir.start(animDuration,animStart,animEnd);
         }
-        gHumanDir = timeAnimGetVec3Value("HumanDirAnim");
-        vec3.normalize(gHumanDir,gHumanDir);
+        this.Dir = this.AnimDir.getVec3Value();
+        vec3.normalize(this.Dir,this.Dir);
 
         // Position   
-        gHumanAngleRange = gHumanSpeed;
-        elapsedFactor = ( 8.0*elapsed)/Math.PI;
-        distFeet6 = Math.sin(degToRad(gHumanAngleRange*6.0));
-        distFeet12 = Math.sin(degToRad(gHumanAngleRange*10.0));
-        distFeet = distFeet6*2.0 + distFeet6*1.0 + distFeet12*1.0;
-        speed = distFeet * elapsedFactor;
-        gHumanPos[2] -= speed * 2.0 * gHumanDir[2];
-        gHumanPos[0] -= speed * 2.0 * gHumanDir[0];
-        gHumanPos[1] = groundGetY(gHumanPos[0],gHumanPos[2])+5.5 ;
+        this.AngleRange = this.Speed;
+        var elapsedFactor = ( 8.0*elapsed)/Math.PI;
+        var distFeet6 = Math.sin(degToRad(this.AngleRange*6.0));
+        var distFeet12 = Math.sin(degToRad(this.AngleRange*10.0));
+        var distFeet = distFeet6*2.0 + distFeet6*1.0 + distFeet12*1.0;
+        var speed = distFeet * elapsedFactor;
+        this.Pos[2] -= speed * 2.0 * this.Dir[2];
+        this.Pos[0] -= speed * 2.0 * this.Dir[0];
+        this.Pos[1] = groundGetY(this.Pos[0],this.Pos[2])+5.5 ;
 
         // Gun Target Dir
         //Process history of target position to simulate reaction time of 0,3s
-        gHumanTargetHist.push([timeGetCurrentInS(),[gPos[0],gPos[1],gPos[2]]]);	
-        var gunTargetPos=gHumanTargetHist[0][1];
-        while (( timeGetCurrentInS() - gHumanTargetHist[0][0]) > 0.3){
-            gunTargetPos = gHumanTargetHist.shift()[1];
+        this.TargetHist.push([timeGetCurrentInS(),[gPos[0],gPos[1],gPos[2]]]);	
+        var gunTargetPos=this.TargetHist[0][1];
+        while (( timeGetCurrentInS() - this.TargetHist[0][0]) > 0.3){
+            gunTargetPos = this.TargetHist.shift()[1];
         } 
         gunTargetPos = [gunTargetPos[0] ,gunTargetPos[1]-3.5,gunTargetPos[2]];
-        vec3.subtract(gHumanGunDir,gHumanPos,gunTargetPos);
-        vec3.normalize(gHumanGunDir,gHumanGunDir);
+        vec3.subtract(this.GunDir,this.Pos,gunTargetPos);
+        vec3.normalize(this.GunDir,this.GunDir);
 
         // Head Dir
-        dotProd =vec3.dot(gHumanGunDir,gHumanDir);
-        turnFactor = (dotProd + 1.0) /2.0;
-        vec3.copy(gHumanHeadDir,gHumanGunDir);
-        gHumanHeadDir = [gHumanGunDir[0]*turnFactor+ (1.0 - turnFactor)*gHumanDir[0],gHumanGunDir[1]*turnFactor+ (1.0 - turnFactor)*gHumanDir[1],gHumanGunDir[2]*turnFactor + (1.0 - turnFactor)*gHumanDir[2]];
-  
+        var dotProd =vec3.dot(this.GunDir,this.Dir);
+        var turnFactor = (dotProd + 1.0) /2.0;
+        vec3.copy(this.HeadDir,this.GunDir);
+        this.HeadDir = [this.GunDir[0]*turnFactor+ (1.0 - turnFactor)*this.Dir[0],this.GunDir[1]*turnFactor+ (1.0 - turnFactor)*this.Dir[1],this.GunDir[2]*turnFactor + (1.0 - turnFactor)*this.Dir[2]];
+
 
         // Update Anim Counter
-        gHumanAnimCounter  += 8.0*elapsed;
-        if (gHumanAnimCounter > 10.0 * Math.PI)  gHumanAnimCounter = 10.0 * Math.PI - gHumanAnimCounter;
+        this.AnimCounter  += 8.0*elapsed;
+        if (this.AnimCounter > 10.0 * Math.PI)  this.AnimCounter = 10.0 * Math.PI - this.AnimCounter;
     }
 
-    gHumanHitTarget=false;
+    // Update Sqr Dist
+    this.sqrDist = vec3.squaredDistance(this.Pos,gPos);
+
+    this.HitTarget=false;
     // Human State Machine
     //  =>test angle between target and human direction
-    switch (gHumanState) {
+    switch (this.State) {
         case "Running":
-            if (dotProd> 0.5 ) gHumanState = "FireStart";
-            if (pFire && gHumanIsInTarget) gHumanState = "StartFalling";
+            if (dotProd> 0.5 && this.sqrDist < 10000) this.State = "FireStart";
+            if (pFire && this.IsInTarget) this.State = "StartFalling";
             break;
         case "FireStart":            
-            gHumanState  = "Fire";
-            if (pFire && gHumanIsInTarget) gHumanState = "StartFalling";
+            this.State  = "Fire";
+            if (pFire && this.IsInTarget) this.State = "StartFalling";
             break;
         case "Fire":
             //Collision detection
@@ -205,36 +179,36 @@ function humanUpdate(pFire)
             var fireVector =  vec3.create();
             var distVector  =  vec3.create();
             var targetPos = [gPos[0] ,gPos[1]-3.5,gPos[2]];
-            vec3.subtract(targetDir,gHumanPos,targetPos);
-            var fireDist = vec3.dot(targetDir,gHumanGunDir);
-            var enemieDist = vec3.distance(gHumanPos,targetPos);		
-            dist = Math.sqrt(enemieDist**2 - fireDist**2);   
-            gHumanHitTarget = (dist < 1 || isNaN(dist));
+            vec3.subtract(targetDir,this.Pos,targetPos);
+            var fireDist = vec3.dot(targetDir,this.GunDir);
+            var enemieDist = vec3.distance(this.Pos,targetPos);		
+            var dist = Math.sqrt(enemieDist**2 - fireDist**2);   
+            this.HitTarget = (dist < 1 || isNaN(dist));
             //Start  Reload Animation
-            timeAnimStart("HumanReloadAnim",500,0,2*3.14);
-            gHumanState  = "Reload";
-            if (pFire && gHumanIsInTarget) gHumanState = "StartFalling";
+            this.AnimReload.start(500,0,2*3.14);
+            this.State  = "Reload";
+            if (pFire && this.IsInTarget) this.State = "StartFalling";
             break;
         case "Reload":
-                if (pFire && gHumanIsInTarget)             gHumanState = "StartFalling";
-            else if (dotProd< 0.5)                          gHumanState = "Running"; 
-            else if (!timeAnimIsRunning("HumanReloadAnim")) gHumanState = "FireStart"; 
+            if (pFire && this.IsInTarget)             this.State = "StartFalling";
+            else if (dotProd< 0.5 || this.sqrDist > 10000)   this.State = "Running"; 
+            else if (!this.AnimReload.running) this.State = "FireStart"; 
             break;
         case "StartFalling":
-            timeAnimStart("HumanSpeedFallAnim",1000,gHumanAngleRange,1);
-            timeAnimStart("HumanBodyFallAnim",1000,0,1);
-            gHumanState = "Falling";
+            this.AnimSpeedFall.start(1000,this.AngleRange,1);
+            this.AnimBodyFall.start(1000,0,1);
+            this.State = "Falling";
             break;
         case "Falling":
-            if (!timeAnimIsRunning("HumanSpeedFallAnim")){
-                gHumanState = "Dead"; 
-                timeAnimStart("HumanDeadAnim",5000,0,1);
+            if (!this.AnimSpeedFall.running){
+                this.State = "Dead"; 
+                this.AnimDead.start(5000,0,1);
             } 
-            gHumanAngleRange= timeAnimGetValue("HumanSpeedFallAnim");
+            this.AngleRange= this.AnimSpeedFall.getValue();
             break;
         case "Dead":
-            if (!timeAnimIsRunning("HumanDeadAnim")) gHumanState = "Running";
-            gHumanAngleRange= 1;
+            if (!this.AnimDead.running) this.State = "Running";
+            this.AngleRange= 1;
             break;
     }
 
@@ -242,28 +216,29 @@ function humanUpdate(pFire)
 
 
 
-function humanArmDraw(pAnimCounter,pIsLeft)
+_ArmDraw(pAnimCounter,pIsLeft)
 {
     //Arm Part 1
-    
-    switch (gHumanState) {
+    var  armDownAngle=0;
+
+    switch (this.State) {
         
         case "Fire":
         case "FireStart":    
         case "Reload":
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(-86), [1, 0, 0]);
-            armDownAngle = (Math.sin( timeAnimGetValue("HumanReloadAnim") + Math.PI/2)-1.0)*gHumanAngleRange*3.0;
+            armDownAngle = (Math.sin(this.AnimReload.getValue() + Math.PI/2)-1.0)*this.AngleRange*3.0;
             break;
         default:
-            mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.sin(pAnimCounter)*gHumanAngleRange*6.0), [1, 0, 0]);
-            armDownAngle = (Math.sin(pAnimCounter + Math.PI/2)-1.0)*gHumanAngleRange*3.0;
+            mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.sin(pAnimCounter)*this.AngleRange*6.0), [1, 0, 0]);
+            armDownAngle = (Math.sin(pAnimCounter + Math.PI/2)-1.0)*this.AngleRange*3.0;
             break;
     }
 
     mat4.translate(mvMatrix,mvMatrix, [0,-0.6,0]);
     mvPushMatrix();
         mat4.scale(mvMatrix,mvMatrix,[0.3,0.9,0.3]);
-        (pIsLeft) ? mat4.copy(gHumanMvMatrix_LeftArmP1,mvMatrix) : mat4.copy(gHumanMvMatrix_RightArmP1,mvMatrix);
+        (pIsLeft) ? mat4.copy(this.MvMatrix_LeftArmP1,mvMatrix) : mat4.copy(this.MvMatrix_RightArmP1,mvMatrix);
         cubeDraw(shaderProgram);
     mvPopMatrix();    
     
@@ -273,16 +248,16 @@ function humanArmDraw(pAnimCounter,pIsLeft)
     mat4.translate(mvMatrix,mvMatrix, [0.0,-0.8,0]);
     mvPushMatrix();
         mat4.scale(mvMatrix,mvMatrix,[0.3,0.8,0.3]);
-        (pIsLeft) ? mat4.copy(gHumanMvMatrix_LeftArmP2,mvMatrix) : mat4.copy(gHumanMvMatrix_RightArmP2,mvMatrix);
+        (pIsLeft) ? mat4.copy(this.MvMatrix_LeftArmP2,mvMatrix) : mat4.copy(this.MvMatrix_RightArmP2,mvMatrix);
         cubeDraw(shaderProgram);
     mvPopMatrix();
     //Hand    
     shaderVertexColorVector = [0.99,0.76,0.67,1.0];  
     mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0.0]);
-    //mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.cos(pAnimCounter)*gHumanAngleRange*3.0), [1, 0, 0]);
+    //mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.cos(pAnimCounter)*this.AngleRange*3.0), [1, 0, 0]);
     mvPushMatrix();
         mat4.scale(mvMatrix,mvMatrix,[0.3,0.2,0.3]);
-        (pIsLeft) ? mat4.copy(gHumanMvMatrix_LeftHand,mvMatrix) : mat4.copy(gHumanMvMatrix_RightHand,mvMatrix);
+        (pIsLeft) ? mat4.copy(this.MvMatrix_LeftHand,mvMatrix) : mat4.copy(this.MvMatrix_RightHand,mvMatrix);
         cubeDraw(shaderProgram);
     mvPopMatrix();   
 
@@ -301,55 +276,55 @@ function humanArmDraw(pAnimCounter,pIsLeft)
     shaderVertexColorVector = [0.99,0.76,0.67,1.0];  
 
 
-    if(gHumanState == "FireStart")
+    if(this.State == "FireStart")
     {
         mvPushMatrix();	
         mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
         mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [1, 0, 0]);
         mat4.scale(mvMatrix,mvMatrix,[0.25,1.0,1.0]);
-        squareDraw(gHumanFireShaderProgram);	
+        squareDraw(this.FireShaderProgram);	
         mvPopMatrix();
 
         mvPushMatrix();	
         mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
         mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [1, 0, 0]);
         mat4.scale(mvMatrix,mvMatrix,[1.2,0.15,1.2]);
-        squareDraw(gHumanFireShaderProgram);	
+        squareDraw(this.FireShaderProgram);	
         mvPopMatrix();
     }
 }
 
 
-function humanLegDraw(pX,pY,pAnimCounter,pIsLeft)
+_LegDraw(pX,pY,pAnimCounter,pIsLeft)
 {
-  
+
     //cuisse
     mvPushMatrix();  
     mat4.translate(mvMatrix,mvMatrix, [pX,pY,0]);
-    mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.sin(pAnimCounter)*gHumanAngleRange*6.0), [1, 0, 0]);
+    mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.sin(pAnimCounter)*this.AngleRange*6.0), [1, 0, 0]);
     mat4.translate(mvMatrix,mvMatrix, [0,-1.0,0]);
     mvPushMatrix();
         mat4.scale(mvMatrix,mvMatrix,[0.3,1.0,0.3]);
-        (pIsLeft) ? mat4.copy(gHumanMvMatrix_LeftLegP1,mvMatrix) : mat4.copy(gHumanMvMatrix_RightLegP1,mvMatrix);
+        (pIsLeft) ? mat4.copy(this.MvMatrix_LeftLegP1,mvMatrix) : mat4.copy(this.MvMatrix_RightLegP1,mvMatrix);
         cubeDraw(shaderProgram);
     mvPopMatrix();    
     //Molet
     mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0]);
-    mat4.rotate(mvMatrix,mvMatrix,  degToRad((Math.sin(pAnimCounter + Math.PI/2)+1.0)*gHumanAngleRange*3.0), [1, 0, 0]);
+    mat4.rotate(mvMatrix,mvMatrix,  degToRad((Math.sin(pAnimCounter + Math.PI/2)+1.0)*this.AngleRange*3.0), [1, 0, 0]);
     mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0]);
     mvPushMatrix();
         mat4.scale(mvMatrix,mvMatrix,[0.3,1.0,0.3]);
-        (pIsLeft) ? mat4.copy(gHumanMvMatrix_LeftLegP2,mvMatrix) : mat4.copy(gHumanMvMatrix_RightLegP2,mvMatrix);
+        (pIsLeft) ? mat4.copy(this.MvMatrix_LeftLegP2,mvMatrix) : mat4.copy(this.MvMatrix_RightLegP2,mvMatrix);
         cubeDraw(shaderProgram);
     mvPopMatrix();
     //Shoes       
     mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0.0]);
-    mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.cos(pAnimCounter)*gHumanAngleRange*3.0), [1, 0, 0]);
+    mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.cos(pAnimCounter)*this.AngleRange*3.0), [1, 0, 0]);
     mat4.translate(mvMatrix,mvMatrix, [0.0,0.0,0.3]);
     mvPushMatrix();
         mat4.scale(mvMatrix,mvMatrix,[0.3,0.2,0.6]);
         mat4.scale(mvMatrix,mvMatrix,[0.3,1.0,0.3]);
-        (pIsLeft) ? mat4.copy(gHumanMvMatrix_LeftLegP3,mvMatrix) : mat4.copy(gHumanMvMatrix_RightLegP3,mvMatrix);
+        (pIsLeft) ? mat4.copy(this.MvMatrix_LeftLegP3,mvMatrix) : mat4.copy(this.MvMatrix_RightLegP3,mvMatrix);
         cubeDraw(shaderProgram);
         cubeDraw(shaderProgram);
     mvPopMatrix();   
@@ -359,33 +334,32 @@ function humanLegDraw(pX,pY,pAnimCounter,pIsLeft)
 
 }
 
-var animCounter=0;
-function humanDraw()
+Draw()
 {
-    var animCounter = gHumanAnimCounter;
+    var animCounter = this.AnimCounter;
     var lookAtMatrix = mat4.create();
 	mat4.identity(mvMatrix);
 
     shaderVertexColorVector = [0.99,0.76,0.67,1.0];
     //body movement
-    mat4.translate(mvMatrix,mvMatrix, gHumanPos);
+    mat4.translate(mvMatrix,mvMatrix, this.Pos);
 
-    mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],gHumanDir,[0,1,0]);
+    mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],this.Dir,[0,1,0]);
     mat4.invert(lookAtMatrix,lookAtMatrix);
     mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
 
-    mat4.rotate(mvMatrix,mvMatrix,  degToRad(gHumanAngleRange*1.0) , [1, 0, 0]);
-    mat4.translate(mvMatrix,mvMatrix, [0,Math.sin(animCounter*2.0)*gHumanAngleRange/40.0,0]);
-    mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.sin(animCounter)*gHumanAngleRange*0.5), [0, 0, 1]);
+    mat4.rotate(mvMatrix,mvMatrix,  degToRad(this.AngleRange*1.0) , [1, 0, 0]);
+    mat4.translate(mvMatrix,mvMatrix, [0,Math.sin(animCounter*2.0)*this.AngleRange/40.0,0]);
+    mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.sin(animCounter)*this.AngleRange*0.5), [0, 0, 1]);
 
 
     // Falling Annimation
-    if (gHumanState == "Falling" || gHumanState == "Dead")
+    if (this.State == "Falling" || this.State == "Dead")
     {
-        bodyFallCoef = timeAnimGetValue("HumanBodyFallAnim")**2;
-        disapeardCoef = timeAnimGetValue("HumanDeadAnim")**2;
+        var bodyFallCoef = this.AnimBodyFall.getValue()**2;
+        var disapeardCoef = this.AnimDead.getValue()**2;
         //mat4.translate(mvMatrix,mvMatrix, [0,bodyFallCoef*40,0]);
-        if (gHumanState == "Dead")  mat4.translate(mvMatrix,mvMatrix, [0,-disapeardCoef*5.0,0]);
+        if (this.State == "Dead")  mat4.translate(mvMatrix,mvMatrix, [0,-disapeardCoef*5.0,0]);
         mat4.translate(mvMatrix,mvMatrix, [0,-5,0]);
         mat4.rotate(mvMatrix,mvMatrix,  degToRad(bodyFallCoef*90), [1, 0, 0]);
         mat4.translate(mvMatrix,mvMatrix, [0,5,0]);
@@ -394,7 +368,7 @@ function humanDraw()
     // Collision Box
     mvPushMatrix();  
         mat4.scale(mvMatrix,mvMatrix,[10.0,10.0,10.0]);
-        mat4.copy(gHumanMvMatrix_Box,mvMatrix);
+        mat4.copy(this.MvMatrix_Box,mvMatrix);
         //cubeDraw(shaderProgram);           
     mvPopMatrix();
  
@@ -402,7 +376,7 @@ function humanDraw()
     // body
     mvPushMatrix();  
         mat4.scale(mvMatrix,mvMatrix,[0.8,2.0,0.4]);
-        mat4.copy(gHumanMvMatrix_Body,mvMatrix);
+        mat4.copy(this.MvMatrix_Body,mvMatrix);
         cubeDraw(shaderProgram);           
     mvPopMatrix();
  
@@ -411,7 +385,7 @@ function humanDraw()
         mat4.translate(mvMatrix,mvMatrix, [0,1.7,0]);
         mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [0, 1, 0 ]);
         mat4.scale(mvMatrix,mvMatrix,[0.4,0.3,0.9]);
-        mat4.copy(gHumanMvMatrix_Shouldern,mvMatrix);
+        mat4.copy(this.MvMatrix_Shouldern,mvMatrix);
         cubeDraw(shaderProgram);       
     mvPopMatrix(); 
 
@@ -428,12 +402,12 @@ function humanDraw()
         mat4.translate(mvMatrix,mvMatrix, [0,3.0,0]);
         mat4.invert(lookAtMatrix,lookAtMatrix);
         mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
-		mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],gHumanHeadDir,[0,1,0]);
+		mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],this.HeadDir,[0,1,0]);
 		mat4.invert(lookAtMatrix,lookAtMatrix);
         mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
         mvPushMatrix();
             mat4.scale(mvMatrix,mvMatrix,[0.5,0.5,0.4]); 
-            mat4.copy(gHumanMvMatrix_Head,mvMatrix);
+            mat4.copy(this.MvMatrix_Head,mvMatrix);
         	cubeDraw(shaderProgram);    
     	mvPopMatrix();
 		//ears
@@ -462,39 +436,40 @@ function humanDraw()
 
     shaderVertexColorVector = [0.99,0.76,0.67,1.0];
     //Legs
-    humanLegDraw(0.5,-1.5,animCounter,true);
-    humanLegDraw(-0.5,-1.5,animCounter  +  Math.PI,false);
+    this._LegDraw(0.5,-1.5,animCounter,true);
+    this._LegDraw(-0.5,-1.5,animCounter  +  Math.PI,false);
     //Arms
 
     
     mvPushMatrix();  
     mat4.translate(mvMatrix,mvMatrix, [-1.2,1.7,0.0]);
-    if(gHumanState == "Reload" || gHumanState == "Fire" || gHumanState == "FireStart" )
+    if(this.State == "Reload" || this.State == "Fire" || this.State == "FireStart" )
     {
-        mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],gHumanDir,[0,1,0]);
+        mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],this.Dir,[0,1,0]);
         mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
-        mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],gHumanGunDir,[0,1,0]);
+        mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],this.GunDir,[0,1,0]);
         mat4.invert(lookAtMatrix,lookAtMatrix);
         mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
     }
-    humanArmDraw(animCounter,true);
+    this._ArmDraw(animCounter,true);
     mvPopMatrix();
 
         
     mvPushMatrix();  
     mat4.translate(mvMatrix,mvMatrix, [1.2,1.7,0.0]);
-    if(gHumanState == "Reload" || gHumanState == "Fire" || gHumanState == "FireStart" )
+    if(this.State == "Reload" || this.State == "Fire" || this.State == "FireStart" )
     {
-        mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],gHumanDir,[0,1,0]);
+        mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],this.Dir,[0,1,0]);
         mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
-        mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],gHumanGunDir,[0,1,0]);
+        mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],this.GunDir,[0,1,0]);
         mat4.invert(lookAtMatrix,lookAtMatrix);
         mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
     }
-    humanArmDraw(animCounter  +  Math.PI,false);
+    this._ArmDraw(animCounter  +  Math.PI,false);
     mvPopMatrix();
     
 
 	mat4.identity(mvMatrix)
 
+}
 }
