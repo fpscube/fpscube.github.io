@@ -17,7 +17,7 @@ function initGame() {
 	gPos = [0,0,10]; 
 	gSpeedCoef=50;
 	gDir = [0,0,-1];
-	gLife = 100;
+	gLife = 10;
 
 	// gl init
 	gl.clearColor(0x00, 0xbf, 0xff, 1.0);	
@@ -77,15 +77,17 @@ function updateGame() {
 
 	var hitTarget=false;
 	var isInTarget=false;
+	var humanAlive=false
 	for(var i =0 ;i<gHuman.length;i++){
 		var fire = mediaIsKey("Fire");
 		gHuman[i].Update(fire);
 		hitTarget =hitTarget || gHuman[i].HitTarget;
 		isInTarget = isInTarget || gHuman[i].IsInTarget;
+		humanAlive = humanAlive || !gHuman[i].IsDead();
 	}	
 	if (hitTarget) gLife--;
-	if (gLife<0) initGame();
-	info2DUpdate(isInTarget,hitTarget,gLife/10);
+	if (gLife<0 || !humanAlive) initGame();
+	info2DUpdate(isInTarget,hitTarget,gLife);
 }
 
 function drawGame() {

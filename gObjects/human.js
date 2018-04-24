@@ -83,6 +83,8 @@ constructor(pPos) {
 Update(pFire)
 {
 
+    if (this.IsDead()) return;
+
     var elapsed = timeGetElapsedInS();
 
     //Human collision Detection
@@ -106,7 +108,7 @@ Update(pFire)
         cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_RightLegP3)
     ) ;
     
-    if (this.State!="Dead")
+    if (this.State!="Disappear")
     {
         //  Speed 
         this.Speed += elapsed*this.Acc;
@@ -114,7 +116,7 @@ Update(pFire)
         if (this.Speed< 1.0) { this.Speed=1.0; this.Acc=1;}
     
         //  Dir 
-        if (!this.AnimDir.running && this.State!="Dead" )
+        if (!this.AnimDir.running && this.State!="Disappear" )
         {
             var animStart=[this.Dir[0],this.Dir[1],this.Dir[2]];
             var animEnd=[Math.random()-0.5,0.0,Math.random()-0.5];
@@ -201,20 +203,26 @@ Update(pFire)
             break;
         case "Falling":
             if (!this.AnimSpeedFall.running){
-                this.State = "Dead"; 
+                this.State = "Disappear"; 
                 this.AnimDead.start(5000,0,1);
             } 
             this.AngleRange= this.AnimSpeedFall.getValue();
             break;
-        case "Dead":
-            if (!this.AnimDead.running) this.State = "Running";
+        case "Disappear":
+            if (!this.AnimDead.running) this.State = "Dead";
             this.AngleRange= 1;
+            break;
+        case "Dead":
             break;
     }
 
 };
 
 
+IsDead()
+{ 
+    return this.State=="Dead";
+}
 
 _ArmDraw(pAnimCounter,pIsLeft)
 {
@@ -336,6 +344,9 @@ _LegDraw(pX,pY,pAnimCounter,pIsLeft)
 
 Draw()
 {
+    
+    if (this.IsDead()) return;
+    
     var animCounter = this.AnimCounter;
     var lookAtMatrix = mat4.create();
 	mat4.identity(mvMatrix);
@@ -354,12 +365,12 @@ Draw()
 
 
     // Falling Annimation
-    if (this.State == "Falling" || this.State == "Dead")
+    if (this.State == "Falling" || this.State == "Disappear")
     {
         var bodyFallCoef = this.AnimBodyFall.getValue()**2;
         var disapeardCoef = this.AnimDead.getValue()**2;
         //mat4.translate(mvMatrix,mvMatrix, [0,bodyFallCoef*40,0]);
-        if (this.State == "Dead")  mat4.translate(mvMatrix,mvMatrix, [0,-disapeardCoef*5.0,0]);
+        if (this.State == "Disappear")  mat4.translate(mvMatrix,mvMatrix, [0,-disapeardCoef*5.0,0]);
         mat4.translate(mvMatrix,mvMatrix, [0,-5,0]);
         mat4.rotate(mvMatrix,mvMatrix,  degToRad(bodyFallCoef*90), [1, 0, 0]);
         mat4.translate(mvMatrix,mvMatrix, [0,5,0]);
