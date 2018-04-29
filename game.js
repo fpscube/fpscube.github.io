@@ -1,10 +1,14 @@
 // Game Model
-var gPos=[] ;
-var gDir=[];
+var gPos=[];
+var gCamDir=[];
+var gRunDir=[];
 var gSpeedCoef=50;
 var gLife=0;
+var gFire=false;
+var gRunning=false;
 
 var gHuman=[];
+var gHero;
 
 // ######### Init ##############// 
 
@@ -16,8 +20,11 @@ function initGame() {
 	// game data Init
 	gPos = [0,0,10]; 
 	gSpeedCoef=50;
-	gDir = [0,0,-1];
+	gCamDir = [0,0,-1];
+	gRunDir = [0,0,0];
 	gLife = 10;
+	gFire=false;
+	gRunning=false;
 
 	// gl init
 	gl.clearColor(0x00, 0xbf, 0xff, 1.0);	
@@ -35,10 +42,9 @@ function initGame() {
 	for(var i =0 ;i<30;i++){
 		gHuman.push(new CHuman([i*10,0,0]));
 	}	
+	gHero = new CHuman([0,0,0]);
 	groundInit();
-	gunsInit();
 	waterInit();
-	bulletsInit();
 		  	
 	// Animation init
 	gLastTime = new Date().getTime();	
@@ -51,26 +57,30 @@ function updateGame() {
 	timeUpdate();
 	var gElapsed = timeGetElapsedInS();
 	shaderCounter = timeGetCurrentInS()*10;
+
+	// Media Fire/Running
+	gFire = mediaIsKey("Fire"); 
+	gRunning = mediaIsRunning();
 	
 	// Media camera movement
 	var camMvVec = mediaGetCamMvVector();
 	mvVector =  vec3.create();
-	vec3.cross(mvVector,gDir,[0,1,0]);
-	gDir[0] += mvVector[0]*camMvVec[0];
-	gDir[1] -= camMvVec[1] ;
-	gDir[2] += mvVector[2]*camMvVec[0];
-	vec3.normalize(gDir,gDir);
+	vec3.cross(mvVector,gCamDir,[0,1,0]);
+	gCamDir[0] += mvVector[0]*camMvVec[0];
+	gCamDir[1] -= camMvVec[1] ;
+	gCamDir[2] += mvVector[2]*camMvVec[0];
+	vec3.normalize(gCamDir,gCamDir);
 
 	// Media running movement
 	if(mediaIsKey("-")) 	gSpeedCoef -=1;	
 	if(mediaIsKey("+") )	gSpeedCoef +=1;	
-	if (mediaIsRunning())
+	if (gRunning)
 	{
 		var mvVector =  vec3.create();
 		var runAngle = mediaGetRunAngle()
-		vec3.rotateY(mvVector,gDir,[0,0,0],runAngle);
-		gPos[0] += gSpeedCoef*gElapsed*mvVector[0];
-		gPos[2] += gSpeedCoef*gElapsed*mvVector[2];	
+		vec3.rotateY(gRunDir,gCamDir,[0,0,0],runAngle);
+		gPos[0] += gSpeedCoef*gElapsed*gRunDir[0];
+		gPos[2] += gSpeedCoef*gElapsed*gRunDir[2];	
 	}
 	
 	gPos[1]=groundGetY(gPos[0],gPos[2]) + 10.0;
@@ -79,12 +89,12 @@ function updateGame() {
 	var isInTarget=false;
 	var humanAlive=false
 	for(var i =0 ;i<gHuman.length;i++){
-		var fire = mediaIsKey("Fire");
-		gHuman[i].Update(fire);
+		gHuman[i].Update(gPos,gCamDir,gFire);
 		hitTarget =hitTarget || gHuman[i].HitTarget;
 		isInTarget = isInTarget || gHuman[i].IsInTarget;
 		humanAlive = humanAlive || !gHuman[i].IsDead();
 	}	
+	gHero.UpdateControled(gPos,gCamDir,gRunning,gRunDir,gFire);
 	if (hitTarget) gLife--;
 	if (gLife<0 || !humanAlive) initGame();
 	info2DUpdate(isInTarget,hitTarget,gLife);
@@ -102,7 +112,7 @@ function drawGame() {
 
 	// Camera managment
 	var lookAtMatrix = mat4.create();
-	viewPos = [gPos[0] + gDir[0],gPos[1] + gDir[1],gPos[2] + gDir[2]];
+	viewPos = [gPos[0] + gCamDir[0],gPos[1] + gCamDir[1],gPos[2] + gCamDir[2]];
 	mat4.lookAt(lookAtMatrix,gPos,viewPos,[0,1,0]);
 	mat4.multiply(pMatrix,pMatrix,lookAtMatrix)
 	
@@ -112,8 +122,7 @@ function drawGame() {
 	for(var i =0 ;i<gHuman.length;i++){
 		gHuman[i].Draw();
 	}	
-	gunsDraw(gPos,gDir);
-	bulletsDraw();	
+	gHero.Draw();
 
 	//Draw Info 2D
 	info2DDraw();

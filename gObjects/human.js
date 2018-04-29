@@ -75,12 +75,60 @@ constructor(pPos) {
     this.MvMatrix_RightLegP2 = mat4.create(); 
     this.MvMatrix_RightLegP3 = mat4.create(); 
 
-    this.sqrDist = vec3.squaredDistance(this.Pos,gPos);
+    this.sqrDist = vec3.squaredDistance(this.Pos,pPos);
 
 }
 
 
-Update(pFire)
+
+UpdateControled(pPos,pCamDir,pRunning,pRunDir,pFire)
+{
+
+    
+    var elapsed = timeGetElapsedInS();
+
+    var projDir = [];
+    vec3.rotateY(projDir,pCamDir,[0,0,0],0.2);
+    this.Pos[0] = projDir[0]*15+pPos[0];
+    this.Pos[2] = projDir[2]*15+pPos[2];
+    this.Pos[1] = groundGetY(this.Pos[0],this.Pos[2])+5.5 ;
+    
+
+    // Update Anim Counter
+    this.AnimCounter  += 8.0*elapsed;
+    if (this.AnimCounter > 10.0 * Math.PI)  this.AnimCounter = 10.0 * Math.PI - this.AnimCounter;
+    
+
+    if(pRunning)
+    {
+        this.AngleRange=4;
+    
+        this.State="Running";
+        this.Dir[0] = -pRunDir[0];
+        this.Dir[1] = 0;
+        this.Dir[2] = -pRunDir[2];
+    }
+    else
+    {
+        this.AngleRange=0.05;
+        this.State="Running";
+
+    }
+    vec3.copy(this.HeadDir,this.Dir);
+    
+
+    if(pFire)    
+    {
+        this.HeadDir[0] =   -pCamDir[0];
+        this.HeadDir[1] =   -pCamDir[1];
+        this.HeadDir[2] =   -pCamDir[2];
+         this.State="FireStart";
+    }
+    
+    vec3.copy(this.GunDir,this.HeadDir);
+}
+
+Update(pPos,pDir,pFire)
 {
 
     if (this.IsDead()) return;
@@ -88,24 +136,24 @@ Update(pFire)
     var elapsed = timeGetElapsedInS();
 
     //Human collision Detection
-    this.IsInTarget =  cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_Box) &&  
+    this.IsInTarget =  cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_Box) &&  
     (    
-        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_Head) ||  
-        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_Neck) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_Body) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_Shouldern) ||  
-        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_LeftArmP1) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_LeftArmP2) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_LeftHand) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_LeftLegP1) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_LeftLegP2) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_LeftLegP3) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_RightArmP1) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_RightArmP2) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_RightHand) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_RightLegP1) ||  
-        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_RightLegP2) ||   
-        cubeIsRayCollisionDetected(gPos,gDir,this.MvMatrix_RightLegP3)
+        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_Head) ||  
+        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_Neck) ||   
+        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_Body) ||   
+        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_Shouldern) ||  
+        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_LeftArmP1) ||   
+        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_LeftArmP2) ||   
+        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_LeftHand) ||   
+        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_LeftLegP1) ||   
+        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_LeftLegP2) ||   
+        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_LeftLegP3) ||   
+        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_RightArmP1) ||   
+        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_RightArmP2) ||   
+        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_RightHand) ||   
+        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_RightLegP1) ||  
+        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_RightLegP2) ||   
+        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_RightLegP3)
     ) ;
     
     if (this.State!="Disappear")
@@ -139,7 +187,7 @@ Update(pFire)
 
         // Gun Target Dir
         //Process history of target position to simulate reaction time of 0,3s
-        this.TargetHist.push([timeGetCurrentInS(),[gPos[0],gPos[1],gPos[2]]]);	
+        this.TargetHist.push([timeGetCurrentInS(),[pPos[0],pPos[1],pPos[2]]]);	
         var gunTargetPos=this.TargetHist[0][1];
         while (( timeGetCurrentInS() - this.TargetHist[0][0]) > 0.3){
             gunTargetPos = this.TargetHist.shift()[1];
@@ -161,7 +209,7 @@ Update(pFire)
     }
 
     // Update Sqr Dist
-    this.sqrDist = vec3.squaredDistance(this.Pos,gPos);
+    this.sqrDist = vec3.squaredDistance(this.Pos,pPos);
 
     this.HitTarget=false;
     // Human State Machine
@@ -180,7 +228,7 @@ Update(pFire)
             var targetDir =  vec3.create();	
             var fireVector =  vec3.create();
             var distVector  =  vec3.create();
-            var targetPos = [gPos[0] ,gPos[1]-3.5,gPos[2]];
+            var targetPos = [pPos[0] ,pPos[1]-3.5,pPos[2]];
             vec3.subtract(targetDir,this.Pos,targetPos);
             var fireDist = vec3.dot(targetDir,this.GunDir);
             var enemieDist = vec3.distance(this.Pos,targetPos);		
@@ -290,14 +338,16 @@ _ArmDraw(pAnimCounter,pIsLeft)
         mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
         mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [1, 0, 0]);
         mat4.scale(mvMatrix,mvMatrix,[0.25,1.0,1.0]);
-        squareDraw(this.FireShaderProgram);	
+       // squareDraw(this.FireShaderProgram);	
+        squareDraw(shaderProgram2);	
         mvPopMatrix();
 
         mvPushMatrix();	
         mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
         mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [1, 0, 0]);
         mat4.scale(mvMatrix,mvMatrix,[1.2,0.15,1.2]);
-        squareDraw(this.FireShaderProgram);	
+        //squareDraw(this.FireShaderProgram);	
+        squareDraw(shaderProgram2);	
         mvPopMatrix();
     }
 }
@@ -331,7 +381,6 @@ _LegDraw(pX,pY,pAnimCounter,pIsLeft)
     mat4.translate(mvMatrix,mvMatrix, [0.0,0.0,0.3]);
     mvPushMatrix();
         mat4.scale(mvMatrix,mvMatrix,[0.3,0.2,0.6]);
-        mat4.scale(mvMatrix,mvMatrix,[0.3,1.0,0.3]);
         (pIsLeft) ? mat4.copy(this.MvMatrix_LeftLegP3,mvMatrix) : mat4.copy(this.MvMatrix_RightLegP3,mvMatrix);
         cubeDraw(shaderProgram);
         cubeDraw(shaderProgram);
