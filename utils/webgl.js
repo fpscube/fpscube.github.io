@@ -1,38 +1,32 @@
 var gl;
+var ctx2d;
 
 function lockChangeAlert() {
+	var canvas = document.getElementById("canvas2D");
 	if (document.pointerLockElement === canvas ||  document.mozPointerLockElement === canvas) {
 		document.addEventListener("mousemove", mediaMouseMove, false);} 
 	else {   
 		document.removeEventListener("mousemove", mediaMouseMove, false); }
 }
 
-function initGL(canvas) {
-	gl = canvas.getContext("experimental-webgl");
-	gl.viewportWidth = canvas.width;
-	gl.viewportHeight = canvas.height;
-	canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;
-	document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
-	
-	canvas.onclick = function() {canvas.requestPointerLock();};
-	document.addEventListener('pointerlockchange', lockChangeAlert, false);
-	document.addEventListener('mozpointerlockchange', lockChangeAlert, false);
-	
-}
 
 function fullScreen(){
-    var el = document.getElementById('canvas');
-	el.width = screen.width;
-	el.height = screen.height;
-	gl.viewportWidth = canvas.width;
-	gl.viewportHeight = canvas.height;
+    var container = document.getElementById('game');
+    var canvas3D = document.getElementById('canvas3D');
+    var canvas2D = document.getElementById('canvas2D');
+	canvas3D.width = screen.width;
+	canvas3D.height = screen.height;
+	canvas2D.width = screen.width;
+	canvas2D.height = screen.height;
+	gl.viewportWidth = canvas3D.width;
+	gl.viewportHeight = canvas3D.height;
 	initGame();
-    if(el.webkitRequestFullScreen) {el.webkitRequestFullScreen();}
-    if(el.mozRequestFullScreen)	   {el.mozRequestFullScreen();}
+    if(container.webkitRequestFullScreen) {container.webkitRequestFullScreen();}
+    if(container.mozRequestFullScreen)	   {container.mozRequestFullScreen();}
 }
 
 function smallScreen(){
-    var el = document.getElementById('canvas');
+    var el = document.getElementById('canvas3D');
 	el.width = 1024;
 	el.height = 600;
 	gl.viewportWidth = canvas.width;
@@ -195,21 +189,8 @@ var shaderVertexColorVector = [1.0,1.0,0.5,1.0];
 var mvMatrix = mat4.create();
 var mvInverseMatrix = mat4.create();
 var mvInverseTransposeMatrix = mat4.create();
-var mvMatrixStack = [];
 var pMatrix = mat4.create();
 
-function mvPushMatrix() {
-	var copy = mat4.create();
-	mat4.copy(copy,mvMatrix);
-	mvMatrixStack.push(copy);
-}
-
-function mvPopMatrix() {
-	if (mvMatrixStack.length == 0) {
-		throw "Invalid popMatrix!";
-	}
-	mvMatrix = mvMatrixStack.pop();
-}
 
 function setMatrixUniforms(pShaderProgram) {
 		
@@ -233,11 +214,27 @@ function tick() {
 }
 
 function webGLStart() {
-	var canvas = document.getElementById("canvas");
-	initGL(canvas);
+	var canvas3D = document.getElementById("canvas3D");
+	var canvas2D = document.getElementById("canvas2D");
+
+	gl = canvas3D.getContext("experimental-webgl");	
+	gl.viewportWidth = canvas3D.width;
+	gl.viewportHeight = canvas3D.height;
+
+	canvas2D.requestPointerLock = canvas2D.requestPointerLock || canvas2D.mozRequestPointerLock;
+	document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
+		
+	canvas2D.onclick = function() {canvas2D.requestPointerLock();};
+	document.addEventListener('pointerlockchange', lockChangeAlert, false);
+	document.addEventListener('mozpointerlockchange', lockChangeAlert, false);
+
 	shaderProgram = initShaders(vertexShader1,fragmentShader1); 
 	shaderProgram2 = initShaders(vertexShader1,fragmentShader2);
 	shaderProgram3 = initShaders(vertexShader1,fragmentShader3);
+
+
+	ctx2d = canvas2D.getContext("2d");
+
 	initGame();
 	tick();
 }

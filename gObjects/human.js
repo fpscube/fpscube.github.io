@@ -131,7 +131,7 @@ UpdateControled(pPos,pCamDir,pRunning,pRunDir,pFire)
 Update(pPos,pDir,pFire)
 {
 
-    if (this.IsDead()) return;
+    if (this.State=="Dead") return;
 
     var elapsed = timeGetElapsedInS();
 
@@ -269,7 +269,7 @@ Update(pPos,pDir,pFire)
 
 IsDead()
 { 
-    return this.State=="Dead";
+    return (this.State=="Dead"  || this.State=="Disappear" || this.State=="Falling" );
 }
 
 _ArmDraw(pAnimCounter,pIsLeft)
@@ -394,7 +394,7 @@ _LegDraw(pX,pY,pAnimCounter,pIsLeft)
 Draw()
 {
     
-    if (this.IsDead()) return;
+    if (this.State=="Dead") return;
     
     var animCounter = this.AnimCounter;
     var lookAtMatrix = mat4.create();

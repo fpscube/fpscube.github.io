@@ -8,6 +8,8 @@ var gFire=false;
 var gRunning=false;
 
 var gHuman=[];
+var gWinAnim;
+var gGameState;
 var gHero;
 
 // ######### Init ##############// 
@@ -23,8 +25,10 @@ function initGame() {
 	gCamDir = [0,0,-1];
 	gRunDir = [0,0,0];
 	gLife = 10;
+	gGameState = "Play"
 	gFire=false;
 	gRunning=false;
+	gWinAnim = new CTimeAnim();
 
 	// gl init
 	gl.clearColor(0x00, 0xbf, 0xff, 1.0);	
@@ -64,6 +68,7 @@ function updateGame() {
 	
 	// Media camera movement
 	var camMvVec = mediaGetCamMvVector();
+	if (gGameState == "Win") camMvVec[0] = -gElapsed;
 	mvVector =  vec3.create();
 	vec3.cross(mvVector,gCamDir,[0,1,0]);
 	gCamDir[0] += mvVector[0]*camMvVec[0];
@@ -87,17 +92,28 @@ function updateGame() {
 
 	var hitTarget=false;
 	var isInTarget=false;
-	var humanAlive=false
+	var enemiesCount = gHuman.length;
 	for(var i =0 ;i<gHuman.length;i++){
 		gHuman[i].Update(gPos,gCamDir,gFire);
 		hitTarget =hitTarget || gHuman[i].HitTarget;
 		isInTarget = isInTarget || gHuman[i].IsInTarget;
-		humanAlive = humanAlive || !gHuman[i].IsDead();
+		if (gHuman[i].IsDead()) enemiesCount--;
 	}	
 	gHero.UpdateControled(gPos,gCamDir,gRunning,gRunDir,gFire);
 	if (hitTarget) gLife--;
-	if (gLife<0 || !humanAlive) initGame();
-	info2DUpdate(isInTarget,hitTarget,gLife);
+
+	info2DUpdate(isInTarget,hitTarget,gLife,enemiesCount,gGameState=="Win");
+
+	//Game state machine
+	if ( (gLife<0 || enemiesCount==0 ) && gGameState=="Play") 
+	{
+		gGameState="Win";
+		gWinAnim.start(2000,0,1);
+	}
+	if (gGameState=="Win" && gFire && !gWinAnim.running)
+	{
+		initGame();
+	}
 }
 
 function drawGame() {

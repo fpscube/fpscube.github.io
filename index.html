@@ -17,15 +17,29 @@
 <script type="text/javascript" src="game.js"></script>
 
 </head>
+<style>
+.container {
+    position: relative;
+}
+ 
+#canvas2D {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    z-index: 10;
+}
+</style>
 <body onload="webGLStart();" onkeydown="mediaSetKeyDownFct(event)" onkeyup="mediaSetKeyUpFct(event)" onmousedown="mediaSetMouseDownFct(event)" onmouseup="mediaSetMouseUpFct(event)" >
 <button type="fullscreen" onclick="fullScreen()">fullscreen</button>
 <button type="fullscreen" onclick="smallScreen()">small</button>
  <p>
- <canvas id="canvas" style="border: none;" width="1024" height="600" 
- ontouchstart="mediaSetTouchStart(event)"
- ontouchmove="mediaSetTouchMove(event)"
- ontouchend="mediaSetTouchEnd(event)"></canvas>
- <input>
+<div class="container" id="game">
+    <canvas id="canvas3D" style="border: none;" width="1024" height="600" 
+    ontouchstart="mediaSetTouchStart(event)"
+    ontouchmove="mediaSetTouchMove(event)"
+    ontouchend="mediaSetTouchEnd(event)"></canvas>
+    <canvas id="canvas2D" style="border: none;" width="1024" height="600"></canvas>
+</div>
 
 </body>
 </html>
