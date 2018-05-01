@@ -68,7 +68,7 @@ function updateGame() {
 	
 	// Media camera movement
 	var camMvVec = mediaGetCamMvVector();
-	if (gGameState == "Win") camMvVec[0] = -gElapsed;
+	if (gGameState == "Win") camMvVec[0] = -gElapsed/2;
 	mvVector =  vec3.create();
 	vec3.cross(mvVector,gCamDir,[0,1,0]);
 	gCamDir[0] += mvVector[0]*camMvVec[0];
