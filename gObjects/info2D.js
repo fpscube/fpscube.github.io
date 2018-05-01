@@ -18,10 +18,11 @@ function info2DInit()
 	gInfo2DAnimTextRefresh.start(1000,0,1);
 	gInfo2DNbFps = 0;
 	gInfo2DWin = false;
+	gInfo2DGameState = "Play";
 ;	
 }
 
-function info2DUpdate(pEnemieTarget,pInjury,pNbLife,pNbEnemies,pWin)
+function info2DUpdate(pEnemieTarget,pInjury,pNbLife,pNbEnemies,pGameState)
 {	
 	
 	// if (!gInfo2DAnimTextRefresh.running) 
@@ -29,12 +30,15 @@ function info2DUpdate(pEnemieTarget,pInjury,pNbLife,pNbEnemies,pWin)
 	// 	gInfo2DNbFps = Math.round(1/timeGetElapsedInMs() * 1000,0);
 	// 	gInfo2DAnimTextRefresh.start(1000,0,1);
 	// }
-	gInfo2DCrossColor =((pEnemieTarget) ?  [1.0,0.0,0.0,1.0]: [1.0,1.0,1.0,1.0]);
-	gInfo2DLifeQt = pNbLife;
-	if (pInjury) gInfo2DAnimInjury.start(200,0.7,0.0);
+	if (pGameState=="Play")
+	{
+		gInfo2DCrossColor =((pEnemieTarget) ?  [1.0,0.0,0.0,1.0]: [1.0,1.0,1.0,1.0]);
+		gInfo2DLifeQt = pNbLife;
+		if (pInjury) gInfo2DAnimInjury.start(200,0.7,0.0);
+	}
 	gInfo2DInjuryAlpha = gInfo2DAnimInjury.getValue();
 	gInfo2DNbEnemies = pNbEnemies;
-	gInfo2DWin = pWin;
+	gInfo2DGameState = pGameState;
 }
 
 function info2DDraw()
@@ -48,12 +52,10 @@ function info2DDraw()
 	ctx2d.font = "15px Arial Black";
 	// ctx2d.fillText("Life : " + gInfo2DLifeQt*10 + "%  -  Enemies : " +  gInfo2DNbEnemies + "  -  Fps : " + gInfo2DNbFps	,10,15 );
 	ctx2d.fillText("Life : " + gInfo2DLifeQt*10 + "%  -  Enemies : " +  gInfo2DNbEnemies ,10,15 );
-	if(gInfo2DWin) 
-	{
-		ctx2d.font = "100px Arial Black";
-		ctx2d.globalAlpha = 0.5;
-		ctx2d.fillText("You Win ",canvas2D.width/2,canvas2D.height/2 );
-	}
+	ctx2d.font = "100px Arial Black";
+	ctx2d.globalAlpha = 0.5;
+	if(gInfo2DGameState == "Win") 	ctx2d.fillText("You Win ",canvas2D.width/2,canvas2D.height/2 );
+	if(gInfo2DGameState == "Lose") 	ctx2d.fillText("You Lose ",canvas2D.width/2,canvas2D.height/2 );
 
 	// Cross Display
 	if(!gInfo2DWin) 

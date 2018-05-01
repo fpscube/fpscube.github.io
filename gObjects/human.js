@@ -81,7 +81,7 @@ constructor(pPos) {
 
 
 
-UpdateControled(pPos,pCamDir,pRunning,pRunDir,pFire)
+UpdateControled(pPos,pCamDir,pRunning,pRunDir,pFire,pDead)
 {
 
     
@@ -93,39 +93,47 @@ UpdateControled(pPos,pCamDir,pRunning,pRunDir,pFire)
     this.Pos[2] = projDir[2]*15+pPos[2];
     this.Pos[1] = groundGetY(this.Pos[0],this.Pos[2])+5.5 ;
     
-
-    // Update Anim Counter
-    this.AnimCounter  += 8.0*elapsed;
-    if (this.AnimCounter > 10.0 * Math.PI)  this.AnimCounter = 10.0 * Math.PI - this.AnimCounter;
-    
-
-    if(pRunning)
+    if(pDead && this.State!= "Falling")
     {
-        this.AngleRange=4;
-    
-        this.State="Running";
-        this.Dir[0] = -pRunDir[0];
-        this.Dir[1] = 0;
-        this.Dir[2] = -pRunDir[2];
+        this.AnimSpeedFall.start(1000,this.AngleRange,1);
+        this.AnimBodyFall.start(1000,0,1);
+        this.State = "Falling";
     }
-    else
+    else if (!pDead)
     {
-        this.AngleRange=0.05;
-        this.State="Running";
+        // Update Anim Counter
+        this.AnimCounter  += 8.0*elapsed;
+        if (this.AnimCounter > 10.0 * Math.PI)  this.AnimCounter = 10.0 * Math.PI - this.AnimCounter;
+        
 
-    }
-    vec3.copy(this.HeadDir,this.Dir);
-    
+        if(pRunning)
+        {
+            this.AngleRange=4;
+        
+            this.State="Running";
+            this.Dir[0] = -pRunDir[0];
+            this.Dir[1] = 0;
+            this.Dir[2] = -pRunDir[2];
+        }
+        else
+        {
+            this.AngleRange=0.05;
+            this.State="Running";
 
-    if(pFire)    
-    {
-        this.HeadDir[0] =   -pCamDir[0];
-        this.HeadDir[1] =   -pCamDir[1];
-        this.HeadDir[2] =   -pCamDir[2];
-         this.State="FireStart";
+        }
+        vec3.copy(this.HeadDir,this.Dir);
+        
+
+        if(pFire)    
+        {
+            this.HeadDir[0] =   -pCamDir[0];
+            this.HeadDir[1] =   -pCamDir[1];
+            this.HeadDir[2] =   -pCamDir[2];
+            this.State="FireStart";
+        }
+        
+        vec3.copy(this.GunDir,this.HeadDir);
     }
-    
-    vec3.copy(this.GunDir,this.HeadDir);
 }
 
 Update(pPos,pDir,pFire)

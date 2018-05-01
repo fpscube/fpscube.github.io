@@ -68,7 +68,7 @@ function updateGame() {
 	
 	// Media camera movement
 	var camMvVec = mediaGetCamMvVector();
-	if (gGameState == "Win") camMvVec[0] = -gElapsed/2;
+	if (gGameState != "Play") camMvVec[0] -= gElapsed/3;
 	mvVector =  vec3.create();
 	vec3.cross(mvVector,gCamDir,[0,1,0]);
 	gCamDir[0] += mvVector[0]*camMvVec[0];
@@ -79,7 +79,7 @@ function updateGame() {
 	// Media running movement
 	if(mediaIsKey("-")) 	gSpeedCoef -=1;	
 	if(mediaIsKey("+") )	gSpeedCoef +=1;	
-	if (gRunning)
+	if (gRunning && (gGameState=="Play"))
 	{
 		var mvVector =  vec3.create();
 		var runAngle = mediaGetRunAngle()
@@ -99,18 +99,24 @@ function updateGame() {
 		isInTarget = isInTarget || gHuman[i].IsInTarget;
 		if (gHuman[i].IsDead()) enemiesCount--;
 	}	
-	gHero.UpdateControled(gPos,gCamDir,gRunning,gRunDir,gFire);
+	gHero.UpdateControled(gPos,gCamDir,gRunning,gRunDir,gFire,gLife<=0);
 	if (hitTarget) gLife--;
 
-	info2DUpdate(isInTarget,hitTarget,gLife,enemiesCount,gGameState=="Win");
+	info2DUpdate(isInTarget,hitTarget,gLife,enemiesCount,gGameState);
 
 	//Game state machine
-	if ( (gLife<0 || enemiesCount==0 ) && gGameState=="Play") 
+	
+	if (gLife<=0 && gGameState=="Play")
+	{
+		gGameState="Lose";
+		gWinAnim.start(2000,0,1);
+	}
+	else if ( enemiesCount==0 && gGameState=="Play") 
 	{
 		gGameState="Win";
 		gWinAnim.start(2000,0,1);
 	}
-	if (gGameState=="Win" && gFire && !gWinAnim.running)
+	if (gGameState!="Play" && gFire && !gWinAnim.running)
 	{
 		initGame();
 	}
