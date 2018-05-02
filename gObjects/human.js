@@ -81,17 +81,12 @@ constructor(pPos) {
 
 
 
-UpdateControled(pPos,pCamDir,pRunning,pRunDir,pFire,pDead)
+UpdateHero(pPos,pRunDir,pRunning,pFire,pFireDir,pDead)
 {
 
-    
-    var elapsed = timeGetElapsedInS();
+    vec3.copy(this.Pos,pPos);
 
-    var projDir = [];
-    vec3.rotateY(projDir,pCamDir,[0,0,0],0.2);
-    this.Pos[0] = projDir[0]*15+pPos[0];
-    this.Pos[2] = projDir[2]*15+pPos[2];
-    this.Pos[1] = groundGetY(this.Pos[0],this.Pos[2])+5.5 ;
+    var elapsed = timeGetElapsedInS();
     
     if(pDead && this.State!= "Falling")
     {
@@ -126,9 +121,9 @@ UpdateControled(pPos,pCamDir,pRunning,pRunDir,pFire,pDead)
 
         if(pFire)    
         {
-            this.HeadDir[0] =   -pCamDir[0];
-            this.HeadDir[1] =   -pCamDir[1];
-            this.HeadDir[2] =   -pCamDir[2];
+            this.HeadDir[0] =  -pFireDir[0];
+            this.HeadDir[1] =  -pFireDir[1];
+            this.HeadDir[2] =  -pFireDir[2];
             this.State="FireStart";
         }
         
@@ -136,7 +131,7 @@ UpdateControled(pPos,pCamDir,pRunning,pRunDir,pFire,pDead)
     }
 }
 
-Update(pPos,pDir,pFire)
+UpdateEnemie(pHeroPos,pHeroDir,pHeroFire)
 {
 
     if (this.State=="Dead") return;
@@ -144,24 +139,24 @@ Update(pPos,pDir,pFire)
     var elapsed = timeGetElapsedInS();
 
     //Human collision Detection
-    this.IsInTarget =  cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_Box) &&  
+    this.IsInTarget =  cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_Box) &&  
     (    
-        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_Head) ||  
-        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_Neck) ||   
-        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_Body) ||   
-        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_Shouldern) ||  
-        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_LeftArmP1) ||   
-        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_LeftArmP2) ||   
-        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_LeftHand) ||   
-        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_LeftLegP1) ||   
-        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_LeftLegP2) ||   
-        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_LeftLegP3) ||   
-        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_RightArmP1) ||   
-        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_RightArmP2) ||   
-        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_RightHand) ||   
-        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_RightLegP1) ||  
-        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_RightLegP2) ||   
-        cubeIsRayCollisionDetected(pPos,pDir,this.MvMatrix_RightLegP3)
+        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_Head) ||  
+        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_Neck) ||   
+        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_Body) ||   
+        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_Shouldern) ||  
+        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_LeftArmP1) ||   
+        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_LeftArmP2) ||   
+        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_LeftHand) ||   
+        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_LeftLegP1) ||   
+        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_LeftLegP2) ||   
+        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_LeftLegP3) ||   
+        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_RightArmP1) ||   
+        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_RightArmP2) ||   
+        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_RightHand) ||   
+        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_RightLegP1) ||  
+        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_RightLegP2) ||   
+        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_RightLegP3)
     ) ;
     
     if (this.State!="Disappear")
@@ -195,7 +190,7 @@ Update(pPos,pDir,pFire)
 
         // Gun Target Dir
         //Process history of target position to simulate reaction time of 0,3s
-        this.TargetHist.push([timeGetCurrentInS(),[pPos[0],pPos[1],pPos[2]]]);	
+        this.TargetHist.push([timeGetCurrentInS(),[pHeroPos[0],pHeroPos[1],pHeroPos[2]]]);	
         var gunTargetPos=this.TargetHist[0][1];
         while (( timeGetCurrentInS() - this.TargetHist[0][0]) > 0.3){
             gunTargetPos = this.TargetHist.shift()[1];
@@ -217,7 +212,7 @@ Update(pPos,pDir,pFire)
     }
 
     // Update Sqr Dist
-    this.sqrDist = vec3.squaredDistance(this.Pos,pPos);
+    this.sqrDist = vec3.squaredDistance(this.Pos,pHeroPos);
 
     this.HitTarget=false;
     // Human State Machine
@@ -225,18 +220,18 @@ Update(pPos,pDir,pFire)
     switch (this.State) {
         case "Running":
             if (dotProd> 0.5 && this.sqrDist < 10000) this.State = "FireStart";
-            if (pFire && this.IsInTarget) this.State = "StartFalling";
+            if (pHeroFire && this.IsInTarget) this.State = "StartFalling";
             break;
         case "FireStart":            
             this.State  = "Fire";
-            if (pFire && this.IsInTarget) this.State = "StartFalling";
+            if (pHeroFire && this.IsInTarget) this.State = "StartFalling";
             break;
         case "Fire":
             //Collision detection
             var targetDir =  vec3.create();	
             var fireVector =  vec3.create();
             var distVector  =  vec3.create();
-            var targetPos = [pPos[0] ,pPos[1]-3.5,pPos[2]];
+            var targetPos = [pHeroPos[0] ,pHeroPos[1]-3.5,pHeroPos[2]];
             vec3.subtract(targetDir,this.Pos,targetPos);
             var fireDist = vec3.dot(targetDir,this.GunDir);
             var enemieDist = vec3.distance(this.Pos,targetPos);		
@@ -245,10 +240,10 @@ Update(pPos,pDir,pFire)
             //Start  Reload Animation
             this.AnimReload.start(500,0,2*3.14);
             this.State  = "Reload";
-            if (pFire && this.IsInTarget) this.State = "StartFalling";
+            if (pHeroFire && this.IsInTarget) this.State = "StartFalling";
             break;
         case "Reload":
-            if (pFire && this.IsInTarget)             this.State = "StartFalling";
+            if (pHeroFire && this.IsInTarget)             this.State = "StartFalling";
             else if (dotProd< 0.5 || this.sqrDist > 10000)   this.State = "Running"; 
             else if (!this.AnimReload.running) this.State = "FireStart"; 
             break;

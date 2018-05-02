@@ -1,16 +1,19 @@
 // Game Model
-var gPos=[];
-var gCamDir=[];
-var gRunDir=[];
+var gHero;
+var gHeroPos=[];
+var gHeroDir=[];
+var gHeroLife=0;
+var gHeroFire=false;
+var gHeroRunning=false;
 var gSpeedCoef=50;
-var gLife=0;
-var gFire=false;
-var gRunning=false;
 
-var gHuman=[];
+var gCamPos=[];
+var gCamDir=[];
+var gCamViewPos=[];
+
+var gEnemies=[];
 var gWinAnim;
 var gGameState;
-var gHero;
 
 // ######### Init ##############// 
 
@@ -20,14 +23,16 @@ function initGame() {
 	timeInit();
 
 	// game data Init
-	gPos = [0,0,10]; 
+ 	gHeroPos = [0,0,10]; 
+	gHeroDir = [0,0,0];
+	gHeroLife = 10;
+	gHeroFire=false;
+	gHeroRunning=false;
+
+	gCamPos = [0,0,10]; 
 	gSpeedCoef=50;
 	gCamDir = [0,0,-1];
-	gRunDir = [0,0,0];
-	gLife = 10;
 	gGameState = "Play"
-	gFire=false;
-	gRunning=false;
 	gWinAnim = new CTimeAnim();
 
 	// gl init
@@ -42,9 +47,9 @@ function initGame() {
 	squareInit();
 	cubeInit();
 
-	gHuman=[];
+	gEnemies=[];
 	for(var i =0 ;i<30;i++){
-		gHuman.push(new CHuman([i*10,0,0]));
+		gEnemies.push(new CHuman([i*10,0,0]));
 	}	
 	gHero = new CHuman([0,0,0]);
 	groundInit();
@@ -63,50 +68,85 @@ function updateGame() {
 	shaderCounter = timeGetCurrentInS()*10;
 
 	// Media Fire/Running
-	gFire = mediaIsKey("Fire"); 
-	gRunning = mediaIsRunning();
+	gHeroFire = mediaIsKey("Fire"); 
+	gHeroRunning = mediaIsRunning();
 	
-	// Media camera movement
+	// Update Camera Dir
 	var camMvVec = mediaGetCamMvVector();
-	if (gGameState != "Play") camMvVec[0] -= gElapsed/3;
+
 	mvVector =  vec3.create();
 	vec3.cross(mvVector,gCamDir,[0,1,0]);
 	gCamDir[0] += mvVector[0]*camMvVec[0];
-	gCamDir[1] -= camMvVec[1] ;
+	if (gGameState == "Play") gCamDir[1] -= camMvVec[1] ;
 	gCamDir[2] += mvVector[2]*camMvVec[0];
 	vec3.normalize(gCamDir,gCamDir);
 
+	
 	// Media running movement
 	if(mediaIsKey("-")) 	gSpeedCoef -=1;	
 	if(mediaIsKey("+") )	gSpeedCoef +=1;	
-	if (gRunning && (gGameState=="Play"))
+	if (gHeroRunning && (gGameState=="Play"))
 	{
 		var mvVector =  vec3.create();
-		var runAngle = mediaGetRunAngle()
-		vec3.rotateY(gRunDir,gCamDir,[0,0,0],runAngle);
-		gPos[0] += gSpeedCoef*gElapsed*gRunDir[0];
-		gPos[2] += gSpeedCoef*gElapsed*gRunDir[2];	
+		var runAngle = mediaGetRunAngle();
+		vec3.rotateY(gHeroDir,gCamDir,[0,0,0],runAngle);
+		gCamPos[0] += gSpeedCoef*gElapsed*gHeroDir[0];
+		gCamPos[2] += gSpeedCoef*gElapsed*gHeroDir[2];
+		
 	}
-	
-	gPos[1]=groundGetY(gPos[0],gPos[2]) + 10.0;
 
+	if (gGameState !== "Play") 
+	{
+		var heroCamVec = [];		
+		vec3.subtract(heroCamVec,gCamPos,gHeroPos);
+		vec3.rotateY(heroCamVec,heroCamVec,[0,0,0],gElapsed/3 + camMvVec[0]);
+		vec3.add(gCamPos,gHeroPos,heroCamVec);
+
+		vec3.normalize(heroCamVec,heroCamVec);
+		
+	 	vec3.rotateY(heroCamVec,heroCamVec,[0,0,0],-0.2)
+	 	gCamDir[0]  =  -heroCamVec[0];
+	 	gCamDir[2]  = -heroCamVec[2];
+		vec3.normalize(gCamDir,gCamDir);
+		
+		
+	}
+	gCamPos[1]=groundGetY(gCamPos[0],gCamPos[2]) + 10.0;
+
+
+	// Update Enemies
 	var hitTarget=false;
 	var isInTarget=false;
-	var enemiesCount = gHuman.length;
-	for(var i =0 ;i<gHuman.length;i++){
-		gHuman[i].Update(gPos,gCamDir,gFire);
-		hitTarget =hitTarget || gHuman[i].HitTarget;
-		isInTarget = isInTarget || gHuman[i].IsInTarget;
-		if (gHuman[i].IsDead()) enemiesCount--;
+	var enemiesCount = gEnemies.length;
+	for(var i =0 ;i<gEnemies.length;i++){
+		gEnemies[i].UpdateEnemie(gCamPos,gCamDir,gHeroFire);
+		hitTarget =hitTarget || gEnemies[i].HitTarget;
+		isInTarget = isInTarget || gEnemies[i].IsInTarget;
+		if (gEnemies[i].IsDead()) enemiesCount--;
 	}	
-	gHero.UpdateControled(gPos,gCamDir,gRunning,gRunDir,gFire,gLife<=0);
-	if (hitTarget) gLife--;
 
-	info2DUpdate(isInTarget,hitTarget,gLife,enemiesCount,gGameState);
+	
+	
+	// Update Hero 
+	
+	if (gGameState == "Play") 
+	{
+		var projDir = [];
+		vec3.rotateY(projDir,gCamDir,[0,0,0],0.2);
+		gHeroPos[0] = projDir[0]*15+gCamPos[0];
+		gHeroPos[2] = projDir[2]*15+gCamPos[2];
+		gHeroPos[1] = groundGetY(gHeroPos[0],gHeroPos[2])+5.5 ;
+	}
+	
+	gHero.UpdateHero(gHeroPos,gHeroDir,gHeroRunning,gHeroFire,gCamDir,gHeroLife<=0);
+
+	if (hitTarget) gHeroLife--;
+
+	info2DUpdate(isInTarget,hitTarget,gHeroLife,enemiesCount,gGameState);
 
 	//Game state machine
 	
-	if (gLife<=0 && gGameState=="Play")
+	if (gHeroLife<=0 && gGameState=="Play")
 	{
 		gGameState="Lose";
 		gWinAnim.start(2000,0,1);
@@ -116,7 +156,7 @@ function updateGame() {
 		gGameState="Win";
 		gWinAnim.start(2000,0,1);
 	}
-	if (gGameState!="Play" && gFire && !gWinAnim.running)
+	if (gGameState!="Play" && gHeroFire && !gWinAnim.running)
 	{
 		initGame();
 	}
@@ -134,15 +174,15 @@ function drawGame() {
 
 	// Camera managment
 	var lookAtMatrix = mat4.create();
-	viewPos = [gPos[0] + gCamDir[0],gPos[1] + gCamDir[1],gPos[2] + gCamDir[2]];
-	mat4.lookAt(lookAtMatrix,gPos,viewPos,[0,1,0]);
+	viewPos = [gCamPos[0] + gCamDir[0],gCamPos[1] + gCamDir[1],gCamPos[2] + gCamDir[2]];
+	mat4.lookAt(lookAtMatrix,gCamPos,viewPos,[0,1,0]);
 	mat4.multiply(pMatrix,pMatrix,lookAtMatrix)
 	
 	groundDraw();
 	waterDraw();	
 	//enemiesDraw();
-	for(var i =0 ;i<gHuman.length;i++){
-		gHuman[i].Draw();
+	for(var i =0 ;i<gEnemies.length;i++){
+		gEnemies[i].Draw();
 	}	
 	gHero.Draw();
 

@@ -8,13 +8,11 @@ var gMediaFireTouch=0;
 // ######### evt Handler ##############// 
 
 function mediaMouseMove(evt) {
-	var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-	if (!isChrome || ( Math.abs(evt.movementX) < 150 && Math.abs(evt.movementY)< 150))
-	{
+
         speedCoef = 2.5
         gMediaCamMvVec[0] += speedCoef*evt.movementX/screen.width;
 		gMediaCamMvVec[1] += speedCoef*evt.movementY/screen.height;
-	}
+
 }
 
 function mediaSetKeyDownFct(evt)
