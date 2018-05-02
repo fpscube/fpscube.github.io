@@ -26,11 +26,14 @@ function fullScreen(){
 }
 
 function smallScreen(){
-    var el = document.getElementById('canvas3D');
-	el.width = 1024;
-	el.height = 600;
-	gl.viewportWidth = canvas.width;
-	gl.viewportHeight = canvas.height;
+    var canvas3D = document.getElementById('canvas3D');
+    var canvas2D = document.getElementById('canvas2D');
+	canvas3D.width = 1024;
+	canvas3D.height = 600;
+	canvas2D.width = 1024;
+	canvas2D.height = 600;
+	gl.viewportWidth = canvas3D.width;
+	gl.viewportHeight = canvas3D.height;
 	initGame();
 }
  
