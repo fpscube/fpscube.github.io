@@ -7,12 +7,20 @@ var gMediaFireTouch=0;
 
 // ######### evt Handler ##############// 
 
+
+function fullScreenRequest()
+{
+    var container = document.getElementById('game');
+    if(container.webkitRequestFullScreen) {container.webkitRequestFullScreen();}
+    if(container.mozRequestFullScreen)	   {container.mozRequestFullScreen();}
+}
+
 function mediaMouseMove(evt) {
 
         speedCoef = 2.5
         gMediaCamMvVec[0] += speedCoef*evt.movementX/screen.width;
 		gMediaCamMvVec[1] += speedCoef*evt.movementY/screen.height;
-
+        fullScreenRequest();
 }
 
 function mediaSetKeyDownFct(evt)
@@ -56,6 +64,7 @@ function mediaSetMouseUpFct(evt){
 }
 
 function mediaSetMouseDownFct(evt){	
+    fullScreenRequest();
 	if (evt.button==0)
     gMediaKeyPressed["Fire"]=1;
 }
@@ -95,7 +104,8 @@ function mediaGetRunAngle()
     return angle;
 }
 
-function mediaSetTouchStart(evt){	
+function mediaSetTouchStart(evt){
+    fullScreenRequest();	
     var touches = evt.changedTouches;
     for (var i=0; i<touches.length; i++) {
       var id = touches[i].identifier;
