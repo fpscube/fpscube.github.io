@@ -20,7 +20,6 @@ function mediaMouseMove(evt) {
         speedCoef = 2.5
         gMediaCamMvVec[0] += speedCoef*evt.movementX/screen.width;
 		gMediaCamMvVec[1] += speedCoef*evt.movementY/screen.height;
-        fullScreenRequest();
 }
 
 function mediaSetKeyDownFct(evt)
@@ -119,7 +118,8 @@ function mediaSetTouchStart(evt){
 }
 
 
-function mediaSetTouchMove(evt){	
+function mediaSetTouchMove(evt){
+    fullScreenRequest();		
     var touches = evt.changedTouches;
     for (var i=0; i<touches.length; i++) {
         var id = touches[i].identifier;

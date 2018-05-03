@@ -10,33 +10,8 @@ function lockChangeAlert() {
 }
 
 
-function fullScreen(){
-    var container = document.getElementById('game');
-    var canvas3D = document.getElementById('canvas3D');
-    var canvas2D = document.getElementById('canvas2D');
-	canvas3D.width = screen.width;
-	canvas3D.height = screen.height;
-	canvas2D.width = screen.width;
-	canvas2D.height = screen.height;
-	gl.viewportWidth = canvas3D.width;
-	gl.viewportHeight = canvas3D.height;
-	initGame();
-    if(container.webkitRequestFullScreen) {container.webkitRequestFullScreen();}
-    if(container.mozRequestFullScreen)	   {container.mozRequestFullScreen();}
-}
 
-function smallScreen(){
-    var canvas3D = document.getElementById('canvas3D');
-    var canvas2D = document.getElementById('canvas2D');
-	canvas3D.width = 1024;
-	canvas3D.height = 600;
-	canvas2D.width = 1024;
-	canvas2D.height = 600;
-	gl.viewportWidth = canvas3D.width;
-	gl.viewportHeight = canvas3D.height;
-	initGame();
-}
- 
+
 
 function shaderCompil(str,shaderType) {
 
