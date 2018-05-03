@@ -53,7 +53,7 @@ function info2DDraw()
 	ctx2d.globalAlpha = 0.2;
     ctx2d.fillRect(0,0,canvas2D.width,18);
     ctx2d.globalAlpha = 1.0;
-	ctx2d.font = "15px Arial Black";
+	ctx2d.font = "Bold 15px Arial";
 	// ctx2d.fillText("Life : " + gInfo2DLifeQt*10 + "%  -  Enemies : " +  gInfo2DNbEnemies + "  -  Fps : " + gInfo2DNbFps	,10,15 );
 	ctx2d.fillText("Life : " + gInfo2DLifeQt*10 + "%  -  Enemies : " +  gInfo2DNbEnemies ,10,15 );
 	ctx2d.font = "100px Arial Black";
