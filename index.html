@@ -18,21 +18,50 @@
 
 </head>
 <style>
+body{
+
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-right: 0px;
+    margin-left: 0px;
+}
+
 .container {
+    width: 100%;
+    height: 100%;
     position: relative;
 }
- 
+
+
+#canvas3D {
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-right: 0px;
+    margin-left: 0px;
+}
 #canvas2D {
     position: absolute;
     left: 0px;
     top: 0px;
     z-index: 10;
+    width: 100%;
+    height: 100%;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-right: 0px;
+    margin-left: 0px;
 }
 </style>
 <body onload="webGLStart();" onkeydown="mediaSetKeyDownFct(event)" onkeyup="mediaSetKeyUpFct(event)" onmousedown="mediaSetMouseDownFct(event)" onmouseup="mediaSetMouseUpFct(event)" >
-<button type="fullscreen" onclick="fullScreen()">fullscreen</button>
-<button type="fullscreen" onclick="smallScreen()">small</button>
- <p>
+
 <div class="container" id="game">
     <canvas id="canvas3D" style="border: none;" width="1024" height="600"></canvas>
     <canvas id="canvas2D" style="border: none;" width="1024" height="600" 
