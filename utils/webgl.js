@@ -207,6 +207,9 @@ function tick() {
 	gpuTimeMs =  new Date().getTime() - gGpuStartTimeMs;
 	if (gGpuStartTimeMs!=0 && gpuTimeMs > 35)	ajustResolution(0.99);
 
+	canvas2D.width = screen.width;
+	canvas2D.height = screen.height;
+	
 	drawGame();
 	gGpuStartTimeMs = new Date().getTime();
 	requestAnimFrame(tick);
