@@ -14,19 +14,8 @@ var gCamViewPos=[];
 var gEnemies=[];
 var gWinAnim;
 var gGameState;
-var gDetailCoef;
+var gDetailCoef=1;
 
-function setResolution(coef){
-	var container = document.getElementById('game');
-	var canvas3D = document.getElementById('canvas3D');
-	var canvas2D = document.getElementById('canvas2D');
-	canvas3D.width = screen.width*coef;
-	canvas3D.height = screen.height*coef;
-	canvas2D.width = screen.width;
-	canvas2D.height = screen.height;
-	gl.viewportWidth = screen.width*coef;
-	gl.viewportHeight = screen.height*coef;
-}
 
 // ######### Init ##############// 
 
@@ -47,7 +36,6 @@ function initGame() {
 	gCamDir = [0,0,-1];
 	gGameState = "Play"
 	gWinAnim = new CTimeAnim();
-	gDetailCoef = 0.6;
 
 	// gl init
 	gl.clearColor(0x00, 0xbf, 0xff, 1.0);	
@@ -95,13 +83,6 @@ function updateGame() {
 	vec3.normalize(gCamDir,gCamDir);
 
 	
-	// Detail mng
-	if(mediaIsKey("-"))    gDetailCoef -=gElapsed/5;
-	if(mediaIsKey("+") )   gDetailCoef +=gElapsed/5;	
-	if (gDetailCoef > 1.0) gDetailCoef = 1.0;
-	if (gDetailCoef < 0.1) gDetailCoef = 0.1;
-	setResolution(gDetailCoef);
-
 	// Media running movement
 	if (gHeroRunning && (gGameState=="Play"))
 	{

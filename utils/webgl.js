@@ -169,26 +169,47 @@ var mvInverseMatrix = mat4.create();
 var mvInverseTransposeMatrix = mat4.create();
 var pMatrix = mat4.create();
 
-
 function setMatrixUniforms(pShaderProgram) {
 		
 	gl.uniform1f (pShaderProgram.counter, shaderCounter);
-	 gl.uniform1f (pShaderProgram.waterY, shaderWaterY);
-	 gl.uniform4fv (pShaderProgram.vertexColorAttribute, shaderVertexColorVector);
+	gl.uniform1f (pShaderProgram.waterY, shaderWaterY);
+	gl.uniform4fv (pShaderProgram.vertexColorAttribute, shaderVertexColorVector);
+
+	gl.uniformMatrix4fv(pShaderProgram.mvMatrixUniform, false, mvMatrix);
+	gl.uniformMatrix4fv(pShaderProgram.pMatrixUniform, false, pMatrix);
 
 	mat4.invert(mvInverseMatrix,mvMatrix);
 	mat4.transpose(mvInverseTransposeMatrix,mvInverseMatrix);
-
-	gl.uniformMatrix4fv(pShaderProgram.pMatrixUniform, false, pMatrix);
-	gl.uniformMatrix4fv(pShaderProgram.mvMatrixUniform, false, mvMatrix);
 	gl.uniformMatrix4fv(pShaderProgram.mvInverseTransposeMatrix, false, mvInverseTransposeMatrix);
 }
 
 function degToRad(degrees) {return degrees * Math.PI / 180;}
 
+function ajustResolution(coef){
+	var container = document.getElementById('game');
+	var canvas3D = document.getElementById('canvas3D');
+
+	newWidth = 	canvas3D.width * coef;
+	newHeight = canvas3D.height * coef;
+	if ((newWidth > screen.width) || (newHeight > screen.height))
+	{
+		newWidth = screen.width;
+		newHeight = screen.height;
+	}
+	canvas3D.width = newWidth;
+	canvas3D.height = newHeight;
+	gl.viewportWidth = canvas3D.width;
+	gl.viewportHeight = canvas3D.height;
+
+}
+var gGpuStartTimeMs=0;
 function tick() {
-	requestAnimFrame(tick);
+	gpuTimeMs =  new Date().getTime() - gGpuStartTimeMs;
+	if (gGpuStartTimeMs!=0 && gpuTimeMs > 35)	ajustResolution(0.99);
+
 	drawGame();
+	gGpuStartTimeMs = new Date().getTime();
+	requestAnimFrame(tick);
 }
 
 function webGLStart() {
@@ -196,8 +217,13 @@ function webGLStart() {
 	var canvas2D = document.getElementById("canvas2D");
 
 	gl = canvas3D.getContext("experimental-webgl");	
-	gl.viewportWidth = canvas3D.width;
-	gl.viewportHeight = canvas3D.height;
+
+	canvas3D.width = screen.width;
+	canvas3D.height = screen.height;
+	canvas2D.width = screen.width;
+	canvas2D.height = screen.height;
+	gl.viewportWidth = screen.width;
+	gl.viewportHeight = screen.height;
 
 	canvas2D.requestPointerLock = canvas2D.requestPointerLock || canvas2D.mozRequestPointerLock;
 	document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
@@ -210,8 +236,8 @@ function webGLStart() {
 	shaderProgram2 = initShaders(vertexShader1,fragmentShader2);
 	shaderProgram3 = initShaders(vertexShader1,fragmentShader3);
 
-
 	ctx2d = canvas2D.getContext("2d");
+
 
 	initGame();
 	tick();

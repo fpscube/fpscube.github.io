@@ -49,13 +49,14 @@ function info2DDraw()
 {
 	 
     var canvas2D = document.getElementById('canvas2D');
+    var canvas3D = document.getElementById('canvas3D');
 	ctx2d.clearRect(0, 0, canvas2D.width, canvas2D.height); 
 	ctx2d.globalAlpha = 0.2;
     ctx2d.fillRect(0,0,canvas2D.width,18);
     ctx2d.globalAlpha = 1.0;
 	ctx2d.font = "Bold 15px Arial";
 	// ctx2d.fillText("Life : " + gInfo2DLifeQt*10 + "%  -  Enemies : " +  gInfo2DNbEnemies + "  -  Fps : " + gInfo2DNbFps	,10,15 );
-	ctx2d.fillText("Life : " + gInfo2DLifeQt*10 + "%  -  Enemies : " +  gInfo2DNbEnemies ,10,15 );
+	ctx2d.fillText("Life : " + gInfo2DLifeQt*10 + "%  -  Enemies : " +  gInfo2DNbEnemies  + "  -  " + canvas3D.width + "x" + canvas3D.height ,10,15 );
 	ctx2d.font = "100px Arial Black";
 	ctx2d.globalAlpha = 0.5;
 	if(gInfo2DGameState == "Win") 	ctx2d.fillText("You Win ",canvas2D.width/2,canvas2D.height/2 );
