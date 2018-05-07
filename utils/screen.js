@@ -1,5 +1,6 @@
 
 
+
 class CScreen
 {
     constructor(pCanva3DName,pCanva2DName) {
@@ -22,14 +23,23 @@ class CScreen
         if(screen.width>1280)
         {
             this.newScreenWidth = 	1280;
-            this.newScreenWidth = screen.height * 1280/ screen.width;
+            this.newScreenHeight = screen.height * 1280/ screen.width;
+        }
+        else
+        {
+            this.newScreenWidth = 	 screen.width;
+            this.newScreenHeight = 	 screen.height;
         }
             
-        this.canvas3D.width = newWidth;
-        this.canvas3D.height = newHeight
-        this.canvas2D.width = screen.width;
-        this.canvas2D.height = screen.height;
+        this.canvas3D.width = this.newScreenWidth;
+        this.canvas3D.height = this.newScreenHeight;
+        this.canvas2D.width = this.screenWidth;
+        this.canvas2D.height = this.screenHeight;
 
-	    pGl.viewport(0, 0, newWidth, newHeight);
+        gl.viewportWidth = this.newScreenWidth;
+        gl.viewportHeight = this.newScreenHeight;
+	
+
+	    pGl.viewport(0, 0, this.newScreenWidth, this.newScreenHeight);
     }
 }

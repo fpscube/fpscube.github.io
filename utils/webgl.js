@@ -198,18 +198,7 @@ function webGLStart() {
 
 	gl = canvas3D.getContext("experimental-webgl");	
 
-	if(screen.width>1280)
-	{
-		newWidth = 	1280;
-		newHeight = screen.height * 1280/ screen.width;
-	}
-	canvas3D.width = newWidth;
-	canvas3D.height = newHeight
-	canvas2D.width = screen.width;
-	canvas2D.height = screen.height;
-	gl.viewportWidth = newWidth;
-	gl.viewportHeight = newHeight;
-	
+
 
 	canvas2D.requestPointerLock = canvas2D.requestPointerLock || canvas2D.mozRequestPointerLock;
 	document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
