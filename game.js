@@ -15,6 +15,7 @@ var gEnemies=[];
 var gWinAnim;
 var gGameState;
 var gDetailCoef=1;
+var gCScreen;
 
 
 // ######### Init ##############// 
@@ -36,6 +37,7 @@ function initGame() {
 	gCamDir = [0,0,-1];
 	gGameState = "Play"
 	gWinAnim = new CTimeAnim();
+	gCScreen = new CScreen("canvas3D","canvas2D");
 
 	// gl init
 	gl.clearColor(0x00, 0xbf, 0xff, 1.0);	
@@ -58,6 +60,8 @@ function initGame() {
 		  	
 	// Animation init
 	gLastTime = new Date().getTime();	
+
+	
 
 }
 
@@ -165,8 +169,9 @@ function drawGame() {
 	
 	updateGame();
 
+
 	// new viewport and clear Display 
-	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+	gCScreen.updateViewPortAndCanvasSize(gl);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 	//Perceptive projection

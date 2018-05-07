@@ -56,8 +56,8 @@ function info2DDraw()
     ctx2d.globalAlpha = 1.0;
 	ctx2d.font = "Bold 15px Arial";
 	// ctx2d.fillText("Life : " + gInfo2DLifeQt*10 + "%  -  Enemies : " +  gInfo2DNbEnemies + "  -  Fps : " + gInfo2DNbFps	,10,15 );
-	ctx2d.fillText("Life : " + gInfo2DLifeQt*10 + "%  -  Enemies : " +  gInfo2DNbEnemies  + "  -  " + canvas3D.width + "x" + canvas3D.height ,10,15 );
-	ctx2d.font = "Bold 100px Arial";
+	ctx2d.fillText("Life : " + gInfo2DLifeQt*10 + "%  -  Enemies : " +  gInfo2DNbEnemies  + "  -  " + canvas3D.width + "x" + canvas3D.height  ,10,15 );
+	ctx2d.font = "Bold 100px Arial  ";
 	ctx2d.globalAlpha = 0.5;
 	if(gInfo2DGameState == "Win") 	ctx2d.fillText("You Win ",canvas2D.width/2,canvas2D.height/2 );
 	if(gInfo2DGameState == "Lose") 	ctx2d.fillText("You Lose ",canvas2D.width/2,canvas2D.height/2 );
