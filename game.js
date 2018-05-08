@@ -3,6 +3,7 @@ var gHero;
 var gHeroPos=[];
 var gHeroDir=[];
 var gHeroLife=0;
+var gHeroSpeed=0;
 var gHeroFire=false;
 var gHeroRunning=false;
 var gMediaRunAngle=0;
@@ -27,8 +28,9 @@ function initGame() {
 
 	// game data Init
  	gHeroPos = [0,0,10]; 
-	gHeroDir = [0,0,0];
+	gHeroDir = [1,0,-1];
 	gHeroLife = 10;
+	gHeroSpeed = 0;
 	gHeroFire=false;
 	gHeroRunning=false;
 	gMediaRunAngle=0;
@@ -91,27 +93,28 @@ function updateGame() {
 			gCamDir[2] += mvVector[2]*gCamMvVec[0];
 			vec3.normalize(gCamDir,gCamDir);
 
-			// Running case (update speed)
-			var speedCoef=0;
-			if (gHeroRunning)
-			{
-				//Update Hero Direction
+			// Update Hero Direction and HeroSpeed
+			if (gHeroRunning){
 				vec3.rotateY(gHeroDir,gCamDir,[0,0,0],gMediaRunAngle);
+				gHeroSpeed = 50;
+			}
+			else
+			{
+				gHeroSpeed = 0;
 
-				speedCoef = 50;
 			}
 					
-			//Update Camera Position
-			gCamPos[0] += speedCoef*gElapsed*gHeroDir[0];
-			gCamPos[2] += speedCoef*gElapsed*gHeroDir[2];		
-			gCamPos[1] = groundGetY(gCamPos[0],gCamPos[2]) + 10.0;		
+			//Update Hero Position
+			gHeroPos[0] += gHeroSpeed*gElapsed*gHeroDir[0];
+			gHeroPos[2] += gHeroSpeed*gElapsed*gHeroDir[2];		
+			gHeroPos[1] = groundGetY(gHeroPos[0],gHeroPos[2]) + 5.5;		
 
-			//Update Hero Position				
+			//Update Cam Position				
 			var projDir = [];
-			vec3.rotateY(projDir,gCamDir,[0,0,0],0.2);
-			gHeroPos[0] = projDir[0]*15+gCamPos[0];
-			gHeroPos[2] = projDir[2]*15+gCamPos[2];
-			gHeroPos[1] = groundGetY(gHeroPos[0],gHeroPos[2])+5.5 ;
+			vec3.rotateY(projDir,gCamDir,[0,0,0],0.125);
+			gCamPos[0] = gHeroPos[0] - projDir[0]*15;
+			gCamPos[2] = gHeroPos[2] - projDir[2]*15;
+			gCamPos[1] = groundGetY(gCamPos[0],gCamPos[2]) + 10.0 ;
 
 
 			// Update Enemies
@@ -161,7 +164,7 @@ function updateGame() {
 
 			//Update Camera Direction look at Hero
 			vec3.normalize(heroCamVec,heroCamVec);
-			vec3.rotateY(heroCamVec,heroCamVec,[0,0,0],-0.2)
+			vec3.rotateY(heroCamVec,heroCamVec,[0,0,0],-0.125)
 			gCamDir[0]  =  -heroCamVec[0];
 			gCamDir[2]  = -heroCamVec[2];
 			vec3.normalize(gCamDir,gCamDir);
