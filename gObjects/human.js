@@ -1,7 +1,7 @@
 class CHuman
 {
 
-constructor(pPos) {
+constructor(pPos,pSpeed) {
 
     
     var fragmentShaderFire= `
@@ -40,7 +40,7 @@ constructor(pPos) {
     this.Dir=[-1,0,1];
     this.HeadDir=[0,0,0];
     this.GunDir=[0,0,0];
-    this.Speed=2.0;
+    this.Speed=pSpeed;
     this.Acc=1;
     this.AngleRange=0
     this.State="Running";
@@ -79,7 +79,17 @@ constructor(pPos) {
 
 }
 
-
+_lookAt(pVec3Dir)
+{
+    var lookAtMatrix = mat4.create();
+    var translationVector = vec3.create();
+    mat4.getTranslation(translationVector,mvMatrix);
+    mat4.identity(mvMatrix);
+    mat4.translate(mvMatrix,mvMatrix, translationVector);
+    mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],pVec3Dir,[0,1,0]);
+    mat4.invert(lookAtMatrix,lookAtMatrix);
+    mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
+}
 
 UpdateHero(pPos,pRunDir,pRunning,pFire,pFireDir,pDead)
 {
@@ -100,20 +110,18 @@ UpdateHero(pPos,pRunDir,pRunning,pFire,pFireDir,pDead)
         this.AnimCounter  += 8.0*elapsed;
         if (this.AnimCounter > 10.0 * Math.PI)  this.AnimCounter = 10.0 * Math.PI - this.AnimCounter;
         
+        this.Dir[0] = -pRunDir[0];
+        this.Dir[1] = 0;
+        this.Dir[2] = -pRunDir[2];    
+        this.State="Running";
 
         if(pRunning)
         {
-            this.AngleRange=4;
-        
-            this.State="Running";
-            this.Dir[0] = -pRunDir[0];
-            this.Dir[1] = 0;
-            this.Dir[2] = -pRunDir[2];
+            this.AngleRange=4;     
         }
         else
         {
             this.AngleRange=0.05;
-            this.State="Running";
 
         }
         vec3.copy(this.HeadDir,this.Dir);
@@ -131,7 +139,7 @@ UpdateHero(pPos,pRunDir,pRunning,pFire,pFireDir,pDead)
     }
 }
 
-UpdateEnemie(pHeroPos,pHeroDir,pHeroFire)
+UpdateEnemie(pCamPos,pCamDir,pHeroPos,pHeroDir,pHeroFire)
 {
 
     if (this.State=="Dead") return;
@@ -139,24 +147,24 @@ UpdateEnemie(pHeroPos,pHeroDir,pHeroFire)
     var elapsed = timeGetElapsedInS();
 
     //Human collision Detection
-    this.IsInTarget =  cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_Box) &&  
+    this.IsInTarget =  cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Box) &&  
     (    
-        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_Head) ||  
-        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_Neck) ||   
-        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_Body) ||   
-        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_Shouldern) ||  
-        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_LeftArmP1) ||   
-        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_LeftArmP2) ||   
-        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_LeftHand) ||   
-        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_LeftLegP1) ||   
-        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_LeftLegP2) ||   
-        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_LeftLegP3) ||   
-        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_RightArmP1) ||   
-        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_RightArmP2) ||   
-        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_RightHand) ||   
-        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_RightLegP1) ||  
-        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_RightLegP2) ||   
-        cubeIsRayCollisionDetected(pHeroPos,pHeroDir,this.MvMatrix_RightLegP3)
+        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Head) ||  
+        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Neck) ||   
+        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Body) ||   
+        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Shouldern) ||  
+        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_LeftArmP1) ||   
+        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_LeftArmP2) ||   
+        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_LeftHand) ||   
+        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_LeftLegP1) ||   
+        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_LeftLegP2) ||   
+        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_LeftLegP3) ||   
+        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_RightArmP1) ||   
+        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_RightArmP2) ||   
+        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_RightHand) ||   
+        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_RightLegP1) ||  
+        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_RightLegP2) ||   
+        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_RightLegP3)
     ) ;
     
     if (this.State!="Disappear")
@@ -359,35 +367,41 @@ _ArmDraw(pAnimCounter,pIsLeft)
 _LegDraw(pX,pY,pAnimCounter,pIsLeft)
 {
 
+    
+
     //cuisse
     mvPushMatrix();  
-    mat4.translate(mvMatrix,mvMatrix, [pX,pY,0]);
-    mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.sin(pAnimCounter)*this.AngleRange*6.0), [1, 0, 0]);
-    mat4.translate(mvMatrix,mvMatrix, [0,-1.0,0]);
-    mvPushMatrix();
-        mat4.scale(mvMatrix,mvMatrix,[0.3,1.0,0.3]);
-        (pIsLeft) ? mat4.copy(this.MvMatrix_LeftLegP1,mvMatrix) : mat4.copy(this.MvMatrix_RightLegP1,mvMatrix);
-        cubeDraw(shaderProgram);
-    mvPopMatrix();    
-    //Molet
-    mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0]);
-    mat4.rotate(mvMatrix,mvMatrix,  degToRad((Math.sin(pAnimCounter + Math.PI/2)+1.0)*this.AngleRange*3.0), [1, 0, 0]);
-    mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0]);
-    mvPushMatrix();
-        mat4.scale(mvMatrix,mvMatrix,[0.3,1.0,0.3]);
-        (pIsLeft) ? mat4.copy(this.MvMatrix_LeftLegP2,mvMatrix) : mat4.copy(this.MvMatrix_RightLegP2,mvMatrix);
-        cubeDraw(shaderProgram);
-    mvPopMatrix();
-    //Shoes       
-    mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0.0]);
-    mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.cos(pAnimCounter)*this.AngleRange*3.0), [1, 0, 0]);
-    mat4.translate(mvMatrix,mvMatrix, [0.0,0.0,0.3]);
-    mvPushMatrix();
-        mat4.scale(mvMatrix,mvMatrix,[0.3,0.2,0.6]);
-        (pIsLeft) ? mat4.copy(this.MvMatrix_LeftLegP3,mvMatrix) : mat4.copy(this.MvMatrix_RightLegP3,mvMatrix);
-        cubeDraw(shaderProgram);
-        cubeDraw(shaderProgram);
-    mvPopMatrix();   
+        mat4.translate(mvMatrix,mvMatrix, [pX,pY,0]);
+        if (this.State != "Falling" && this.State != "Disappear")
+        {
+            this._lookAt([this.Dir[0],0,this.Dir[2]]);
+        }
+        mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.sin(pAnimCounter)*this.AngleRange*6.0), [1, 0, 0]);
+        mat4.translate(mvMatrix,mvMatrix, [0,-1.0,0]);
+        mvPushMatrix();
+            mat4.scale(mvMatrix,mvMatrix,[0.3,1.0,0.3]);
+            (pIsLeft) ? mat4.copy(this.MvMatrix_LeftLegP1,mvMatrix) : mat4.copy(this.MvMatrix_RightLegP1,mvMatrix);
+            cubeDraw(shaderProgram);
+        mvPopMatrix();    
+        //Molet
+        mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0]);
+        mat4.rotate(mvMatrix,mvMatrix,  degToRad((Math.sin(pAnimCounter + Math.PI/2)+1.0)*this.AngleRange*3.0), [1, 0, 0]);
+        mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0]);
+        mvPushMatrix();
+            mat4.scale(mvMatrix,mvMatrix,[0.3,1.0,0.3]);
+            (pIsLeft) ? mat4.copy(this.MvMatrix_LeftLegP2,mvMatrix) : mat4.copy(this.MvMatrix_RightLegP2,mvMatrix);
+            cubeDraw(shaderProgram);
+        mvPopMatrix();
+        //Shoes       
+        mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0.0]);
+        mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.cos(pAnimCounter)*this.AngleRange*3.0), [1, 0, 0]);
+        mat4.translate(mvMatrix,mvMatrix, [0.0,0.0,0.3]);
+        mvPushMatrix();
+            mat4.scale(mvMatrix,mvMatrix,[0.3,0.2,0.6]);
+            (pIsLeft) ? mat4.copy(this.MvMatrix_LeftLegP3,mvMatrix) : mat4.copy(this.MvMatrix_RightLegP3,mvMatrix);
+            cubeDraw(shaderProgram);
+            cubeDraw(shaderProgram);
+        mvPopMatrix();   
 
     mvPopMatrix();
 
@@ -407,9 +421,10 @@ Draw()
     //body movement
     mat4.translate(mvMatrix,mvMatrix, this.Pos);
 
-    mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],this.Dir,[0,1,0]);
+    mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],[this.HeadDir[0]+this.Dir[0],0,this.HeadDir[2]+this.Dir[2]],[0,1,0]);
     mat4.invert(lookAtMatrix,lookAtMatrix);
     mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
+    
 
     mat4.rotate(mvMatrix,mvMatrix,  degToRad(this.AngleRange*1.0) , [1, 0, 0]);
     mat4.translate(mvMatrix,mvMatrix, [0,Math.sin(animCounter*2.0)*this.AngleRange/40.0,0]);
@@ -438,7 +453,7 @@ Draw()
 
     // body
     mvPushMatrix();  
-        mat4.scale(mvMatrix,mvMatrix,[0.8,2.0,0.4]);
+        mat4.scale(mvMatrix,mvMatrix,[0.8,1.8,0.4]);
         mat4.copy(this.MvMatrix_Body,mvMatrix);
         cubeDraw(shaderProgram);           
     mvPopMatrix();
@@ -463,11 +478,9 @@ Draw()
     //head
     mvPushMatrix(); 
         mat4.translate(mvMatrix,mvMatrix, [0,3.0,0]);
-        mat4.invert(lookAtMatrix,lookAtMatrix);
-        mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
-		mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],this.HeadDir,[0,1,0]);
-		mat4.invert(lookAtMatrix,lookAtMatrix);
-        mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
+
+        this._lookAt(this.HeadDir);
+
         mvPushMatrix();
             mat4.scale(mvMatrix,mvMatrix,[0.5,0.5,0.4]); 
             mat4.copy(this.MvMatrix_Head,mvMatrix);
@@ -508,11 +521,7 @@ Draw()
     mat4.translate(mvMatrix,mvMatrix, [-1.2,1.7,0.0]);
     if(this.State == "Reload" || this.State == "Fire" || this.State == "FireStart" )
     {
-        mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],this.Dir,[0,1,0]);
-        mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
-        mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],this.GunDir,[0,1,0]);
-        mat4.invert(lookAtMatrix,lookAtMatrix);
-        mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
+        this._lookAt(this.GunDir);
     }
     this._ArmDraw(animCounter,true);
     mvPopMatrix();
@@ -522,11 +531,7 @@ Draw()
     mat4.translate(mvMatrix,mvMatrix, [1.2,1.7,0.0]);
     if(this.State == "Reload" || this.State == "Fire" || this.State == "FireStart" )
     {
-        mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],this.Dir,[0,1,0]);
-        mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
-        mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],this.GunDir,[0,1,0]);
-        mat4.invert(lookAtMatrix,lookAtMatrix);
-        mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
+        this._lookAt(this.GunDir);
     }
     this._ArmDraw(animCounter  +  Math.PI,false);
     mvPopMatrix();
