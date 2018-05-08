@@ -33,13 +33,13 @@ function info2DUpdate(pEnemieTarget,pInjury,pNbLife,pNbEnemies,pGameState)
 	if (pGameState=="Play")
 	{
 		gInfo2DCrossColor =((pEnemieTarget) ?  [1.0,0.0,0.0,1.0]: [1.0,1.0,1.0,1.0]);
-		gInfo2DLifeQt = pNbLife;
 		if (pInjury) gInfo2DAnimInjury.start(200,0.7,0.0);
 	}
 	else
 	{
 		gInfo2DCrossColor = [0.0,0.0,0.0,0.0];
 	}
+	gInfo2DLifeQt = pNbLife;
 	gInfo2DInjuryAlpha = gInfo2DAnimInjury.getValue();
 	gInfo2DNbEnemies = pNbEnemies;
 	gInfo2DGameState = pGameState;
