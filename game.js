@@ -37,7 +37,7 @@ function initGame() {
 
 	gCamPos = [0,0,10]; 
 	gSpeedCoef=50;
-	gCamDir = [0,0,-1];
+	gCamDir = [1,0,-1];
 	gGameState = "Play"
 	gEndAnim = new CTimeAnim();
 	gCScreen = new CScreen("canvas3D","canvas2D");
