@@ -98,9 +98,7 @@ function updateGame() {
 			if (gHeroRunning){
 				vec3.rotateY(gHeroDir,gCamDir,[0,0,0],gMediaRunAngle);
 				gHeroSpeed = 50;
-			}
-			else
-			{
+			}else{
 				gHeroSpeed = 0;
 			}
 					

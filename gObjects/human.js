@@ -106,9 +106,6 @@ UpdateHero(pPos,pRunDir,pRunning,pFire,pFireDir,pDead)
     }
     else if (!pDead)
     {
-        // Update Anim Counter
-        this.AnimCounter  += 8.0*elapsed;
-        if (this.AnimCounter > 10.0 * Math.PI)  this.AnimCounter = 10.0 * Math.PI - this.AnimCounter;
         
         this.Dir[0] = -pRunDir[0];
         this.Dir[1] = 0;
@@ -136,6 +133,20 @@ UpdateHero(pPos,pRunDir,pRunning,pFire,pFireDir,pDead)
         }
         
         vec3.copy(this.GunDir,this.HeadDir);
+
+        //BackWardsRunning
+        if (vec3.dot(this.Dir,this.GunDir) <-0.75)
+        {
+            vec3.scale(this.Dir,this.Dir,-1);
+            this.AnimCounter  -= 8.0*elapsed;
+            if (this.AnimCounter > 10.0 * Math.PI)  this.AnimCounter = 10.0 * Math.PI - this.AnimCounter;
+        }
+        else
+        {
+            this.AnimCounter  += 8.0*elapsed;
+            if (this.AnimCounter < -10.0 * Math.PI)  this.AnimCounter = -10.0 * Math.PI - this.AnimCounter;
+        }
+
     }
 }
 
@@ -216,7 +227,7 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos,pHeroDir,pHeroFire)
 
         // Update Anim Counter
         this.AnimCounter  += 8.0*elapsed;
-        if (this.AnimCounter > 10.0 * Math.PI)  this.AnimCounter = 10.0 * Math.PI - this.AnimCounter;
+        if (this.AnimCounter > (10 * Math.PI) )  this.AnimCounter = 10.0 * Math.PI - this.AnimCounter;
     }
 
     // Update Sqr Dist
