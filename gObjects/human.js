@@ -4,7 +4,7 @@ class CHuman
 constructor(pPos,pSpeed) {
 
     
-    var fragmentShaderFire= `
+    var fragmentShaderEnemyFire= `
         precision lowp float;
             
         varying vec4 v_position; 
@@ -19,6 +19,24 @@ constructor(pPos,pSpeed) {
         gl_FragColor = vec4(uVertexColor.x,uVertexColor.y,uVertexColor.z,1.0-dist); 
         
         }`;
+
+    var fragmentShaderHeroFire = `
+
+        precision lowp float;
+            
+        varying vec4 v_position; 
+        varying vec4 a_position;      
+        uniform vec4 uVertexColor;    
+        uniform float uCounter; 
+        uniform float uWaterY;
+
+        void main()
+        {
+        float dist = a_position.y*a_position.y + a_position.x*a_position.x;
+        gl_FragColor = vec4(1.0-dist,1.0-dist,0.0,cos(uCounter*6.0)-dist ); 
+        
+        }`;
+
 
     var fragmentShaderEyes= `
         precision lowp float;
@@ -36,6 +54,8 @@ constructor(pPos,pSpeed) {
         
         }`;
 
+
+
     this.Pos=pPos;
     this.Dir=[-1,0,1];
     this.HeadDir=[0,0,0];
@@ -45,11 +65,13 @@ constructor(pPos,pSpeed) {
     this.AngleRange=0
     this.State="Running";
     this.TargetHist=[];
-    this.FireShaderProgram =  initShaders(vertexShader1,fragmentShaderFire);
+    this.FireHeroShaderProgram =  initShaders(vertexShader1,fragmentShaderHeroFire);
+    this.FireEnemyShaderProgram =  initShaders(vertexShader1,fragmentShaderEnemyFire);
     this.EyesShaderProgram =  initShaders(vertexShader1,fragmentShaderEyes);
     this.HitTarget = false;
     this.IsTouched = false;
     this.AnimCounter=0;
+    this.Hero = false;
     
     this.AnimDir = new CTimeAnim();
     this.AnimReload = new CTimeAnim();
@@ -129,7 +151,8 @@ UpdateHero(pPos,pRunDir,pRunning,pFire,pFireDir,pDead)
             this.HeadDir[0] =  -pFireDir[0];
             this.HeadDir[1] =  -pFireDir[1];
             this.HeadDir[2] =  -pFireDir[2];
-            this.State="FireStart";
+            this.State="Fire";
+            this.Hero = true;
         }
         
         vec3.copy(this.GunDir,this.HeadDir);
@@ -238,14 +261,10 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos,pHeroDir,pHeroFire)
     //  =>test angle between target and human direction
     switch (this.State) {
         case "Running":
-            if (dotProd> 0.5 && this.sqrDist < 10000) this.State = "FireStart";
+            if (dotProd> 0.5 && this.sqrDist < 10000) this.State = "Fire";
             if (pHeroFire && this.IsInTarget) this.State = "StartFalling";
             break;
-        case "FireStart":            
-            this.State  = "Fire";
-            if (pHeroFire && this.IsInTarget) this.State = "StartFalling";
-            break;
-        case "Fire":
+        case "Fire":       
             //Collision detection
             var targetDir =  vec3.create();	
             var fireVector =  vec3.create();
@@ -264,7 +283,7 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos,pHeroDir,pHeroFire)
         case "Reload":
             if (pHeroFire && this.IsInTarget)             this.State = "StartFalling";
             else if (dotProd< 0.5 || this.sqrDist > 10000)   this.State = "Running"; 
-            else if (!this.AnimReload.running) this.State = "FireStart"; 
+            else if (!this.AnimReload.running) this.State = "Fire"; 
             break;
         case "StartFalling":
             this.AnimSpeedFall.start(1000,this.AngleRange,1);
@@ -301,8 +320,7 @@ _ArmDraw(pAnimCounter,pIsLeft)
 
     switch (this.State) {
         
-        case "Fire":
-        case "FireStart":    
+        case "Fire":    
         case "Reload":
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(-86), [1, 0, 0]);
             armDownAngle = (Math.sin(this.AnimReload.getValue() + Math.PI/2)-1.0)*this.AngleRange*3.0;
@@ -354,21 +372,19 @@ _ArmDraw(pAnimCounter,pIsLeft)
     shaderVertexColorVector = [0.99,0.76,0.67,1.0];  
 
 
-    if(this.State == "FireStart")
+    if(this.State == "Fire")
     {
         mvPushMatrix();	
         mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
         mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [1, 0, 0]);
         mat4.scale(mvMatrix,mvMatrix,[0.25,1.0,1.0]);
-       // squareDraw(this.FireShaderProgram);	
-        squareDraw(shaderProgram2);	
+        (this.Hero) ? squareDraw(this.FireHeroShaderProgram) : squareDraw(this.FireEnemyShaderProgram);
         mvPopMatrix();
-
         mvPushMatrix();	
         mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
         mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [1, 0, 0]);
         mat4.scale(mvMatrix,mvMatrix,[1.2,0.15,1.2]);
-        //squareDraw(this.FireShaderProgram);	
+        (this.Hero) ? squareDraw(this.FireHeroShaderProgram) : squareDraw(this.FireEnemyShaderProgram);
         squareDraw(shaderProgram2);	
         mvPopMatrix();
     }
@@ -530,7 +546,7 @@ Draw()
     
     mvPushMatrix();  
     mat4.translate(mvMatrix,mvMatrix, [-1.2,1.7,0.0]);
-    if(this.State == "Reload" || this.State == "Fire" || this.State == "FireStart" )
+    if(this.State == "Reload" || this.State == "Fire" )
     {
         this._lookAt(this.GunDir);
     }
@@ -540,7 +556,7 @@ Draw()
         
     mvPushMatrix();  
     mat4.translate(mvMatrix,mvMatrix, [1.2,1.7,0.0]);
-    if(this.State == "Reload" || this.State == "Fire" || this.State == "FireStart" )
+    if(this.State == "Reload" || this.State == "Fire" )
     {
         this._lookAt(this.GunDir);
     }
