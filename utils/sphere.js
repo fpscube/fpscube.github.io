@@ -95,8 +95,5 @@ class CSphere
         
         gl.drawElements(gl.TRIANGLES,this.indices.length, gl.UNSIGNED_SHORT,0);
     }
-
- 
-
 }
 
