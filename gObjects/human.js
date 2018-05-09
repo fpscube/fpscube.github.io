@@ -385,7 +385,6 @@ _ArmDraw(pAnimCounter,pIsLeft)
         mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [1, 0, 0]);
         mat4.scale(mvMatrix,mvMatrix,[1.2,0.15,1.2]);
         (this.Hero) ? squareDraw(this.FireHeroShaderProgram) : squareDraw(this.FireEnemyShaderProgram);
-        squareDraw(shaderProgram2);	
         mvPopMatrix();
     }
 }
