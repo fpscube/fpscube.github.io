@@ -117,7 +117,6 @@ function cubeInit()
 
 function cubeDraw(pShaderProgram)
 {
-
     gl.useProgram(pShaderProgram);
 	  setMatrixUniforms(pShaderProgram);
     

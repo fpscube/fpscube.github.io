@@ -53,6 +53,7 @@ function initGame() {
 	info2DInit();
 	squareInit();
 	cubeInit();
+	SphereInit();
 
 	gEnemies=[];
 	for(var i =0 ;i<30;i++){
@@ -201,6 +202,7 @@ function drawGame() {
 
 	//Draw Info 2D
 	info2DDraw();
+
 
 
 }

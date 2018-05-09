@@ -54,7 +54,20 @@ constructor(pPos,pSpeed) {
         
         }`;
 
+    var fragmentShaderHuman= `
+        precision lowp float;
+        
+        varying vec3 v_normal;     
+        uniform vec4 uVertexColor;   
+        
+        void main() {
+          float light;
 
+          light = dot(v_normal, vec3(0.0,1.0,0.0))*0.6 +0.4; 
+          
+          gl_FragColor = vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,1.0) ;
+        }
+    `;
 
     this.Pos=pPos;
     this.Dir=[-1,0,1];
@@ -68,6 +81,7 @@ constructor(pPos,pSpeed) {
     this.FireHeroShaderProgram =  initShaders(vertexShader1,fragmentShaderHeroFire);
     this.FireEnemyShaderProgram =  initShaders(vertexShader1,fragmentShaderEnemyFire);
     this.EyesShaderProgram =  initShaders(vertexShader1,fragmentShaderEyes);
+    this.HumanShaderProgram =  initShaders(vertexShader1,fragmentShaderHuman);
     this.HitTarget = false;
     this.IsTouched = false;
     this.AnimCounter=0;
@@ -330,31 +344,38 @@ _ArmDraw(pAnimCounter,pIsLeft)
             armDownAngle = (Math.sin(pAnimCounter + Math.PI/2)-1.0)*this.AngleRange*3.0;
             break;
     }
+    
+    shaderVertexColorVector = [0.2,0.2,0.2,1.0]; 
+    mvPushMatrix();
+        mat4.scale(mvMatrix,mvMatrix,[0.4,0.35 ,0.35]);
+        (pIsLeft) ? mat4.copy(this.MvMatrix_LeftArmP1,mvMatrix) : mat4.copy(this.MvMatrix_RightArmP1,mvMatrix);
+        Sphere.Draw(this.HumanShaderProgram); 
+    mvPopMatrix();  
 
     mat4.translate(mvMatrix,mvMatrix, [0,-0.6,0]);
     mvPushMatrix();
-        mat4.scale(mvMatrix,mvMatrix,[0.3,0.9,0.3]);
+        mat4.scale(mvMatrix,mvMatrix,[0.32,0.9,0.32]);
         (pIsLeft) ? mat4.copy(this.MvMatrix_LeftArmP1,mvMatrix) : mat4.copy(this.MvMatrix_RightArmP1,mvMatrix);
-        cubeDraw(shaderProgram);
+        Sphere.Draw(this.HumanShaderProgram); 
     mvPopMatrix();    
     
     //ArmDown    
-    mat4.translate(mvMatrix,mvMatrix, [0.0,-0.8,0]);
+    mat4.translate(mvMatrix,mvMatrix, [0.0,-0.7,0]);
     mat4.rotate(mvMatrix,mvMatrix, degToRad(armDownAngle), [1, 0, 0]);
-    mat4.translate(mvMatrix,mvMatrix, [0.0,-0.8,0]);
+    mat4.translate(mvMatrix,mvMatrix, [0.0,-0.7,0]);
     mvPushMatrix();
         mat4.scale(mvMatrix,mvMatrix,[0.3,0.8,0.3]);
         (pIsLeft) ? mat4.copy(this.MvMatrix_LeftArmP2,mvMatrix) : mat4.copy(this.MvMatrix_RightArmP2,mvMatrix);
-        cubeDraw(shaderProgram);
+        Sphere.Draw(this.HumanShaderProgram); 
     mvPopMatrix();
     //Hand    
     shaderVertexColorVector = [0.99,0.76,0.67,1.0];  
     mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0.0]);
     //mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.cos(pAnimCounter)*this.AngleRange*3.0), [1, 0, 0]);
     mvPushMatrix();
-        mat4.scale(mvMatrix,mvMatrix,[0.3,0.2,0.3]);
+        mat4.scale(mvMatrix,mvMatrix,[0.25,0.6,0.25]);
         (pIsLeft) ? mat4.copy(this.MvMatrix_LeftHand,mvMatrix) : mat4.copy(this.MvMatrix_RightHand,mvMatrix);
-        cubeDraw(shaderProgram);
+        Sphere.Draw(this.HumanShaderProgram); 
     mvPopMatrix();   
 
     //Gun    
@@ -362,12 +383,12 @@ _ArmDraw(pAnimCounter,pIsLeft)
     mat4.translate(mvMatrix,mvMatrix, [0.0,-0.7,0.6]);
     mvPushMatrix();
     mat4.scale(mvMatrix,mvMatrix,[0.2,1.0,0.2]);
-    cubeDraw(shaderProgram);
+    cubeDraw(this.HumanShaderProgram);
     mvPopMatrix();
     mvPushMatrix();
     mat4.translate(mvMatrix,mvMatrix, [0.0,0.4,-0.5]);
     mat4.scale(mvMatrix,mvMatrix,[0.2,0.2,0.6]);        
-    cubeDraw(shaderProgram);
+    cubeDraw(this.HumanShaderProgram);
     mvPopMatrix();   
     shaderVertexColorVector = [0.99,0.76,0.67,1.0];  
 
@@ -397,36 +418,36 @@ _LegDraw(pX,pY,pAnimCounter,pIsLeft)
 
     //cuisse
     mvPushMatrix();  
-        mat4.translate(mvMatrix,mvMatrix, [pX,pY,0]);
+        shaderVertexColorVector = [0.2,0.2,0.2,1.0]; 
+        mat4.translate(mvMatrix,mvMatrix, [pX,pY,0.08]);
         if (this.State != "Falling" && this.State != "Disappear")
         {
             this._lookAt([this.Dir[0],0,this.Dir[2]]);
         }
         mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.sin(pAnimCounter)*this.AngleRange*6.0), [1, 0, 0]);
-        mat4.translate(mvMatrix,mvMatrix, [0,-1.0,0]);
+        mat4.translate(mvMatrix,mvMatrix, [0,-1.4,0]);
         mvPushMatrix();
-            mat4.scale(mvMatrix,mvMatrix,[0.3,1.0,0.3]);
+            mat4.scale(mvMatrix,mvMatrix,[0.4,1.4,0.4]);
             (pIsLeft) ? mat4.copy(this.MvMatrix_LeftLegP1,mvMatrix) : mat4.copy(this.MvMatrix_RightLegP1,mvMatrix);
-            cubeDraw(shaderProgram);
+            Sphere.Draw(this.HumanShaderProgram); 
         mvPopMatrix();    
         //Molet
-        mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0]);
+        mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0]);
         mat4.rotate(mvMatrix,mvMatrix,  degToRad((Math.sin(pAnimCounter + Math.PI/2)+1.0)*this.AngleRange*3.0), [1, 0, 0]);
-        mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0]);
+        mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0]);
         mvPushMatrix();
-            mat4.scale(mvMatrix,mvMatrix,[0.3,1.0,0.3]);
+            mat4.scale(mvMatrix,mvMatrix,[0.35,1.1,0.35]);
             (pIsLeft) ? mat4.copy(this.MvMatrix_LeftLegP2,mvMatrix) : mat4.copy(this.MvMatrix_RightLegP2,mvMatrix);
-            cubeDraw(shaderProgram);
+            Sphere.Draw(this.HumanShaderProgram); 
         mvPopMatrix();
         //Shoes       
-        mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0.0]);
+        mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
         mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.cos(pAnimCounter)*this.AngleRange*3.0), [1, 0, 0]);
         mat4.translate(mvMatrix,mvMatrix, [0.0,0.0,0.3]);
         mvPushMatrix();
             mat4.scale(mvMatrix,mvMatrix,[0.3,0.2,0.6]);
             (pIsLeft) ? mat4.copy(this.MvMatrix_LeftLegP3,mvMatrix) : mat4.copy(this.MvMatrix_RightLegP3,mvMatrix);
-            cubeDraw(shaderProgram);
-            cubeDraw(shaderProgram);
+            Sphere.Draw(this.HumanShaderProgram);     
         mvPopMatrix();   
 
     mvPopMatrix();
@@ -473,64 +494,75 @@ Draw()
     mvPushMatrix();  
         mat4.scale(mvMatrix,mvMatrix,[10.0,10.0,10.0]);
         mat4.copy(this.MvMatrix_Box,mvMatrix);
-        //cubeDraw(shaderProgram);           
+        //cubeDraw(this.HumanShaderProgram);           
     mvPopMatrix();
  
 
     // body
     mvPushMatrix();  
-        mat4.scale(mvMatrix,mvMatrix,[0.8,1.8,0.4]);
+        shaderVertexColorVector = [1.0,1.0,1.0,1.0];
+        mat4.scale(mvMatrix,mvMatrix,[0.8,2.0,0.4]);
         mat4.copy(this.MvMatrix_Body,mvMatrix);
-        cubeDraw(shaderProgram);           
+        Sphere.Draw(this.HumanShaderProgram); 
     mvPopMatrix();
  
-    //shouldern
+    // body up
+    mvPushMatrix();    
+        mat4.translate(mvMatrix,mvMatrix, [0,1.3,0]);
+        mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [0, 1, 0 ]);
+        mat4.scale(mvMatrix,mvMatrix,[0.4,0.8,0.8]);
+        mat4.copy(this.MvMatrix_Shouldern,mvMatrix);
+        Sphere.Draw(this.HumanShaderProgram);       
+    mvPopMatrix(); 
+
+    // shouldern
     mvPushMatrix();    
         mat4.translate(mvMatrix,mvMatrix, [0,1.7,0]);
         mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [0, 1, 0 ]);
-        mat4.scale(mvMatrix,mvMatrix,[0.4,0.3,0.9]);
+        mat4.scale(mvMatrix,mvMatrix,[0.4,0.4,1.0]);
         mat4.copy(this.MvMatrix_Shouldern,mvMatrix);
-        cubeDraw(shaderProgram);       
+        Sphere.Draw(this.HumanShaderProgram);       
     mvPopMatrix(); 
+    
 
     //neck
+    shaderVertexColorVector = [0.99,0.76,0.67,1.0]; 
     mvPushMatrix();
         mat4.translate(mvMatrix,mvMatrix, [0,2.3,0]);
-        mat4.scale(mvMatrix,mvMatrix,[0.2,0.3,0.3]);
-        cubeDraw(shaderProgram);       
+        mat4.scale(mvMatrix,mvMatrix,[0.2,0.8,0.2]);
+        Sphere.Draw(this.HumanShaderProgram);
     mvPopMatrix(); 
 
     
     //head
     mvPushMatrix(); 
         mat4.translate(mvMatrix,mvMatrix, [0,3.0,0]);
-
         this._lookAt(this.HeadDir);
 
         mvPushMatrix();
-            mat4.scale(mvMatrix,mvMatrix,[0.5,0.5,0.4]); 
+            mat4.scale(mvMatrix,mvMatrix,[0.55,0.7,0.5]); 
             mat4.copy(this.MvMatrix_Head,mvMatrix);
-        	cubeDraw(shaderProgram);    
+            Sphere.Draw(this.HumanShaderProgram);
     	mvPopMatrix();
 		//ears
         mvPushMatrix();
-   			shaderVertexColorVector = [1.0,1.0,1.0,1.0];
-        	mat4.scale(mvMatrix,mvMatrix,[0.6,0.2,0.2]); 
-        	cubeDraw(shaderProgram);    
+            mat4.translate(mvMatrix,mvMatrix, [0,0.2,0]);
+        	mat4.scale(mvMatrix,mvMatrix,[0.6,0.3,0.2]); 
+            Sphere.Draw(this.HumanShaderProgram);
     	mvPopMatrix();
 		//eyes
        		mat4.translate(mvMatrix,mvMatrix, [0.0,0.2,0.5]);
         mvPushMatrix();
              shaderVertexColorVector = [0.8,0.8,0.8,1.0];
-       		mat4.translate(mvMatrix,mvMatrix, [-0.3,0.0,0.0]);
+       		mat4.translate(mvMatrix,mvMatrix, [-0.25,0.0,0.0]);
         	mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.05]); 
-			cubeDraw(shaderProgram3);   
+			cubeDraw( this.EyesShaderProgram );   
     	mvPopMatrix();
         mvPushMatrix();
             shaderVertexColorVector = [0.8,0.8,0.8,1.0];
-       		mat4.translate(mvMatrix,mvMatrix, [0.3,0.0,0.0]);
+       		mat4.translate(mvMatrix,mvMatrix, [0.25,0.0,0.0]);
         	mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.05]); 
-			cubeDraw(shaderProgram3);   
+			cubeDraw( this.EyesShaderProgram );   
     	mvPopMatrix();
 
 
@@ -538,8 +570,8 @@ Draw()
 
     shaderVertexColorVector = [0.99,0.76,0.67,1.0];
     //Legs
-    this._LegDraw(0.5,-1.5,animCounter,true);
-    this._LegDraw(-0.5,-1.5,animCounter  +  Math.PI,false);
+    this._LegDraw(0.5,-0.9,animCounter,true);
+    this._LegDraw(-0.5,-0.9,animCounter  +  Math.PI,false);
     //Arms
 
     

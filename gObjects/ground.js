@@ -87,7 +87,7 @@ function groundInit()
   // Normal Buffer	
   groundNormalBuffer = gl.createBuffer();
   groundNormalBuffer.itemSize = 3;
-  groundNormalBuffer.numItems = groundNormals/3;
+  groundNormalBuffer.numItems = groundNormals.length/3;
   gl.bindBuffer(gl.ARRAY_BUFFER, groundNormalBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(groundNormals), gl.STATIC_DRAW);	
     

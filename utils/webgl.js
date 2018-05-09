@@ -91,22 +91,6 @@ var fragmentShader1 = `
     }
 `;
 
-var fragmentShader2 = `
-
-precision lowp float;
-      
-varying vec4 v_position; 
-varying vec4 a_position;      
-uniform vec4 uVertexColor;    
-uniform float uCounter; 
-uniform float uWaterY;
-
-void main()
-{
-  float dist = a_position.y*a_position.y + a_position.x*a_position.x;
-  gl_FragColor = vec4(1.0-dist,1.0-dist,0.0,cos(uCounter*6.0)-dist ); 
-  
-}`;
 
 
 var fragmentShader3 = `
@@ -128,7 +112,6 @@ void main()
 
 
 var shaderProgram;
-var shaderProgram2;
 var shaderProgram3;
 
 function initShaders(vertexShaderStr,fragmentShaderStr) {
@@ -208,8 +191,6 @@ function webGLStart() {
 	document.addEventListener('mozpointerlockchange', lockChangeAlert, false);
 
 	shaderProgram = initShaders(vertexShader1,fragmentShader1); 
-	shaderProgram2 = initShaders(vertexShader1,fragmentShader2);
-	shaderProgram3 = initShaders(vertexShader1,fragmentShader3);
 
 	ctx2d = canvas2D.getContext("2d");
 
