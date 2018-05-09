@@ -14,7 +14,7 @@ class CSphere
 
     constructor()
     {
-        var res = 30;
+        var res = 4;
         var stepU = 2*Math.PI/res;
         var stepV = Math.PI/res;
 

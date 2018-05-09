@@ -154,8 +154,6 @@ var pMatrix = mat4.create();
 
 function setMatrixUniforms(pShaderProgram) {
 		
-	gl.uniform1f (pShaderProgram.counter, shaderCounter);
-	gl.uniform1f (pShaderProgram.waterY, shaderWaterY);
 	gl.uniform4fv (pShaderProgram.vertexColorAttribute, shaderVertexColorVector);
 
 	gl.uniformMatrix4fv(pShaderProgram.mvMatrixUniform, false, mvMatrix);

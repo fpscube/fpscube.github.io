@@ -395,16 +395,19 @@ _ArmDraw(pAnimCounter,pIsLeft)
 
     if(this.State == "Fire")
     {
+        
         mvPushMatrix();	
         mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
         mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [1, 0, 0]);
         mat4.scale(mvMatrix,mvMatrix,[0.25,1.0,1.0]);
+	    gl.uniform1f (this.FireHeroShaderProgram.counter, shaderCounter);
         (this.Hero) ? squareDraw(this.FireHeroShaderProgram) : squareDraw(this.FireEnemyShaderProgram);
         mvPopMatrix();
         mvPushMatrix();	
         mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
         mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [1, 0, 0]);
         mat4.scale(mvMatrix,mvMatrix,[1.2,0.15,1.2]);
+	    gl.uniform1f (this.FireHeroShaderProgram.counter, shaderCounter);
         (this.Hero) ? squareDraw(this.FireHeroShaderProgram) : squareDraw(this.FireEnemyShaderProgram);
         mvPopMatrix();
     }
@@ -551,18 +554,18 @@ Draw()
             Sphere.Draw(this.HumanShaderProgram);
     	mvPopMatrix();
 		//eyes
-       		mat4.translate(mvMatrix,mvMatrix, [0.0,0.2,0.5]);
+       		mat4.translate(mvMatrix,mvMatrix, [0.0,0.2,0.45]);
         mvPushMatrix();
              shaderVertexColorVector = [0.8,0.8,0.8,1.0];
        		mat4.translate(mvMatrix,mvMatrix, [-0.25,0.0,0.0]);
-        	mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.05]); 
-			cubeDraw( this.EyesShaderProgram );   
+            mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.05]);         
+            Sphere.Draw(this.EyesShaderProgram);    
     	mvPopMatrix();
         mvPushMatrix();
             shaderVertexColorVector = [0.8,0.8,0.8,1.0];
        		mat4.translate(mvMatrix,mvMatrix, [0.25,0.0,0.0]);
-        	mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.05]); 
-			cubeDraw( this.EyesShaderProgram );   
+        	mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.05]);         
+            Sphere.Draw(this.EyesShaderProgram);  
     	mvPopMatrix();
 
 
