@@ -102,5 +102,29 @@ class CSphere
         
         gl.drawElements(gl.TRIANGLES,this.indices.length, gl.UNSIGNED_SHORT,0);
     }
+
+    IsRayCollisionDetected(rayPoint,rayDir,mvMatrix)
+    {
+        var tranformRayPoint1 = vec3.create();
+        var tranformRayPoint2 = vec3.create();
+        var tranformRayPointToTarget = vec3.create();
+        var tranformRayDir = vec3.create();
+        var mvMatrixInv = mat4.create();
+        mat4.invert(mvMatrixInv,mvMatrix);
+        vec3.transformMat4(tranformRayPoint1,rayPoint,mvMatrixInv);
+        vec3.transformMat4(tranformRayPoint2,[rayPoint[0]+rayDir[0],rayPoint[1]+rayDir[1],rayPoint[2]+rayDir[2]],mvMatrixInv);
+        vec3.subtract(tranformRayDir,tranformRayPoint2,tranformRayPoint1);
+        vec3.scale(tranformRayPointToTarget,tranformRayPoint1,-1);
+        vec3.normalize(tranformRayDir,tranformRayDir);
+        
+        //rayDist = rayDir(normalize).rayPointToTargetVec
+        //squareCollisionDist = rayPointDist^2-rayDist^2
+        var rayDist = vec3.dot(tranformRayDir,tranformRayPointToTarget);
+        var raySquaredPointDist = vec3.squaredLength(tranformRayPointToTarget);
+        var squareCollisionDist =raySquaredPointDist-rayDist**2;
+
+        return ( squareCollisionDist<1 );
+
+    }
 }
 

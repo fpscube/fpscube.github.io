@@ -65,7 +65,7 @@ constructor(pPos,pSpeed) {
 
           light = dot(v_normal, vec3(0.0,1.0,0.0))*0.6 +0.4; 
           
-          gl_FragColor = vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,1.0) ;
+          gl_FragColor = vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,uVertexColor.a) ;
         }
     `;
 
@@ -97,6 +97,7 @@ constructor(pPos,pSpeed) {
     this.MvMatrix_Head = mat4.create(); 
     this.MvMatrix_Neck = mat4.create(); 
     this.MvMatrix_Body = mat4.create(); 
+    this.MvMatrix_BodyUp = mat4.create(); 
     this.MvMatrix_Shouldern = mat4.create(); 
     this.MvMatrix_LeftArmP1 = mat4.create(); 
     this.MvMatrix_LeftArmP2 = mat4.create(); 
@@ -197,22 +198,23 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos,pHeroDir,pHeroFire)
     //Human collision Detection
     this.IsInTarget =  cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Box) &&  
     (    
-        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Head) ||  
-        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Neck) ||   
-        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Body) ||   
-        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Shouldern) ||  
-        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_LeftArmP1) ||   
-        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_LeftArmP2) ||   
-        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_LeftHand) ||   
-        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_LeftLegP1) ||   
-        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_LeftLegP2) ||   
-        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_LeftLegP3) ||   
-        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_RightArmP1) ||   
-        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_RightArmP2) ||   
-        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_RightHand) ||   
-        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_RightLegP1) ||  
-        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_RightLegP2) ||   
-        cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_RightLegP3)
+        Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Head) ||  
+        Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Neck) ||   
+        Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_BodyUp) ||  
+        Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Body) ||   
+        Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Shouldern) ||  
+        Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_LeftArmP1) ||   
+        Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_LeftArmP2) ||   
+        Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_LeftHand) ||   
+        Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_LeftLegP1) ||   
+        Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_LeftLegP2) ||   
+        Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_LeftLegP3) ||   
+        Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_RightArmP1) ||   
+        Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_RightArmP2) ||   
+        Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_RightHand) ||   
+        Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_RightLegP1) ||  
+        Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_RightLegP2) ||   
+        Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_RightLegP3)
     ) ;
     
     if (this.State!="Disappear")
@@ -493,13 +495,6 @@ Draw()
         mat4.translate(mvMatrix,mvMatrix, [0,5,0]);
     }
 
-    // Collision Box
-    mvPushMatrix();  
-        mat4.scale(mvMatrix,mvMatrix,[10.0,10.0,10.0]);
-        mat4.copy(this.MvMatrix_Box,mvMatrix);
-        //cubeDraw(this.HumanShaderProgram);           
-    mvPopMatrix();
- 
 
     // body
     mvPushMatrix();  
@@ -514,7 +509,7 @@ Draw()
         mat4.translate(mvMatrix,mvMatrix, [0,1.3,0]);
         mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [0, 1, 0 ]);
         mat4.scale(mvMatrix,mvMatrix,[0.4,0.8,0.8]);
-        mat4.copy(this.MvMatrix_Shouldern,mvMatrix);
+        mat4.copy(this.MvMatrix_BodyUp,mvMatrix);
         Sphere.Draw(this.HumanShaderProgram);       
     mvPopMatrix(); 
 
@@ -533,6 +528,7 @@ Draw()
     mvPushMatrix();
         mat4.translate(mvMatrix,mvMatrix, [0,2.3,0]);
         mat4.scale(mvMatrix,mvMatrix,[0.2,0.8,0.2]);
+        mat4.copy(this.MvMatrix_Neck,mvMatrix);
         Sphere.Draw(this.HumanShaderProgram);
     mvPopMatrix(); 
 
@@ -597,6 +593,14 @@ Draw()
     this._ArmDraw(animCounter  +  Math.PI,false);
     mvPopMatrix();
     
+    // Collision Box
+    mvPushMatrix();  
+        mat4.scale(mvMatrix,mvMatrix,[6.0,7.0,6.0]);
+        mat4.copy(this.MvMatrix_Box,mvMatrix);
+       // shaderVertexColorVector = [1.0,1.0,1.0,0.5];
+       // Sphere.Draw(this.HumanShaderProgram);         
+    mvPopMatrix();
+ 
 
 	mat4.identity(mvMatrix)
 
