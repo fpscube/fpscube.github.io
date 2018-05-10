@@ -93,26 +93,8 @@ var fragmentShader1 = `
 
 
 
-var fragmentShader3 = `
-
-precision lowp float;
-      
-varying vec4 v_position; 
-varying vec4 a_position;      
-uniform vec4 uVertexColor;    
-uniform float uCounter; 
-uniform float uWaterY;
-
-void main()
-{
-  float dist = a_position.y*a_position.y + a_position.x*a_position.x;
-  gl_FragColor = vec4(uVertexColor.x,uVertexColor.y,uVertexColor.z,1.0-dist); 
-  
-}`;
-
 
 var shaderProgram;
-var shaderProgram3;
 
 function initShaders(vertexShaderStr,fragmentShaderStr) {
 
@@ -152,18 +134,6 @@ var mvInverseMatrix = mat4.create();
 var mvInverseTransposeMatrix = mat4.create();
 var pMatrix = mat4.create();
 
-function setMatrixUniforms(pShaderProgram) {
-		
-	gl.uniform4fv (pShaderProgram.vertexColorAttribute, shaderVertexColorVector);
-
-	gl.uniformMatrix4fv(pShaderProgram.mvMatrixUniform, false, mvMatrix);
-	gl.uniformMatrix4fv(pShaderProgram.pMatrixUniform, false, pMatrix);
-
-	mat4.invert(mvInverseMatrix,mvMatrix);
-	mat4.transpose(mvInverseTransposeMatrix,mvInverseMatrix);
-	gl.uniformMatrix4fv(pShaderProgram.mvInverseTransposeMatrix, false, mvInverseTransposeMatrix);
-}
-
 function degToRad(degrees) {return degrees * Math.PI / 180;}
 
 
@@ -178,8 +148,6 @@ function webGLStart() {
 	var canvas2D = document.getElementById("canvas2D");
 
 	gl = canvas3D.getContext("experimental-webgl");	
-
-
 
 	canvas2D.requestPointerLock = canvas2D.requestPointerLock || canvas2D.mozRequestPointerLock;
 	document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;

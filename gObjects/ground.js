@@ -116,7 +116,18 @@ function groundDraw()
 
     
     gl.useProgram(shaderProgram);
-    setMatrixUniforms(shaderProgram);
+    
+    //function setMatrixUniforms(pShaderProgram) {
+		
+    gl.uniform4fv (shaderProgram.vertexColorAttribute, shaderVertexColorVector);
+    
+    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+    
+    mat4.invert(mvInverseMatrix,mvMatrix);
+    mat4.transpose(mvInverseTransposeMatrix,mvInverseMatrix);
+    gl.uniformMatrix4fv(shaderProgram.mvInverseTransposeMatrix, false, mvInverseTransposeMatrix);
+
     
     gl.drawElements(gl.TRIANGLES,groundIndices.length, gl.UNSIGNED_SHORT,0);
   

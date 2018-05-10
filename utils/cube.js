@@ -118,7 +118,14 @@ function cubeInit()
 function cubeDraw(pShaderProgram)
 {
     gl.useProgram(pShaderProgram);
-	  setMatrixUniforms(pShaderProgram);
+    
+    //function setMatrixUniforms(pShaderProgram) {
+    gl.uniform4fv (pShaderProgram.vertexColorAttribute, shaderVertexColorVector);
+    gl.uniformMatrix4fv(pShaderProgram.mvMatrixUniform, false, mvMatrix);
+    gl.uniformMatrix4fv(pShaderProgram.pMatrixUniform, false, pMatrix);
+    mat4.invert(mvInverseMatrix,mvMatrix);
+    mat4.transpose(mvInverseTransposeMatrix,mvInverseMatrix);
+    gl.uniformMatrix4fv(pShaderProgram.mvInverseTransposeMatrix, false, mvInverseTransposeMatrix);
     
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexBuffer);
     gl.vertexAttribPointer(pShaderProgram.vertexPositionAttribute, cubeVertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
