@@ -19,7 +19,7 @@ function mediaMouseMove(evt) {
 
         speedCoef = 2.5
         gMediaCamMvVec[0] += speedCoef*evt.movementX/screen.width;
-		gMediaCamMvVec[1] += speedCoef*evt.movementY/screen.height;
+	gMediaCamMvVec[1] += speedCoef*evt.movementY/screen.height;
 }
 
 function mediaSetKeyDownFct(evt)
@@ -139,6 +139,8 @@ function mediaSetTouchMove(evt){
             gMediaTouchStartPos[id] = [ touches[i].pageX,touches[i].pageY];
         }
     }
+    evt.preventDefault();
+    evt.stopPropagation();
 }
 
 function mediaSetTouchEnd(evt){	
