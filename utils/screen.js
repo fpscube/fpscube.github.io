@@ -39,6 +39,7 @@ class CScreen
         if ((this.windowWidth == width) && (this.windowHeight == height) && (this.orientation == orientation)) return;
         this.windowWidth = width;
         this.windowHeight = height;
+        this.orientation = orientation;
 
         if(this.windowWidth>1280)
         {
@@ -51,7 +52,7 @@ class CScreen
             this.newwindowHeight = 	  this.windowHeight;
         }
 
-        if (window.orientation == 'landscape') 
+        if (this.orientation == 'landscape') 
         {
             this.newwindowWidth = this.windowHeight;
             this.newwindowHeight = 	 this.windowWidth;
