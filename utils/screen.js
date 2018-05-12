@@ -4,42 +4,68 @@
 class CScreen
 {
     constructor(pCanva3DName,pCanva2DName) {
-        this.screenWidth=0;
-        this.screenHeight =0;
-        this.newScreenWidth=0;
-        this.newScreenHeight =0;        
+        this.windowWidth=0;
+        this.windowHeight =0;
+        this.newwindowWidth=0;
+        this.newwindowHeight =0;        
 	    this.canvas3D = document.getElementById(pCanva3DName);
         this.canvas2D = document.getElementById(pCanva2DName);
+        this.orientation ='landscape';   
 
     }
 
 
-    updateViewPortAndCanvasSize(pGl)
+  updateViewPortAndCanvasSize(pGl)
     {
-        if ((this.screenWidth == screen.width) && (this.screenHeight == screen.height)) return;
-        this.screenWidth = screen.width;
-        this.screenHeight = screen.height;
+		
+		var width = window.innerWidth
+		|| document.documentElement.clientWidth
+		|| document.body.clientWidth;
 
-        if(screen.width>1280)
+		var height = window.innerHeight
+		|| document.documentElement.clientHeight
+		|| document.body.clientHeight;	
+
+		var orientation = '';
+		switch(screen.orientation) {  
+		  case -90 || 90:
+			orientation ='landscape';
+			break; 
+		  default:
+			orientation ='portrait';
+			break; 
+		}	
+		
+        if ((this.windowWidth == width) && (this.windowHeight == height) && (this.orientation == orientation)) return;
+        this.windowWidth = width;
+        this.windowHeight = height;
+
+        if(this.windowWidth>1280)
         {
-            this.newScreenWidth = 	1280;
-            this.newScreenHeight = screen.height * 1280/ screen.width;
+            this.newwindowWidth = 	1280;
+            this.newwindowHeight =  this.windowHeight * 1280/ this.windowWidth;
         }
         else
         {
-            this.newScreenWidth = 	 screen.width;
-            this.newScreenHeight = 	 screen.height;
+            this.newwindowWidth = 	 this.windowWidth;
+            this.newwindowHeight = 	  this.windowHeight;
+        }
+
+        if (window.orientation == 'landscape') 
+        {
+            this.newwindowWidth = this.windowHeight;
+            this.newwindowHeight = 	 this.windowWidth;
         }
             
-        this.canvas3D.width = this.newScreenWidth;
-        this.canvas3D.height = this.newScreenHeight;
-        this.canvas2D.width = this.screenWidth;
-        this.canvas2D.height = this.screenHeight;
+        this.canvas3D.width = this.newwindowWidth;
+        this.canvas3D.height = this.newwindowHeight;
+        this.canvas2D.width = this.windowWidth;
+        this.canvas2D.height = this.windowHeight;
 
-        gl.viewportWidth = this.newScreenWidth;
-        gl.viewportHeight = this.newScreenHeight;
+        gl.viewportWidth = this.newwindowWidth;
+        gl.viewportHeight = this.newwindowHeight;
 	
 
-	    pGl.viewport(0, 0, this.newScreenWidth, this.newScreenHeight);
+	    pGl.viewport(0, 0, this.newwindowWidth, this.newwindowHeight);
     }
 }
