@@ -244,7 +244,7 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos,pHeroDir,pHeroFire)
         var elapsedFactor = ( 8.0*elapsed)/Math.PI;
         var distFeet6 = Math.sin(degToRad(this.AngleRange*6.0));
         var distFeet12 = Math.sin(degToRad(this.AngleRange*10.0));
-        var distFeet = distFeet6*2.0 + distFeet6*1.0 + distFeet12*1.0;
+        var distFeet = distFeet6*3.4 + distFeet6*1.9 + distFeet12*1.5;
         var speed = distFeet * elapsedFactor;
         this.Pos[2] -= speed * 2.0 * this.Dir[2];
         this.Pos[0] -= speed * 2.0 * this.Dir[0];
