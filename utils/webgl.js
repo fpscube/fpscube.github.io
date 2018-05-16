@@ -9,10 +9,6 @@ function lockChangeAlert() {
 		document.removeEventListener("mousemove", mediaMouseMove, false); }
 }
 
-
-
-
-
 function shaderCompil(str,shaderType) {
 
 	shader = gl.createShader(shaderType);
@@ -25,7 +21,6 @@ function shaderCompil(str,shaderType) {
 	}
 	return shader;
 }
-
 
 
 var vertexShader1 = `    

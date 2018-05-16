@@ -113,7 +113,7 @@ function updateGame() {
 			vec3.rotateY(projDir,gCamDir,[0,0,0],0.125);
 			gCamPos[0] = gHeroPos[0] - projDir[0]*15;
 			gCamPos[2] = gHeroPos[2] - projDir[2]*15;
-			gCamPos[1] = groundGetY(gCamPos[0],gCamPos[2]) + 10.0 ;
+			gCamPos[1] = groundGetY(gCamPos[0],gCamPos[2]) + 11.0 ;
 
 
 			// Update Enemies
@@ -152,7 +152,7 @@ function updateGame() {
 			vec3.rotateY(projDir,gCamDir,[0,0,0],0.125);
 			gCamPos[0] = gHeroPos[0] - projDir[0]*15;
 			gCamPos[2] = gHeroPos[2] - projDir[2]*15;
-			gCamPos[1] = groundGetY(gCamPos[0],gCamPos[2]) + 10.0 ;
+			gCamPos[1] = groundGetY(gCamPos[0],gCamPos[2]) + 11.0 ;
 
 			// Update Enemies
 			for(var i =0 ;i<gEnemies.length;i++){
