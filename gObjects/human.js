@@ -528,7 +528,7 @@ Draw()
     mvPopMatrix(); 
     
 
-    shaderVertexColorVector = [0.5,0.5,0.9,1.0];
+    shaderVertexColorVector = [0.99,0.76,0.67,1.0]; 
     //neck
     mvPushMatrix();
         mat4.translate(mvMatrix,mvMatrix, [0,3.5,0]);
@@ -543,9 +543,18 @@ Draw()
         mat4.translate(mvMatrix,mvMatrix, [0,4.2,0]);
         this._lookAt(this.HeadDir);
 
-    
-        //Head1
+    shaderVertexColorVector = [0.7,0.0,0.0,1.0]; 
+        //Hair
+        mvPushMatrix();
+            mat4.translate(mvMatrix,mvMatrix, [0.0,0.18,-0.1]);
+            mat4.rotate(mvMatrix,mvMatrix,  degToRad(-30), [1, 0, 0]);
+            mat4.scale(mvMatrix,mvMatrix,[0.6,0.35,0.6]); 
+            mat4.copy(this.MvMatrix_Head1,mvMatrix);
+            Sphere.Draw(this.HumanShaderProgram);
+    	mvPopMatrix();      
+    	
     shaderVertexColorVector = [0.99,0.76,0.67,1.0]; 
+        //Head1
         mvPushMatrix();
             mat4.scale(mvMatrix,mvMatrix,[0.55,0.55,0.5]); 
             mat4.copy(this.MvMatrix_Head1,mvMatrix);
@@ -553,19 +562,43 @@ Draw()
     	mvPopMatrix();       
 
         //Head2
-        shaderVertexColorVector = [0.5,0.5,0.9,1.0];
     	 mvPushMatrix();
             mat4.translate(mvMatrix,mvMatrix, [0.0,-0.35,0.1]);
-            mat4.scale(mvMatrix,mvMatrix,[0.55,0.55,0.5]); 
+            mat4.scale(mvMatrix,mvMatrix,[0.48,0.5,0.5]); 
             mat4.copy(this.MvMatrix_Head2,mvMatrix);
             Sphere.Draw(this.HumanShaderProgram);
     	mvPopMatrix();
+
+    	//Nose
+    	 mvPushMatrix();
+            mat4.translate(mvMatrix,mvMatrix, [0.0,-0.2,0.55]);
+            mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.1]); 
+            mat4.copy(this.MvMatrix_Head2,mvMatrix);
+            Sphere.Draw(this.HumanShaderProgram);
+    	mvPopMatrix();
+
+    	//Mooth
+        shaderVertexColorVector = [0.99,0.,0.1,1.0]; 
+    	 mvPushMatrix();
+            mat4.translate(mvMatrix,mvMatrix, [0.0,-0.5,0.58]);
+            mat4.scale(mvMatrix,mvMatrix,[0.1,0.025,0.02]); 
+            Sphere.Draw(this.HumanShaderProgram);
+    	mvPopMatrix();
+
+    	//Beard
+        shaderVertexColorVector = [0.2,0.2,0.2,1.0];  
+    	mvPushMatrix();
+            mat4.translate(mvMatrix,mvMatrix, [0.0,-0.6,0.45]);
+            mat4.scale(mvMatrix,mvMatrix,[0.2,0.3,0.1]); 
+            Sphere.Draw(this.HumanShaderProgram);
+    	mvPopMatrix();
+
 
 
         shaderVertexColorVector = [0.99,0.76,0.67,1.0]; 
     	//ears
         mvPushMatrix();
-            mat4.translate(mvMatrix,mvMatrix, [0,0.1,0]);
+            mat4.translate(mvMatrix,mvMatrix, [0,-0.0,0]);
         	mat4.scale(mvMatrix,mvMatrix,[0.6,0.3,0.2]); 
             Sphere.Draw(this.HumanShaderProgram);
         mvPopMatrix();
@@ -573,21 +606,33 @@ Draw()
 
 
 		//eyes
-       		mat4.translate(mvMatrix,mvMatrix, [0.0,0.1,0.45]);
+        shaderVertexColorVector = [1.0,1.0,1.0,1.0];
+       	mat4.translate(mvMatrix,mvMatrix, [0.0,0.1,0.48]);
         mvPushMatrix();
-             shaderVertexColorVector = [0.5,0.5,0.8,1.0];
        		mat4.translate(mvMatrix,mvMatrix, [-0.22,0.0,0.0]);
             mat4.scale(mvMatrix,mvMatrix,[0.1,0.08,0.05]);         
-            Sphere.Draw(this.EyesShaderProgram);    
+            Sphere.Draw(this.HumanShaderProgram);    
     	mvPopMatrix();
 
-    	
         mvPushMatrix();
-             shaderVertexColorVector = [0.5,0.5,0.8,1.0];
        		mat4.translate(mvMatrix,mvMatrix, [0.22,0.0,0.0]);
             mat4.scale(mvMatrix,mvMatrix,[0.1,0.08,0.05]);             
-            Sphere.Draw(this.EyesShaderProgram);  
-    	mvPopMatrix();
+            Sphere.Draw(this.HumanShaderProgram);  
+        mvPopMatrix();       
+        
+        shaderVertexColorVector = [0.5,0.5,0.8,1.0];
+        mat4.translate(mvMatrix,mvMatrix, [0.0,0.0,0.01]);
+        mvPushMatrix();
+            mat4.translate(mvMatrix,mvMatrix, [-0.22,0.0,0.0]);
+            mat4.scale(mvMatrix,mvMatrix,[0.05,0.05,0.05]);         
+            Sphere.Draw(this.HumanShaderProgram);    
+        mvPopMatrix();
+
+        mvPushMatrix();
+            mat4.translate(mvMatrix,mvMatrix, [0.22,0.0,0.0]);
+            mat4.scale(mvMatrix,mvMatrix,[0.05,0.05,0.05]);             
+            Sphere.Draw(this.HumanShaderProgram);  
+        mvPopMatrix();
 
 
     mvPopMatrix(); 
