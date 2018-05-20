@@ -1,5 +1,6 @@
 var gl;
 var ctx2d;
+var game;
 
 function lockChangeAlert() {
 	var canvas = document.getElementById("canvas2D");
@@ -134,7 +135,8 @@ function degToRad(degrees) {return degrees * Math.PI / 180;}
 
 function tick() {
 
-	drawGame();
+	game.update();
+	game.draw();
 	requestAnimFrame(tick);
 }
 
@@ -155,7 +157,7 @@ function webGLStart() {
 
 	ctx2d = canvas2D.getContext("2d");
 
+	game = new CGame();
 
-	initGame();
 	tick();
 }
