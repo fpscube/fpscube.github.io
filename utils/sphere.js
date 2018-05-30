@@ -126,5 +126,66 @@ class CSphere
         return ( squareCollisionDist<1 );
 
     }
+
+    GetCollisionPos(rayPoint1,rayPoint2,pMvMatrix,pSquaredDistMax,lastCollision)
+    {
+        var tranformRayPoint1 = vec3.create();
+        var tranformRayPoint2 = vec3.create();
+        var tranformRayDir = vec3.create();
+        var mvMatrixInv = mat4.create();
+
+        mat4.invert(mvMatrixInv,pMvMatrix);
+        vec3.transformMat4(tranformRayPoint1,rayPoint1,mvMatrixInv);
+        vec3.transformMat4(tranformRayPoint2,rayPoint2,mvMatrixInv);
+        vec3.subtract(tranformRayDir,tranformRayPoint2,tranformRayPoint1);
+        vec3.normalize(tranformRayDir,tranformRayDir);
+
+        var xa = tranformRayDir[0] ;
+        var ya = tranformRayDir[1] ;
+        var za = tranformRayDir[2] ;
+
+        var xb = tranformRayPoint1[0] ;
+        var yb = tranformRayPoint1[1] ;
+        var zb = tranformRayPoint1[2] ;
+
+        var a = xa**2 + ya**2 + za**2;
+        var b = 2*(xa*xb + ya*yb + za*zb);
+        var c = xb**2 + yb**2 + zb**2 -1 ;
+    
+        var delta = b**2-4*a*c;
+
+        if(delta<=0) return lastCollision;           
+                
+        var t1 = (-b - Math.sqrt(delta))/2*a
+        var t2 = (-b + Math.sqrt(delta))/2*a
+        if ( t1 < 0 && t2 < 0) return null;  
+        
+        
+        var transformCollisionPoint =[xa*t1+xb,ya*t1+yb,za*t1+zb];
+        var collisionPoint = vec3.create();         
+        vec3.transformMat4(collisionPoint,transformCollisionPoint,pMvMatrix);
+
+        
+        var squaredDist	= vec3.squaredDistance(rayPoint1,collisionPoint); 
+        var squaredDistMax = pSquaredDistMax;
+        if (lastCollision!=null)  squaredDistMax = vec3.squaredDistance(rayPoint1,lastCollision);
+
+        console.log(squaredDist + " " +squaredDistMax );
+        return (squaredDist < squaredDistMax) ? collisionPoint : lastCollision;
+        
+        
+        
+        // var collisionNormal = vec3.create();
+        // var mvInverseTransposeMatrix = mat4.create();
+        // mat4.transpose(mvInverseTransposeMatrix,mvMatrixInv);
+        // mat3.fromMat4(mvMatrix,pMvMatrix);
+        // vec3.transformMat3(collisionNormal,transformCollisionPoint,mvMatrix);        
+        // vec3.normalize(collisionNormal,collisionNormal);
+        
+        // return {"pos":collisionPoint,"normal":collisionNormal,"inside":( t1 < 0 ||  t2 < 0),"squaredDist":squaredist};  
+
+          
+    }
+
 }
 

@@ -15,9 +15,13 @@ class CGame
 
 		// game data Init
 		this.HeroPos = [-370,13,100]; 
+		// this.HeroPos = [-70,13,100]; 
 		this.HeroDir = [0.88,-0.15,-0.43];
+		this.HeroCollision = false;
 		this.HeroLife = 10;
 		this.HeroSpeed = 0;
+		this.HeroVSpeed=0;
+		this.HeroVAcc=-100.0;
 		this.HeroFire=false;
 		this.HeroRunning=false;
 		this.MediaRunAngle=0;
@@ -79,25 +83,81 @@ class CGame
 			case "Play":
 
 				// Update Hero Direction and HeroSpeed
-				if (this.HeroRunning){
+				if (this.HeroRunning ){
 					vec3.rotateY(this.HeroDir,this.CamDir,[0,0,0],this.MediaRunAngle);
 					this.HeroSpeed = 50;
 				}else{
 					this.HeroSpeed = 0;
 				}
-						
-				//Update Hero Position
-				this.HeroPos[0] += this.HeroSpeed*gElapsed*this.HeroDir[0];
-				this.HeroPos[2] += this.HeroSpeed*gElapsed*this.HeroDir[2];		
-				this.HeroPos[1] = groundGetY(this.HeroPos[0],this.HeroPos[2]) + 5.5;		
+				
+				//Store Hero New Position
+
+				//Horizontal Collision
+				var newPos=[];
+				var newHorizontalPos=[];
+				var newVerticalPos=[];
+				newHorizontalPos[0] = this.HeroPos[0] + this.HeroSpeed*gElapsed*this.HeroDir[0];
+				newHorizontalPos[2] = this.HeroPos[2] + this.HeroSpeed*gElapsed*this.HeroDir[2];
+				newHorizontalPos[1] = this.HeroPos[1];
+
+				
+				var horzCollisionPos = this.Stone.getCollisionPoint(this.HeroPos,newHorizontalPos,mvMatrix);
+
+				if (horzCollisionPos==null && this.HeroRunning )
+				{
+					//Vertical Collision
+					vec3.copy(newVerticalPos,newHorizontalPos);
+					this.HeroVSpeed += this.HeroVAcc*gElapsed;
+					newVerticalPos[1] += this.HeroVSpeed - 5.5;
+					var vertCollisionPos = this.Stone.getCollisionPoint(newHorizontalPos,newVerticalPos,mvMatrix);
+					var groundY =  groundGetY(newVerticalPos[0],newVerticalPos[2]);
+					if(vertCollisionPos!=null) 
+					{
+						newVerticalPos[1] = vertCollisionPos[1];
+						this.HeroVSpeed = 0;
+					}
+					if(newVerticalPos[1]<groundY) newVerticalPos[1]  = groundY;
+					{
+						this.HeroVSpeed = 0;
+					}
+
+					//Final Collision
+					newVerticalPos[1] += 5.5;
+					var vertCollisionPos = this.Stone.getCollisionPoint(this.HeroPos,newVerticalPos,mvMatrix);
+					if(vertCollisionPos==null) 
+					{						
+						vec3.copy(this.HeroPos,newVerticalPos);
+					}
+					
+				}
+				else
+				{
+					//Vertical Collision
+					vec3.copy(newVerticalPos,this.HeroPos);
+					this.HeroVSpeed += this.HeroVAcc*gElapsed;;
+					newVerticalPos[1] += this.HeroVSpeed - 5.5;
+					var vertCollisionPos = this.Stone.getCollisionPoint(this.HeroPos,newVerticalPos,mvMatrix);
+					var groundY =  groundGetY(newVerticalPos[0],newVerticalPos[2]);
+					if(vertCollisionPos!=null) 
+					{
+						newVerticalPos[1] = vertCollisionPos[1];
+						this.HeroVSpeed = 0;
+					}
+					if(newVerticalPos[1]<groundY) newVerticalPos[1]  = groundY;
+					{
+						this.HeroVSpeed = 0;
+					}
+					newVerticalPos[1] += 5.5;
+					vec3.copy(this.HeroPos,newVerticalPos);
+				}
+		
 
 				//Update Cam Position				
 				var projDir = [];
 				vec3.rotateY(projDir,this.CamDir,[0,0,0],0.125);
 				this.CamPos[0] = this.HeroPos[0] - projDir[0]*15;
 				this.CamPos[2] = this.HeroPos[2] - projDir[2]*15;
-				this.CamPos[1] = groundGetY(this.CamPos[0],this.CamPos[2]) + 11.0 ;
-
+				this.CamPos[1] = this.HeroPos[1] + 5.5 ;
 
 				// Update Enemies
 				var hitTarget=false;
@@ -124,6 +184,7 @@ class CGame
 					this.EndAnim.start(2000,0,1);
 				}
 
+				
 
 				break;
 			case "Win":
@@ -174,7 +235,7 @@ class CGame
 		
 		groundDraw();
 		waterDraw();
-		//this.Stone.draw();	
+		  this.Stone.draw();	
 
 		for(var i =0 ;i<this.Enemies.length;i++){
 			this.Enemies[i].draw();
