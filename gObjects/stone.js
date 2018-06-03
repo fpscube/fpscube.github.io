@@ -46,7 +46,7 @@ class CStone
         var collision = null ;
         for (var i=0;i<this.CollisionMatrixList.length;i++)
         {
-            collision = Sphere.GetCollisionPos(rayPoint1,rayPoint2,this.CollisionMatrixList[i],distMove,collision);
+            collision = Sphere.GetCollisionPos(rayPoint1,rayPoint2,this.CollisionMatrixList[i],collision);
         }
 
         return collision;
@@ -73,6 +73,7 @@ class CStone
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(120), [1, 0, 0]);   
             mat4.scale(mvMatrix,mvMatrix,[20.0,20.0,30.0]); 
             Sphere.Draw(this.shaderProgram); 
+        
             this._storeCollisionMatrix(mvMatrix);
         mvPopMatrix();
 

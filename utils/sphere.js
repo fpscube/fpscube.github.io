@@ -127,7 +127,8 @@ class CSphere
 
     }
 
-    GetCollisionPos(rayPoint1,rayPoint2,pMvMatrix,pSquaredDistMax,lastCollision)
+
+    GetCollisionPos(rayPoint1,rayPoint2,pMvMatrix,lastCollision)
     {
         var tranformRayPoint1 = vec3.create();
         var tranformRayPoint2 = vec3.create();
@@ -158,7 +159,7 @@ class CSphere
                 
         var t1 = (-b - Math.sqrt(delta))/2*a
         var t2 = (-b + Math.sqrt(delta))/2*a
-        if ( t1 < 0 && t2 < 0) return null;  
+        if ( t1 < 0 && t2 < 0) return lastCollision;  
         
         
         var transformCollisionPoint =[xa*t1+xb,ya*t1+yb,za*t1+zb];
@@ -166,13 +167,20 @@ class CSphere
         vec3.transformMat4(collisionPoint,transformCollisionPoint,pMvMatrix);
 
         
-        var squaredDist	= vec3.squaredDistance(rayPoint1,collisionPoint); 
-        var squaredDistMax = pSquaredDistMax;
-        if (lastCollision!=null)  squaredDistMax = vec3.squaredDistance(rayPoint1,lastCollision);
+        var squaredDistPoint1ToCollision = vec3.squaredDistance(rayPoint1,collisionPoint); 
+        var squaredDistPoint1ToPoint2 = vec3.squaredDistance(rayPoint1,rayPoint2);
 
-        console.log(squaredDist + " " +squaredDistMax );
-        return (squaredDist < squaredDistMax) ? collisionPoint : lastCollision;
-        
+        /* No collision if dist to collision is lower than dist to the new position */
+        if (squaredDistPoint1ToPoint2 < squaredDistPoint1ToCollision) return lastCollision;
+
+      
+        if (lastCollision!=null)
+        {
+            var squaredDistLastCollision = vec3.squaredDistance(rayPoint1,lastCollision);  
+            if (squaredDistLastCollision < squaredDistPoint1ToCollision) return lastCollision;
+        } 
+
+        return collisionPoint;
         
         
         // var collisionNormal = vec3.create();
