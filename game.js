@@ -16,11 +16,11 @@ class CGame
 		// game data Init
 		this.HeroPos = [-370,13,100]; 
 		// this.HeroPos = [-70,13,100]; 
-		this.HeroPos = [100,32,-500]; 
+		// this.HeroPos = [100,32,-500]; 
 		this.HeroDir = [0.88,-0.15,-0.43];
 		this.HeroCollision = false;
-	//	this.HeroLife = 10;
-	this.HeroLife = 100000000000000;
+		this.HeroLife = 10;
+		//this.HeroLife = 100000000000000;
 		this.HeroHSpeed = 0;
 		this.HeroVSpeed = 0;
 		this.HeroVAcc=-100.0;
