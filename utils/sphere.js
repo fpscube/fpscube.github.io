@@ -177,7 +177,7 @@ class CSphere
         if (lastCollision!=null)
         {
             var squaredDistLastCollision = vec3.squaredDistance(rayPoint1,lastCollision);  
-            if ((squaredDistLastCollision+distSquaredOffset)  < squaredDistPoint1ToCollision) return lastCollision;
+            if (squaredDistLastCollision  < squaredDistPoint1ToCollision) return lastCollision;
         } 
 
         return collisionPoint;
