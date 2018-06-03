@@ -128,7 +128,7 @@ class CSphere
     }
 
 
-    GetCollisionPos(rayPoint1,rayPoint2,pMvMatrix,lastCollision)
+    GetCollisionPos(rayPoint1,rayPoint2,pMvMatrix,lastCollision,distSquaredOffset)
     {
         var tranformRayPoint1 = vec3.create();
         var tranformRayPoint2 = vec3.create();
@@ -171,13 +171,13 @@ class CSphere
         var squaredDistPoint1ToPoint2 = vec3.squaredDistance(rayPoint1,rayPoint2);
 
         /* No collision if dist to collision is lower than dist to the new position */
-        if (squaredDistPoint1ToPoint2 < squaredDistPoint1ToCollision) return lastCollision;
+        if ((squaredDistPoint1ToPoint2+distSquaredOffset) < squaredDistPoint1ToCollision) return lastCollision;
 
       
         if (lastCollision!=null)
         {
             var squaredDistLastCollision = vec3.squaredDistance(rayPoint1,lastCollision);  
-            if (squaredDistLastCollision < squaredDistPoint1ToCollision) return lastCollision;
+            if ((squaredDistLastCollision+distSquaredOffset)  < squaredDistPoint1ToCollision) return lastCollision;
         } 
 
         return collisionPoint;

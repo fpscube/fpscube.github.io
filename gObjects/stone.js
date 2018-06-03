@@ -40,13 +40,12 @@ class CStone
     {
     }   
 
-    getCollisionPoint(rayPoint1,rayPoint2,mvMatrix)
+    getCollisionPoint(rayPoint1,rayPoint2,mvMatrix,distSquaredOffset)
     {
-        var distMove  = vec3.squaredDistance(rayPoint1,rayPoint2); 
         var collision = null ;
         for (var i=0;i<this.CollisionMatrixList.length;i++)
         {
-            collision = Sphere.GetCollisionPos(rayPoint1,rayPoint2,this.CollisionMatrixList[i],collision);
+            collision = Sphere.GetCollisionPos(rayPoint1,rayPoint2,this.CollisionMatrixList[i],collision,distSquaredOffset);
         }
 
         return collision;

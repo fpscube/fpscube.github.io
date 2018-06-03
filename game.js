@@ -16,11 +16,13 @@ class CGame
 		// game data Init
 		this.HeroPos = [-370,13,100]; 
 		// this.HeroPos = [-70,13,100]; 
+		this.HeroPos = [100,32,-500]; 
 		this.HeroDir = [0.88,-0.15,-0.43];
 		this.HeroCollision = false;
-		this.HeroLife = 10;
-		this.HeroSpeed = 0;
-		this.HeroVSpeed=0;
+	//	this.HeroLife = 10;
+	this.HeroLife = 100000000000000;
+		this.HeroHSpeed = 0;
+		this.HeroVSpeed = 0;
 		this.HeroVAcc=-100.0;
 		this.HeroFire=false;
 		this.HeroRunning=false;
@@ -82,12 +84,12 @@ class CGame
 		switch (this.State) {
 			case "Play":
 
-				// Update Hero Direction and HeroSpeed
+				// Update Hero Direction and Hero Horz Speed
 				if (this.HeroRunning ){
 					vec3.rotateY(this.HeroDir,this.CamDir,[0,0,0],this.MediaRunAngle);
-					this.HeroSpeed = 50;
+					this.HeroHSpeed = 50;
 				}else{
-					this.HeroSpeed = 0;
+					this.HeroHSpeed = 0;
 				}
 				
 				//Store Hero New Position
@@ -95,60 +97,67 @@ class CGame
 				//Horizontal Collision
 				var newPos=[];
 				var newHorizontalPos=[];
-				var newVerticalPos=[];
-				newHorizontalPos[0] = this.HeroPos[0] + this.HeroSpeed*gElapsed*this.HeroDir[0];
-				newHorizontalPos[2] = this.HeroPos[2] + this.HeroSpeed*gElapsed*this.HeroDir[2];
-				newHorizontalPos[1] = this.HeroPos[1];
+				newHorizontalPos[0] = this.HeroPos[0] + this.HeroHSpeed*gElapsed*this.HeroDir[0];
+				newHorizontalPos[2] = this.HeroPos[2] + this.HeroHSpeed*gElapsed*this.HeroDir[2];
+				newHorizontalPos[1] = this.HeroPos[1] ;
 
 				
-				var horzCollisionPos = this.Stone.getCollisionPoint(this.HeroPos,newHorizontalPos,mvMatrix);
+				
+				var horzCollisionPos = this.Stone.getCollisionPoint(this.HeroPos,newHorizontalPos,mvMatrix,0);
 
 				if (horzCollisionPos==null && this.HeroRunning )
 				{
-					//Vertical Collision
-					vec3.copy(newVerticalPos,newHorizontalPos);
+					//Vertical Collision to detect new y Pos
+					vec3.copy(newPos,newHorizontalPos);
 					this.HeroVSpeed += this.HeroVAcc*gElapsed;
-					newVerticalPos[1] += this.HeroVSpeed - 5.5;
-					var vertCollisionPos = this.Stone.getCollisionPoint(newHorizontalPos,newVerticalPos,mvMatrix);
-					var groundY =  groundGetY(newVerticalPos[0],newVerticalPos[2]);
-					if(vertCollisionPos!=null) 
+					newPos[1] += this.HeroVSpeed - 5.5;
+					var collisionPos = this.Stone.getCollisionPoint(newHorizontalPos,newPos,mvMatrix,0);
+					var groundY =  groundGetY(newPos[0],newPos[2]);
+					if(collisionPos!=null) 
 					{
-						newVerticalPos[1] = vertCollisionPos[1];
+						newPos[1] = collisionPos[1];
 						this.HeroVSpeed = 0;
 					}
-					if(newVerticalPos[1]<groundY) newVerticalPos[1]  = groundY;
+					if(newPos[1]<groundY) newPos[1]  = groundY;
 					{
 						this.HeroVSpeed = 0;
 					}
 
 					//Final Collision
-					newVerticalPos[1] += 5.5;
-					var vertCollisionPos = this.Stone.getCollisionPoint(this.HeroPos,newVerticalPos,mvMatrix);
-					if(vertCollisionPos==null) 
-					{						
-						vec3.copy(this.HeroPos,newVerticalPos);
+					newPos[1] += 5.5;
+					var collisionPos1 = this.Stone.getCollisionPoint(this.HeroPos,newPos,mvMatrix,16.0);
+					newPos[1] += 5.0;
+					this.HeroPos[1] += 5.0;
+					var collisionPos2 = this.Stone.getCollisionPoint(this.HeroPos,newPos,mvMatrix,0.0);
+					
+					newPos[1] -= 5.0;
+					this.HeroPos[1] -= 5.0;	
+
+					if(collisionPos1==null && collisionPos2==null ) 
+					{			
+						vec3.copy(this.HeroPos,newPos);
 					}
 					
 				}
 				else
 				{
 					//Vertical Collision
-					vec3.copy(newVerticalPos,this.HeroPos);
+					vec3.copy(newPos,this.HeroPos);
 					this.HeroVSpeed += this.HeroVAcc*gElapsed;;
-					newVerticalPos[1] += this.HeroVSpeed - 5.5;
-					var vertCollisionPos = this.Stone.getCollisionPoint(this.HeroPos,newVerticalPos,mvMatrix);
-					var groundY =  groundGetY(newVerticalPos[0],newVerticalPos[2]);
-					if(vertCollisionPos!=null) 
+					newPos[1] += this.HeroVSpeed - 5.5;
+					var collisionPos = this.Stone.getCollisionPoint(this.HeroPos,newPos,mvMatrix);
+					var groundY =  groundGetY(newPos[0],newPos[2]);
+					if(collisionPos!=null) 
 					{
-						newVerticalPos[1] = vertCollisionPos[1];
+						newPos[1] = collisionPos[1];
 						this.HeroVSpeed = 0;
 					}
-					if(newVerticalPos[1]<groundY) newVerticalPos[1]  = groundY;
+					if(newPos[1]<groundY) newPos[1]  = groundY;
 					{
 						this.HeroVSpeed = 0;
 					}
-					newVerticalPos[1] += 5.5;
-					vec3.copy(this.HeroPos,newVerticalPos);
+					newPos[1] += 5.5;
+					vec3.copy(this.HeroPos,newPos);
 				}
 		
 
