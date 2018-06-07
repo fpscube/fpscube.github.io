@@ -246,10 +246,14 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos,pHeroDir,pHeroFire)
         var distFeet12 = Math.sin(degToRad(this.AngleRange*10.0));
         var distFeet = distFeet6*3.4 + distFeet6*1.9 + distFeet12*1.5;
         var speed = distFeet * elapsedFactor;
-        this.Pos[2] -= speed * 2.0 * this.Dir[2];
-        this.Pos[0] -= speed * 2.0 * this.Dir[0];
-        this.Pos[1] = groundGetY(this.Pos[0],this.Pos[2])+5.5 ;
-
+        var newPos=[];
+        newPos[2]  = this.Pos[2] - speed * 2.0 * this.Dir[2];
+        newPos[0]  = this.Pos[0] - speed * 2.0 * this.Dir[0];
+        newPos[1]  = groundGetY(newPos[0], newPos[2])+5.5 ;
+        if (!waterIsUnder(newPos[1]))
+        {        
+            vec3.copy(this.Pos,newPos);      
+        }
         // Gun Target Dir
         //Process history of target position to simulate reaction time of 0,3s
         this.TargetHist.push([timeGetCurrentInS(),[pHeroPos[0],pHeroPos[1],pHeroPos[2]]]);	

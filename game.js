@@ -55,6 +55,7 @@ class CGame
 		this.Hero = new CHuman([0,0,0],2);
 		groundInit();
 		waterInit();
+		treeInit();
 					
 
 	}
@@ -242,9 +243,10 @@ class CGame
 		mat4.lookAt(lookAtMatrix,this.CamPos,viewPos,[0,1,0]);
 		mat4.multiply(pMatrix,pMatrix,lookAtMatrix)
 		
+		treeDraw();
 		groundDraw();
-		waterDraw();
-		  this.Stone.draw();	
+		waterDraw();		
+		this.Stone.draw();	
 
 		for(var i =0 ;i<this.Enemies.length;i++){
 			this.Enemies[i].draw();
@@ -254,6 +256,7 @@ class CGame
 		
 		//Draw Info 2D
 		info2DDraw();
+
 
 
 	}
