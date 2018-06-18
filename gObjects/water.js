@@ -6,6 +6,10 @@ function waterInit()
 }
 
 
+function checkCollision(pPos1,pPos2)
+{
+       
+}
 
 
 function waterIsUnder(y)

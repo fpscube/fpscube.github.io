@@ -183,8 +183,26 @@ function mvPushMatrix() {
 }
 
 function mvPopMatrix() {
-	if (mvMatrixStack.length == 0) {
-		throw "Invalid popMatrix!";
-	}
 	mvMatrix = mvMatrixStack.pop();
+}
+
+
+function collisionPushMatrix(pCollisionList,pMvMatrix)
+{
+    var collMat = mat4.create();
+    mat4.copy(collMat,pMvMatrix);
+    pCollisionList.push(collMat);
+}
+
+
+function lookAt(pVec3Dir)
+{
+    var lookAtMatrix = mat4.create();
+    var translationVector = vec3.create();
+    mat4.getTranslation(translationVector,mvMatrix);
+    mat4.identity(mvMatrix);
+    mat4.translate(mvMatrix,mvMatrix, translationVector);
+    mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],pVec3Dir,[0,1,0]);
+    mat4.invert(lookAtMatrix,lookAtMatrix);
+    mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
 }

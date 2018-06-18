@@ -97,6 +97,11 @@ function groundInit()
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(groundIndices), gl.STATIC_DRAW);
 }
 
+function groundCheckCollision(pPos1,pPos2)
+{
+    
+}
+
 
 function groundDraw()
 {
