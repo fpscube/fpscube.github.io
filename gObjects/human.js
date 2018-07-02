@@ -88,7 +88,8 @@ constructor(pPos,pSpeed) {
     this.HitTarget = false;
     this.IsTouched = false;
     this.AnimCounter=0;
-    this.Hero = false;
+    this.Hero = false; 
+    this.Gun = true;
     
     this.AnimDir = new CTimeAnim();
     this.AnimReload = new CTimeAnim();
@@ -108,12 +109,15 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
 {
 
     var elapsed = timeGetElapsedInS();
+    var newPos=[];
     
     //Store Hero New Position
     this.HSpeed  =  (pRunning) ? 50 : 0;
+
+    //Store current Pos In New Pos
+    vec3.copy(newPos,this.Pos);
     
-    //Horizontal Collision
-    var newPos=[];
+    //Horizontal Collision with Stone
     var newHorizontalPos=[];
     newHorizontalPos[0] = this.Pos[0] + this.HSpeed*elapsed*pRunDir[0];
     newHorizontalPos[2] = this.Pos[2] + this.HSpeed*elapsed*pRunDir[2];
@@ -125,41 +129,41 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
     if (horzCollisionPos==null && pRunning )
     {
         //Vertical Collision to detect new y Pos
-        vec3.copy(newPos,newHorizontalPos);
+        var tmpNewPos=[];
+        vec3.copy(tmpNewPos,newHorizontalPos);
         this.VSpeed += this.VAcc*elapsed;
-        newPos[1] += this.VSpeed - 5.5;
-        var collisionPos = pStone.getCollisionPoint(newHorizontalPos,newPos,mvMatrix,0);
-        var groundY =  groundGetY(newPos[0],newPos[2]);
+        tmpNewPos[1] += this.VSpeed - 5.5;
+        var collisionPos = pStone.getCollisionPoint(newHorizontalPos,tmpNewPos,mvMatrix,0);
+        var groundY =  groundGetY(tmpNewPos[0],tmpNewPos[2]);
         if(collisionPos!=null) 
         {
-            newPos[1] = collisionPos[1];
+            tmpNewPos[1] = collisionPos[1];
             this.VSpeed = 0;
         }
-        if(newPos[1]<groundY) newPos[1]  = groundY;
+        if(tmpNewPos[1]<groundY) tmpNewPos[1]  = groundY;
         {
             this.VSpeed = 0;
         }
 
         //Final Collision
-        newPos[1] += 5.5;
-        var collisionPos1 = pStone.getCollisionPoint(this.Pos,newPos,mvMatrix,16.0);
-        newPos[1] += 5.0;
+        tmpNewPos[1] += 5.5;
+        var collisionPos1 = pStone.getCollisionPoint(this.Pos,tmpNewPos,mvMatrix,16.0);
+        tmpNewPos[1] += 5.0;
         this.Pos[1] += 5.0;
-        var collisionPos2 = pStone.getCollisionPoint(this.Pos,newPos,mvMatrix,0.0);
+        var collisionPos2 = pStone.getCollisionPoint(this.Pos,tmpNewPos,mvMatrix,0.0);
         
-        newPos[1] -= 5.0;
+        tmpNewPos[1] -= 5.0;
         this.Pos[1] -= 5.0;	
 
         if(collisionPos1==null && collisionPos2==null ) 
         {			
-            vec3.copy(this.Pos,newPos);
+            vec3.copy(newPos,tmpNewPos);
         }
         
     }
     else
     {
         //Vertical Collision
-        vec3.copy(newPos,this.Pos);
         this.VSpeed += this.VAcc*elapsed;;
         newPos[1] += this.VSpeed - 5.5;
         var collisionPos = pStone.getCollisionPoint(this.Pos,newPos,mvMatrix);
@@ -169,15 +173,25 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
             newPos[1] = collisionPos[1];
             this.VSpeed = 0;
         }
-        if(newPos[1]<groundY) newPos[1]  = groundY;
-        {
+        if(newPos[1]<groundY)
+        { 
+            newPos[1]  = groundY;
             this.VSpeed = 0;
         }
         newPos[1] += 5.5;
-        vec3.copy(this.Pos,newPos);
     }
 
+     if(gunCheckCollision(this.Pos,newPos) != null)
+     {
+         this.Gun = true;
+         console.log("collision");
+     }
 
+     //Collision Check is finished apply new pos to current
+     vec3.copy(this.Pos,newPos);
+
+     //Control Gun
+     if (this.Gun) gunSetPosAndDir([this.Pos[0],this.Pos[1],this.Pos[2]],this.Dir);  
 
     
     if(pDead && this.State!= "Falling")
@@ -276,13 +290,13 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos,pHeroDir,pHeroFire)
         var distFeet12 = Math.sin(degToRad(this.AngleRange*10.0));
         var distFeet = distFeet6*3.4 + distFeet6*1.9 + distFeet12*1.5;
         var speed = distFeet * elapsedFactor;
-        var newPos=[];
-        newPos[2]  = this.Pos[2] - speed * 2.0 * this.Dir[2];
-        newPos[0]  = this.Pos[0] - speed * 2.0 * this.Dir[0];
-        newPos[1]  = groundGetY(newPos[0], newPos[2])+5.5 ;
-        if (!waterIsUnder(newPos[1]))
+        var tmpNewPos=[];
+        tmpNewPos[2]  = this.Pos[2] - speed * 2.0 * this.Dir[2];
+        tmpNewPos[0]  = this.Pos[0] - speed * 2.0 * this.Dir[0];
+        tmpNewPos[1]  = groundGetY(tmpNewPos[0], tmpNewPos[2])+5.5 ;
+        if (!waterIsUnder(tmpNewPos[1]))
         {        
-            vec3.copy(this.Pos,newPos);      
+            vec3.copy(this.Pos,tmpNewPos);      
         }
         // Gun Target Dir
         //Process history of target position to simulate reaction time of 0,3s
@@ -566,7 +580,15 @@ draw()
         collisionPushMatrix(this.CollisionMatrixList,mvMatrix);
         Sphere.Draw(this.HumanShaderProgram);       
     mvPopMatrix(); 
-    
+
+    if (this.Gun && this.Hero)
+    {
+        mvPushMatrix();  
+            mat4.translate(mvMatrix,mvMatrix,[1.4,3.6,0.0]); 
+            lookAt(this.GunDir);
+            gunsDrawFct();    
+        mvPopMatrix(); 
+    }
 
     shaderVertexColorVector = [0.99,0.76,0.67,1.0]; 
     //neck

@@ -40,6 +40,7 @@ var gunsVertexShader = `
 var gunsShaderProgram;
 var gunPos;
 var gunDir;
+var gunControlled;
 var gunCollisionMatrix;
 
 function gunsInit()
@@ -47,11 +48,15 @@ function gunsInit()
     gunsShaderProgram = initShaders(gunsVertexShader,gunsFragmentShader);
     gunPos = [-100.0,groundGetY(-100.0,20.0)+5.0,10];
     gunCollisionMatrix = mat4.create();
+    gunControlled =false;
+    gunDir = []; 
 
 }
 
+
 function gunSetPosAndDir(pPos,pDir)
 {
+    gunControlled = true;
     vec3.copy(gunPos,pPos);
     vec3.copy(gunDir,pDir);
 }
@@ -67,42 +72,47 @@ function gunCheckCollision(pPos1,pPos2)
     return (Sphere.GetCollisionPos(pPos1,pPos2,gunCollisionMatrix,null,0));
 }
 
-function gunsDraw()
-{
-
+function gunsDraw(dist)
+{   
+    if (gunControlled)   return;
+    
     mat4.identity(mvMatrix);
     mat4.translate(mvMatrix,mvMatrix,gunPos); 
-    mat4.rotate(mvMatrix,mvMatrix, timeGetAnimRad(), [0 , 1, 0]);
-
-    //Process collision matrix
+    mat4.rotate(mvMatrix,mvMatrix, timeGetAnimRad(), [0 , 1, 0]);    
     mvPushMatrix();
-        mat4.translate(mvMatrix,mvMatrix,[0.5,0.0,0.0]); 
-        mat4.scale(mvMatrix,mvMatrix,[5.0,1.0,1.0]);
-        mat4.copy(gunCollisionMatrix,mvMatrix) ;
+    mat4.translate(mvMatrix,mvMatrix,[0.0,0.0,0.5]); 
+    mat4.scale(mvMatrix,mvMatrix,[3.0,5.0,5.0]);
+    mat4.copy(gunCollisionMatrix,mvMatrix) ;
+        //  Sphere.Draw(gunsShaderProgram);   
     mvPopMatrix();   
 
+    gunsDrawFct();
+    
+}
 
+function gunsDrawFct()
+{  
+    //Process collision matrix
     for (var i=0;i<360;i+=45)
     {
 
-            shaderVertexColorVector[0] +=0.01;
-            shaderVertexColorVector[1] +=0.02;
-            shaderVertexColorVector[2] +=0.02;
-        mvPushMatrix();
-            mat4.rotate(mvMatrix,mvMatrix,  degToRad(i), [1, 0, 0]); 
+		shaderVertexColorVector[0] +=0.01;
+		shaderVertexColorVector[1] +=0.02;
+		shaderVertexColorVector[2] +=0.02;
+		mvPushMatrix();
+		mat4.rotate(mvMatrix,mvMatrix,  degToRad(i), [0, 0, 1]); 
 
-            mat4.translate(mvMatrix,mvMatrix,[0.5,0.0,0.5]); 
-                mat4.scale(mvMatrix,mvMatrix,[3.8,0.7,0.2]);
-                Sphere.Draw(gunsShaderProgram);   
-        mvPopMatrix(); 
+		mat4.translate(mvMatrix,mvMatrix,[0.5,0.0,0.5]); 
+			mat4.scale(mvMatrix,mvMatrix,[0.2,0.7,3.8]);
+			Sphere.Draw(gunsShaderProgram);   
+		mvPopMatrix(); 
     }
 
     mvPushMatrix();
-        mat4.translate(mvMatrix,mvMatrix,[3.2,0.0,0.0]); 
+        mat4.translate(mvMatrix,mvMatrix,[0.0,0.0,3.2]); 
         mat4.scale(mvMatrix,mvMatrix,[0.6,0.6,0.6]);
         Sphere.Draw(gunsShaderProgram);   
     mvPopMatrix();   
 
 }
-
 
