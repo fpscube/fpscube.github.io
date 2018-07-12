@@ -41,11 +41,9 @@ class CGame
 		cubeInit();
 		SphereInit();
 
-		this.Enemies=[];
-		for(var i =0 ;i<30;i++){
-			this.Enemies.push(new CHuman([i*20,0,0],Math.random()*8));
-		}	
+		this.Enemies = new CEnemies(30);
 		this.Hero = new CHuman([-370,13,100],2);
+
 		groundInit();
 		waterInit();
 		treeInit();
@@ -84,6 +82,8 @@ class CGame
 				}
 								
 				this.Hero.UpdateHero(this.HeroDir,this.HeroRunning,this.HeroFire,this.CamDir,this.HeroLife<=0,this.Stone);
+				// if hero use bazzoka collision is not treated by enemies
+				if(this.Hero.Bazooka) this.HeroFire=false;
 				
 				//Update Cam Position				
 				var projDir = [];
@@ -93,29 +93,20 @@ class CGame
 				this.CamPos[1] = this.Hero.Pos[1] + 5.5 ;
 
 				// Update Enemies
-				var hitTarget=false;
-				var isInTarget=false;
-				this.EnemiesCount = this.Enemies.length;
-				for(var i =0 ;i<this.Enemies.length;i++){
-					this.Enemies[i].UpdateEnemie(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,this.HeroFire);
-					hitTarget =hitTarget || this.Enemies[i].HitTarget;
-					isInTarget = isInTarget || this.Enemies[i].IsInTarget;
-					if (this.Enemies[i].IsDead()) this.EnemiesCount--;
-				}	
-				if (hitTarget) this.HeroLife--;
-				
+				this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,this.HeroFire);
+	
+				if (this.Enemies.HitTarget) this.HeroLife--;
 
 				if (this.HeroLife<=0 )
 				{
 					this.State="Lose";
 					this.EndAnim.start(2000,0,1);
 				}	
-				else if (this.EnemiesCount==0) 
+				else if (this.Enemies.NbALive==0) 
 				{
 					this.State="Win";
 					this.EndAnim.start(2000,0,1);
 				}
-
 
 				break;
 			case "Win":
@@ -130,9 +121,7 @@ class CGame
 				this.CamPos[1] = groundGetY(this.CamPos[0],this.CamPos[2]) + 11.0 ;
 
 				// Update Enemies
-				for(var i =0 ;i<this.Enemies.length;i++){
-					this.Enemies[i].UpdateEnemie(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,false);
-				}	
+				this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,false);				
 				
 				this.Hero.UpdateHero(this.HeroDir,this.HeroRunning,this.HeroFire,this.CamDir,this.HeroLife<=0,this.Stone);
 
@@ -144,8 +133,8 @@ class CGame
 				break;
 		}
 
-		info2DUpdate(isInTarget,hitTarget,this.HeroLife,this.EnemiesCount,this.State);
-
+		info2DUpdate(this.Enemies.IsInTarget,this.Enemies.HitTarget,this.HeroLife,this.Enemies.NbALive,this.State);
+		gunsUpdate();
 
 	}
 
@@ -167,15 +156,12 @@ class CGame
 		treeDraw();
 		groundDraw();
 		waterDraw();	
-		gunsDraw();	
-		this.Stone.draw();	
-
-		for(var i =0 ;i<this.Enemies.length;i++){
-			this.Enemies[i].draw();
-		}	
+		this.Stone.draw();	 
+		this.Enemies.draw();
 		this.Hero.draw();
 
 		
+		gunsDraw();	
 		//Draw Info 2D
 		info2DDraw();
 

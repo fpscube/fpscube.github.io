@@ -127,8 +127,19 @@ class CSphere
 
     }
 
+    GetCollisionPosUsingMatrixList(pRayPoint1,pRayPoint2,pCollisionMatrixList,pLastCollPt,pDistSquaredOffset,pUserData)
+    {
+        var collisionPt = pLastCollPt;
 
-    GetCollisionPos(rayPoint1,rayPoint2,pMvMatrix,lastCollision,distSquaredOffset)
+        for (var i=0;i<pCollisionMatrixList.length;i++)
+        {
+            collisionPt = this.GetCollisionPos(pRayPoint1,pRayPoint2,pCollisionMatrixList[i],collisionPt,pDistSquaredOffset,pUserData);
+        }  
+        return collisionPt;
+    }
+
+
+    GetCollisionPos(pRayPoint1,pRayPoint2,pMvMatrix,pLastCollPt,pDistSquaredOffset,pUserData)
     {
         var tranformRayPoint1 = vec3.create();
         var tranformRayPoint2 = vec3.create();
@@ -136,8 +147,8 @@ class CSphere
         var mvMatrixInv = mat4.create();
 
         mat4.invert(mvMatrixInv,pMvMatrix);
-        vec3.transformMat4(tranformRayPoint1,rayPoint1,mvMatrixInv);
-        vec3.transformMat4(tranformRayPoint2,rayPoint2,mvMatrixInv);
+        vec3.transformMat4(tranformRayPoint1,pRayPoint1,mvMatrixInv);
+        vec3.transformMat4(tranformRayPoint2,pRayPoint2,mvMatrixInv);
         vec3.subtract(tranformRayDir,tranformRayPoint2,tranformRayPoint1);
         vec3.normalize(tranformRayDir,tranformRayDir);
 
@@ -155,30 +166,32 @@ class CSphere
     
         var delta = b**2-4*a*c;
 
-        if(delta<=0) return lastCollision;           
+        if(delta<=0) return pLastCollPt;           
                 
         var t1 = (-b - Math.sqrt(delta))/2*a
         var t2 = (-b + Math.sqrt(delta))/2*a
-        if ( t1 < 0 && t2 < 0) return lastCollision;  
+        if ( t1 < 0 && t2 < 0) return pLastCollPt;  
         
         
         var transformCollisionPoint =[xa*t1+xb,ya*t1+yb,za*t1+zb];
-        var collisionPoint = vec3.create();         
+        var collisionPoint = [];         
         vec3.transformMat4(collisionPoint,transformCollisionPoint,pMvMatrix);
 
         
-        var squaredDistPoint1ToCollision = vec3.squaredDistance(rayPoint1,collisionPoint); 
-        var squaredDistPoint1ToPoint2 = vec3.squaredDistance(rayPoint1,rayPoint2);
+        var squaredDistPoint1ToCollision = vec3.squaredDistance(pRayPoint1,collisionPoint); 
+        var squaredDistPoint1ToPoint2 = vec3.squaredDistance(pRayPoint1,pRayPoint2);
 
         /* No collision if dist to collision is lower than dist to the new position */
-        if ((squaredDistPoint1ToPoint2+distSquaredOffset) < squaredDistPoint1ToCollision) return lastCollision;
+        if ((squaredDistPoint1ToPoint2+pDistSquaredOffset) < squaredDistPoint1ToCollision) return pLastCollPt;
 
       
-        if (lastCollision!=null)
+        if (pLastCollPt!=null)
         {
-            var squaredDistLastCollision = vec3.squaredDistance(rayPoint1,lastCollision);  
-            if (squaredDistLastCollision  < squaredDistPoint1ToCollision) return lastCollision;
+            var squaredDistLastCollision = vec3.squaredDistance(pRayPoint1,pLastCollPt);  
+            if (squaredDistLastCollision  < squaredDistPoint1ToCollision) return pLastCollPt;
         } 
+
+        collisionPoint[3]=pUserData;
 
         return collisionPoint;
         

@@ -1,4 +1,6 @@
 
+var CStoneInst;
+
 class CStone
 {
 
@@ -18,7 +20,7 @@ class CStone
         }
     `;
 
-    
+        CStoneInst = this;
         this.shaderProgram =  initShaders(vertexShader1,fragmentShader);
         this.CollisionMatrixList = [];
     }
@@ -40,12 +42,12 @@ class CStone
     {
     }   
 
-    getCollisionPoint(rayPoint1,rayPoint2,mvMatrix,distSquaredOffset)
+    getCollisionPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOffset)
     {
-        var collision = null ;
+        var collision = pCollision ;
         for (var i=0;i<this.CollisionMatrixList.length;i++)
         {
-            collision = Sphere.GetCollisionPos(rayPoint1,rayPoint2,this.CollisionMatrixList[i],collision,distSquaredOffset);
+            collision = Sphere.GetCollisionPos(pRayPoint1,pRayPoint2,this.CollisionMatrixList[i],collision,pDistSquaredOffset);
         }
 
         return collision;
