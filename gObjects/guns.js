@@ -60,7 +60,8 @@ function gunsInit()
 {
     gunsShaderProgram = initShaders(gunsVertexShader,gunsFragmentShader);
     gunsExpShaderProgram = initShaders(gunsVertexShader,gunsBulletFragmentShader);
-    gunPos = [-100.0,groundGetY(-100.0,20.0)+5.0,10];
+   // gunPos = [-50.0,35,0]; 
+    gunPos = [10.0,groundGetY(10.0,20.0)+20.0,20];
     gunCollisionMatrix = mat4.create();
     gunControlled =false;
     gunDir = []; 
@@ -117,11 +118,13 @@ function gunsDraw(dist)
     mat4.rotate(mvMatrix,mvMatrix, timeGetAnimRad(), [0 , 1, 0]);    
     mvPushMatrix();
     mat4.translate(mvMatrix,mvMatrix,[0.0,0.0,0.5]); 
+    mat4.scale(mvMatrix,mvMatrix,[3.0,3.0,3.0]);
     mat4.scale(mvMatrix,mvMatrix,[3.0,5.0,5.0]);
     mat4.copy(gunCollisionMatrix,mvMatrix) ;
     //  Sphere.Draw(gunsShaderProgram);   
     mvPopMatrix(); 
     
+    mat4.scale(mvMatrix,mvMatrix,[3.0,3.0,3.0]);
     gunsDrawFct();
     
 }
@@ -265,7 +268,7 @@ class CBullet
             }
 
         
-            if ((collision!=null) || ((timeGetCurrentInS()-this.StartTimeInS) > 1.5))  
+            if ((collision!=null) || ((timeGetCurrentInS()-this.StartTimeInS) > 3.0))  
             {
                 this.Scale = 0;
                 this.Speed = [0,0,0];

@@ -310,7 +310,7 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
 
 
         //Bazooka to heavy for rotation
-        if (this.Bazooka)
+        if (this.BazookaWeapon > 0)
         {
             vec3.copy(this.Dir,this.GunDir); 
             if (this.BazookaState == "Ready" && pFire)
@@ -327,18 +327,18 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
                 pos[2] = this.Pos[2] -this.GunDir[0]*0.8 ;
                 gunsFire(size,speed,fireDir,pos);
                 this.BazookaState = "Fire";
-              //  this.BazookaWeapon--;
+                this.BazookaWeapon--;
             }
             if(this.BazookaState == "Fire" && !pFire)
             {
                 this.BazookaState = "Ready";
+                gunsControl(false);      
             }
 
-            if(this.BazookaWeapon<=0)
-            {
-                this.Bazooka = false;
-            }
         }
+
+        //Switch gun when no more weapons
+        this.Bazooka = (this.BazookaWeapon >0) ;
 
 
         //Orientation and BackWardsRunning
