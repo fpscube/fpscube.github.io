@@ -262,7 +262,6 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
         this.Bazooka = true;
         this.BazookaWeapon = 10;
         this.BazookaState = "Ready";
-        gunsControl(true);      
     }
        
 
@@ -331,14 +330,14 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
             }
             if(this.BazookaState == "Fire" && !pFire)
             {
-                this.BazookaState = "Ready";
-                gunsControl(false);      
+                this.BazookaState = "Ready";  
             }
 
         }
 
         //Switch gun when no more weapons
         this.Bazooka = (this.BazookaWeapon >0) ;
+        gunsControl(this.Bazooka );
 
 
         //Orientation and BackWardsRunning

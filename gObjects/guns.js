@@ -286,7 +286,7 @@ class CBullet
         else
         {      
             this.Color = [0.9,0.9,0.0,1.0]; 
-            this.Scale =  this.ExplosionAnim.coef**6 *100;
+            this.Scale =  this.ExplosionAnim.coef**6 *70;
             this.Color[3] = 1.0-(this.ExplosionAnim.coef)**3*0.8;
             if(!this.ExplosionAnim.running)  this.Explosion = false;
             var humanList = CEnemiesInst.getHumansInSphere(this.Pos,this.Scale);
