@@ -154,7 +154,7 @@ class CGame
 		mat4.multiply(pMatrix,pMatrix,lookAtMatrix)
 		
 		treeDraw();
-		groundDraw();
+		groundDraw(this.Hero.Pos[0],this.Hero.Pos[2]);
 		waterDraw();	
 		this.Stone.draw();	 
 		this.Enemies.draw();

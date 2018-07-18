@@ -5,6 +5,7 @@ var groundIndiceBuffer;
 var groundPositions;
 var groundNormals;
 var groundIndices;
+var groundSectorInst;
 
 function groundGetY(x,z)
 {
@@ -30,100 +31,90 @@ function groundGetNormalVec(x,z)
 }
 
 
-function groundInit()
+class CGroundSector
 {
-  sizeX = 2500;
-  sizeZ = 2500;
-  res = 100   ;
-
+  constructor(pPosX,pPosZ,pSize,pRes)
+  {
+    
+   var groundPositions=[];
+   var groundNormals=[];
+   var groundIndices=[];
   
- groundPositions=[];
- groundNormals=[];
- groundIndices=[];
-
-  for (ix=0;ix<=res;ix+=1)
-  {    
-    for (iz=0;iz<=res;iz+=1)
-    {
-      x=-sizeX/2+ix*sizeX/res;
-      z=-sizeZ/2+iz*sizeZ/res;
-      
-      // compute ground position
-      groundPositions.push(x);
-      groundPositions.push(groundGetY(x,z));
-      groundPositions.push(z);
-
-      
-        // compute normal position
-        normVector = groundGetNormalVec(x,z);
-        groundNormals.push(normVector[0]);
-        groundNormals.push(normVector[1]);
-        groundNormals.push(normVector[2]);
-
-      if (((ix+1)<=res) && ((iz+1)<=res))
+    for (var ix=0;ix<=pRes;ix+=1)
+    {    
+      for (var iz=0;iz<=pRes;iz+=1)
       {
-        groundIndices.push(iz+ix*(res+1));
-        groundIndices.push(iz+1+ix*(res+1));
-        groundIndices.push(iz+(ix+1)*(res+1));
-
-        groundIndices.push(iz+1+ix*(res+1));
-        groundIndices.push(iz+1+(ix+1)*(res+1));
-        groundIndices.push(iz+(ix+1)*(res+1));
-       
+        var x = pPosX + ix*pSize/pRes - pSize/2;
+        var z = pPosZ + iz*pSize/pRes - pSize/2;
+        
+        // compute ground position
+        groundPositions.push(x);
+        groundPositions.push(groundGetY(x,z));
+        groundPositions.push(z);
+  
+        
+          // compute normal position
+          var normVector = groundGetNormalVec(x,z);
+          groundNormals.push(normVector[0]);
+          groundNormals.push(normVector[1]);
+          groundNormals.push(normVector[2]);
+  
+        if (((ix+1)<=pRes) && ((iz+1)<=pRes))
+        {
+          groundIndices.push(iz+ix*(pRes+1));
+          groundIndices.push(iz+1+ix*(pRes+1));
+          groundIndices.push(iz+(ix+1)*(pRes+1));
+  
+          groundIndices.push(iz+1+ix*(pRes+1));
+          groundIndices.push(iz+1+(ix+1)*(pRes+1));
+          groundIndices.push(iz+(ix+1)*(pRes+1));
+         
+        }
       }
     }
-  }
-
   
-  gl.useProgram(shaderProgram);
-
-  // Vertex Buffer
-  groundVertexBuffer = gl.createBuffer();
-  groundVertexBuffer.itemSize = 3;
-  groundVertexBuffer.numItems = groundPositions.length/3;
-  gl.bindBuffer(gl.ARRAY_BUFFER, groundVertexBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(groundPositions), gl.STATIC_DRAW);	
-
-  // Normal Buffer	
-  groundNormalBuffer = gl.createBuffer();
-  groundNormalBuffer.itemSize = 3;
-  groundNormalBuffer.numItems = groundNormals.length/3;
-  gl.bindBuffer(gl.ARRAY_BUFFER, groundNormalBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(groundNormals), gl.STATIC_DRAW);	
-    
-  // Index Buffer
-  groundIndiceBuffer = gl.createBuffer ();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, groundIndiceBuffer);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(groundIndices), gl.STATIC_DRAW);
-}
-
-function groundCheckCollision(pPos1,pPos2)
-{
-    
-}
-
-
-function groundDraw()
-{
-    shaderWaterY = -28.5;
-    shaderVertexColorVector = [1.0,1.0,0.5,1.0];
-  	mat4.identity(mvMatrix)
-  
-    
-  
-    gl.bindBuffer(gl.ARRAY_BUFFER, groundVertexBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, groundNormalBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, groundIndiceBuffer);
-
     
     gl.useProgram(shaderProgram);
+  
+    // Vertex Buffer
+    this.groundVertexBuffer = gl.createBuffer();
+    this.groundVertexBuffer.itemSize = 3;
+    this.groundVertexBuffer.numItems = groundPositions.length/3;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.groundVertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(groundPositions), gl.STATIC_DRAW);	
+  
+    // Normal Buffer	
+    this.groundNormalBuffer = gl.createBuffer();
+    this.groundNormalBuffer.itemSize = 3;
+    this.groundNormalBuffer.numItems = groundNormals.length/3;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.groundNormalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(groundNormals), gl.STATIC_DRAW);	
+      
+    // Index Buffer
+    this.groundIndiceBuffer = gl.createBuffer ();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.groundIndiceBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(groundIndices), gl.STATIC_DRAW);
+
+    this.nbElement = groundIndices.length;
+  }
+   
+  drawSector()
+  {
+
+    shaderWaterY = -2008.5;
+    shaderVertexColorVector = [1.0,1.0,0.5,1.0];
+  	mat4.identity(mvMatrix)    
+  
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.groundVertexBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.groundNormalBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.groundIndiceBuffer);
     
-    //function setMatrixUniforms(pShaderProgram) {
-		
+    gl.useProgram(shaderProgram);
+    		
     gl.uniform4fv (shaderProgram.vertexColorAttribute, shaderVertexColorVector);
     
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
@@ -134,7 +125,47 @@ function groundDraw()
     gl.uniformMatrix4fv(shaderProgram.mvInverseTransposeMatrix, false, mvInverseTransposeMatrix);
 
     
-    gl.drawElements(gl.TRIANGLES,groundIndices.length, gl.UNSIGNED_SHORT,0);
+    gl.drawElements(gl.TRIANGLES,this.nbElement, gl.UNSIGNED_SHORT,0);
+  }
+
+
+}
+
+
+groundSize = 10000;
+groundRes = 20;
+
+function groundInit()
+{
+  groundSectorInst = [];
+  for (ix=0;ix<groundRes;ix++)
+  {
+    groundSectorInst[ix]=[];
+    for (iz=0;iz<groundRes;iz++)
+    {
+      var x = -groundSize/2 +  ix*groundSize/groundRes;
+      var z = -groundSize/2 +  iz*groundSize/groundRes;
+      groundSectorInst[ix][iz] = new CGroundSector(x,z,groundSize/groundRes,40);
+
+    }
+  }
+}
+
+
+function groundDraw(pPosX,pPosZ)
+{
+  var step = groundSize/groundRes;
+  var ix = Math.floor(pPosX/step + 0.5) + groundRes/2;
+  var iz = Math.floor(pPosZ/step + 0.5) + groundRes/2;
+
+  groundSectorInst[ix][iz].drawSector();
+  groundSectorInst[ix][iz-1].drawSector();
+  groundSectorInst[ix][iz+1].drawSector();
+  groundSectorInst[ix-1][iz].drawSector();
+  groundSectorInst[ix-1][iz-1].drawSector();
+  groundSectorInst[ix-1][iz+1].drawSector();
+  groundSectorInst[ix+1][iz].drawSector();
+  groundSectorInst[ix+1][iz-1].drawSector();
+  groundSectorInst[ix+1][iz+1].drawSector();
   
-   // gl.drawElements(gl.LINES,groundIndices.length, gl.UNSIGNED_SHORT,0);
 }
