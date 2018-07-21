@@ -401,13 +401,21 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos,pHeroDir,pHeroFire)
         var distFeet = distFeet6*3.4 + distFeet6*1.9 + distFeet12*1.5;
         var speed = distFeet * elapsedFactor;
         var tmpNewPos=[];
-        tmpNewPos[2]  = this.Pos[2] - speed * 2.0 * this.Dir[2];
-        tmpNewPos[0]  = this.Pos[0] - speed * 2.0 * this.Dir[0];
-        tmpNewPos[1]  = groundGetY(tmpNewPos[0], tmpNewPos[2])+5.5 ;
-        if (!waterIsUnder(tmpNewPos[1]))
-        {        
-            vec3.copy(this.Pos,tmpNewPos);      
-        }
+
+        do{
+            tmpNewPos[2]  = this.Pos[2] - speed * 2.0 * this.Dir[2];
+            tmpNewPos[0]  = this.Pos[0] - speed * 2.0 * this.Dir[0];
+            tmpNewPos[1]  = groundGetY(tmpNewPos[0], tmpNewPos[2]) ;
+            if (waterIsUnder(tmpNewPos[1]))
+            {
+                vec3.rotateY(this.Dir,this.Dir,[0,0,0],0.5);
+                this.AnimDir.running = false;
+            }
+        } while(waterIsUnder(tmpNewPos[1]));
+         
+        tmpNewPos[1]  = tmpNewPos[1] +5.5 ;
+        vec3.copy(this.Pos,tmpNewPos);      
+
         // Gun Target Dir
         //Process history of target position to simulate reaction time of 0,3s
         this.TargetHist.push([timeGetCurrentInS(),[pHeroPos[0],pHeroPos[1],pHeroPos[2]]]);	
