@@ -221,6 +221,7 @@ class CBullet
             newPos[2] = startPos[2] + this.Speed[2]*elapsed;
             collision = CEnemiesInst.getCollisionPoint(startPos,newPos,null,0);
             collision = CStoneInst.getCollisionPoint(startPos,newPos,collision,0);
+            collision = CTreesInst.getCollisionPoint(startPos,newPos,collision,0);
 
             startPos[0] = this.Pos[0] + this.Dir[2]*this.Scale;
             startPos[1] = this.Pos[1];
@@ -230,6 +231,7 @@ class CBullet
             newPos[2] = startPos[2] + this.Speed[2]*elapsed;
             collision = CEnemiesInst.getCollisionPoint(startPos,newPos,collision,0);
             collision = CStoneInst.getCollisionPoint(startPos,newPos,collision,0);
+            collision = CTreesInst.getCollisionPoint(startPos,newPos,collision,0);
         
 
             startPos[0] = this.Pos[0];
@@ -240,6 +242,7 @@ class CBullet
             newPos[2] = startPos[2] + this.Speed[2]*elapsed;
             collision = CEnemiesInst.getCollisionPoint(startPos,newPos,collision,0); 
             collision = CStoneInst.getCollisionPoint(startPos,newPos,collision,0);
+            collision = CTreesInst.getCollisionPoint(startPos,newPos,collision,0);
             
             startPos[0] = this.Pos[0];
             startPos[1] = this.Pos[1] - this.Scale;
@@ -249,12 +252,14 @@ class CBullet
             newPos[2] = startPos[2] + this.Speed[2]*elapsed;
             collision = CEnemiesInst.getCollisionPoint(startPos,newPos,collision,0);
             collision = CStoneInst.getCollisionPoint(startPos,newPos,collision,0);
+            collision = CTreesInst.getCollisionPoint(startPos,newPos,collision,0);
 
             newPos[0] = this.Pos[0] + this.Speed[0]*elapsed;
             newPos[1] = this.Pos[1] + this.Speed[1]*elapsed;
             newPos[2] = this.Pos[2] + this.Speed[2]*elapsed
             collision = CEnemiesInst.getCollisionPoint(this.Pos,newPos,collision,0);
-            collision = CStoneInst.getCollisionPoint(startPos,newPos,collision,0);
+            collision = CStoneInst.getCollisionPoint(this.Pos,newPos,collision,0);
+            collision = CTreesInst.getCollisionPoint(startPos,newPos,collision,0);
 
             if (collision != null && collision[3]!=null) 
             {
@@ -267,14 +272,13 @@ class CBullet
                 collision = true;
             }
 
-        
             if ((collision!=null) || ((timeGetCurrentInS()-this.StartTimeInS) > 3.0))  
             {
                 this.Scale = 0;
                 this.Speed = [0,0,0];
                 this.Explosion = true;
-                this.ExplosionAnim.start(600,0,1);
-                this.Color = [0.9,0.9,0.0,1.0]; 
+                this.ExplosionAnim.start(400,0,1);
+                this.Color = [0.9,0.5,0.0,0.9]; 
             }
             else{
 
@@ -286,8 +290,8 @@ class CBullet
         else
         {      
             this.Color = [0.9,0.9,0.0,1.0]; 
-            this.Scale =  this.ExplosionAnim.coef**6 *70;
-            this.Color[3] = 1.0-(this.ExplosionAnim.coef)**3*0.8;
+            this.Scale =  this.ExplosionAnim.coef**2 *70;
+            this.Color[3] = 1.0-(this.ExplosionAnim.coef)**3*0.4;
             if(!this.ExplosionAnim.running)  this.Explosion = false;
             var humanList = CEnemiesInst.getHumansInSphere(this.Pos,this.Scale);
             for(var i =0 ;i<humanList.length;i++){

@@ -39,42 +39,108 @@ var treeVertexShader = `
 
 var treeShaderProgram;
 
+var CTreesInst;
 
-function treeInit()
+class CTrees
 {
-    treeShaderProgram = initShaders(treeVertexShader,treeFragmentShader);
+    constructor()
+    {
+        this.list=[]
+        this.list.push(new CTree());
+        CTreesInst = this;
+        treeShaderProgram = initShaders(treeVertexShader,treeFragmentShader);
+    }
+
+    
+    getCollisionPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOffset)
+    {
+        return pCollision;
+    }
+
+    update()
+    {
+        for (var i=0;i<this.list.length;i++){
+            this.list[i].update();
+        }
+    }
+
+    draw()
+    {
+        for (var i=0;i<this.list.length;i++){
+            this.list[i].draw();
+        }
+    }
+
+
 }
 
- 
-function treeDraw()
+
+class CTree
 {
-    mat4.identity(mvMatrix);
-    mat4.translate(mvMatrix,mvMatrix,[-350.0,0.0,60.0]); 
+    constructor()
+    {
+        this.collisionMatrixList = [];       
+    }
+
+     
+    getCollisionPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOffset)
+    {
+        var collision = pCollision ;
+        for (var i=0;i<this.treeCollisionMatrixList.length;i++)
+        {
+            collision = Sphere.GetCollisionPos(pRayPoint1,pRayPoint2,this.treeCollisionMatrixList[i],collision,pDistSquaredOffset);
+        }
+
+        return collision;
+    }
 
 
-   for (var i=0;i<6;i++)
-   {
-        shaderVertexColorVector = [0.5+i*0.05,0.25+i*0.05,0.0,1.0]; 
-        mvPushMatrix();
-            mat4.translate(mvMatrix,mvMatrix,[0.0,i*12+6.0,0.0]);   
-          //  mat4.rotate(mvMatrix,mvMatrix,  degToRad(2), [1, 0, 0]);   
-            mat4.scale(mvMatrix,mvMatrix,[10.0-i*1.0,12.0,10.0-i*1.0]); 
-            Sphere.Draw(treeShaderProgram);   
-        mvPopMatrix(); 
-   }
+    storeCollisionMatrix(pMvMatrix)
+    {
+        var collMat = mat4.create();
+        mat4.copy(collMat,pMvMatrix);
+        this.collisionMatrixList.push(collMat);
+    }
 
-   shaderVertexColorVector = [0.35,0.65,0.0,1.0]; 
-   for (var i=0;i<360;i+=45)
-   {
-        mvPushMatrix();
-            mat4.rotate(mvMatrix,mvMatrix,  degToRad(i), [0, 1, 0]); 
-            mat4.translate(mvMatrix,mvMatrix,[20.0,6*12-5.0,0.0]);    
-            mat4.rotate(mvMatrix,mvMatrix,  degToRad(-20), [0, 0, 1]);  
-            mat4.scale(mvMatrix,mvMatrix,[40.0,2.0,6.0]); 
-            Sphere.Draw(treeShaderProgram);   
-        mvPopMatrix(); 
-   }
+    update()
+    {
 
+    }
+
+    draw()
+    {
+        mat4.identity(mvMatrix);
+        mat4.translate(mvMatrix,mvMatrix,[-350.0,0.0,60.0]); 
+
+
+        for (var i=0;i<6;i++)
+        {
+                shaderVertexColorVector = [0.5+i*0.05,0.25+i*0.05,0.0,1.0]; 
+                mvPushMatrix();
+                    mat4.translate(mvMatrix,mvMatrix,[0.0,i*12+6.0,0.0]);   
+                //  mat4.rotate(mvMatrix,mvMatrix,  degToRad(2), [1, 0, 0]);   
+                    mat4.scale(mvMatrix,mvMatrix,[10.0-i*1.0,12.0,10.0-i*1.0]); 
+                    this.storeCollisionMatrix(mvMatrix);
+                    Sphere.Draw(treeShaderProgram);   
+                mvPopMatrix(); 
+        }
+
+        shaderVertexColorVector = [0.35,0.65,0.0,1.0]; 
+        for (var i=0;i<360;i+=45)
+        {
+                mvPushMatrix();
+                    mat4.rotate(mvMatrix,mvMatrix,  degToRad(i), [0, 1, 0]); 
+                    mat4.translate(mvMatrix,mvMatrix,[20.0,6*12-5.0,0.0]);    
+                    mat4.rotate(mvMatrix,mvMatrix,  degToRad(-20), [0, 0, 1]);  
+                    mat4.scale(mvMatrix,mvMatrix,[40.0,2.0,6.0]); 
+                    this.storeCollisionMatrix(mvMatrix);
+                    Sphere.Draw(treeShaderProgram);   
+                mvPopMatrix(); 
+        }
+
+
+
+    }
 
 }
 

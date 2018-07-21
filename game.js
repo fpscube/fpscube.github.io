@@ -41,12 +41,12 @@ class CGame
 		cubeInit();
 		SphereInit();
 
+		this.Trees = new CTrees();
 		this.Enemies = new CEnemies(30);
 		this.Hero = new CHuman([-370,13,100],2);
 
 		groundInit();
 		waterInit();
-		treeInit();
 		gunsInit();
 					
 
@@ -153,7 +153,7 @@ class CGame
 		mat4.lookAt(lookAtMatrix,this.CamPos,viewPos,[0,1,0]);
 		mat4.multiply(pMatrix,pMatrix,lookAtMatrix)
 		
-		treeDraw();
+		this.Trees.draw();
 		groundDraw(this.Hero.Pos[0],this.Hero.Pos[2]);
 		waterDraw();	
 		this.Stone.draw();	 
