@@ -36,14 +36,14 @@ class CGame
 		gl.enable(gl.DEPTH_TEST);      
 
 		// init gl object
-		info2DInit();
+		this.Info = new CInfo();
 		squareInit();
 		cubeInit();
 		SphereInit();
 
 		this.Trees = new CTrees();
 		this.Enemies = new CEnemies(30);
-		this.Hero = new CHuman([-370,13,100],2);
+		this.Hero = new CHuman([-575,30,81],2);
 
 		groundInit();
 		waterInit();
@@ -133,7 +133,7 @@ class CGame
 				break;
 		}
 
-		info2DUpdate(this.Enemies.IsInTarget,this.Enemies.HitTarget,this.HeroLife,this.Enemies.NbALive,this.State);
+		this.Info.update(this.Enemies.IsInTarget,this.Enemies.HitTarget,this.HeroLife,this.Enemies.NbALive,this.State);
 		gunsUpdate();
 
 	}
@@ -163,7 +163,7 @@ class CGame
 		
 		gunsDraw();	
 		//Draw Info 2D
-		info2DDraw();
+		this.Info.draw();
 
 
 

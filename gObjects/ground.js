@@ -132,7 +132,7 @@ class CGroundSector
 }
 
 
-groundSize = 10000;
+groundSize = 15000;
 groundRes = 20;
 
 function groundInit()
