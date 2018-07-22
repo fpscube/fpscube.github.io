@@ -123,7 +123,7 @@ class CGame
 				// Update Enemies
 				this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,false);				
 				
-				this.Hero.UpdateHero(this.HeroDir,this.HeroRunning,this.HeroFire,this.CamDir,this.HeroLife<=0,this.Stone);
+				this.Hero.UpdateHero(this.HeroDir,false,false,this.CamDir,this.HeroLife<=0,this.Stone);
 
 				if (this.HeroFire && !this.EndAnim.running)
 				{
