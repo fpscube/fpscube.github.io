@@ -33,10 +33,11 @@ function groundGetNormalVec(x,z)
 function groundGetCollisionPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOffset)
 {
   var collision = pCollision;
-  var groundYLevel = groundGetY(pRayPoint1[0],pRayPoint1[2]);
-	if ((pRayPoint1[1]>=groundYLevel) && (pRayPoint2[1]<groundYLevel))
+  var groundYLevel1 = groundGetY(pRayPoint1[0],pRayPoint1[2]);
+  var groundYLevel2 = groundGetY(pRayPoint2[0],pRayPoint2[2]);
+	if ((pRayPoint1[1]>=groundYLevel1) && (pRayPoint2[1]<groundYLevel2))
 	{
-		var collision = [pRayPoint2[0],groundYLevel,pRayPoint2[0]];	
+		var collision = [pRayPoint2[0],groundYLevel2,pRayPoint2[0]];	
 	}
 	return collision;
 }
