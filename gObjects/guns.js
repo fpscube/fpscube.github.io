@@ -181,6 +181,17 @@ function gunsFire(pSize,pSpeed,pDir,pPos)
 
 }
 
+function  _gunsAllCollisionGetPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOffset)
+{
+    var collision = pCollision;
+    collision = CEnemiesInst.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
+    collision = CTreesInst.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
+    collision = CStoneInst.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
+    collision = groundGetCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
+    collision = waterGetCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
+
+    return collision;
+} 
 
 class CBullet
 {
@@ -201,6 +212,7 @@ class CBullet
     {
         return (this.Explosion && this.ExplosionAnim.running==false)
     }
+    
 
     update()
     {
@@ -219,9 +231,7 @@ class CBullet
             newPos[0] = startPos[0] + this.Speed[0]*elapsed;
             newPos[1] = startPos[1] + this.Speed[1]*elapsed;
             newPos[2] = startPos[2] + this.Speed[2]*elapsed;
-            collision = CEnemiesInst.getCollisionPoint(startPos,newPos,null,0);
-            collision = CStoneInst.getCollisionPoint(startPos,newPos,collision,0);
-            collision = CTreesInst.getCollisionPoint(startPos,newPos,collision,0);
+            collision = _gunsAllCollisionGetPoint(startPos,newPos,null,0);
 
             startPos[0] = this.Pos[0] + this.Dir[2]*this.Scale;
             startPos[1] = this.Pos[1];
@@ -229,10 +239,7 @@ class CBullet
             newPos[0] = startPos[0] + this.Speed[0]*elapsed;
             newPos[1] = startPos[1] + this.Speed[1]*elapsed;
             newPos[2] = startPos[2] + this.Speed[2]*elapsed;
-            collision = CEnemiesInst.getCollisionPoint(startPos,newPos,collision,0);
-            collision = CStoneInst.getCollisionPoint(startPos,newPos,collision,0);
-            collision = CTreesInst.getCollisionPoint(startPos,newPos,collision,0);
-        
+            collision = _gunsAllCollisionGetPoint(startPos,newPos,collision,0);        
 
             startPos[0] = this.Pos[0];
             startPos[1] = this.Pos[1] + this.Scale;
@@ -240,9 +247,7 @@ class CBullet
             newPos[0] = startPos[0] + this.Speed[0]*elapsed;
             newPos[1] = startPos[1] + this.Speed[1]*elapsed;
             newPos[2] = startPos[2] + this.Speed[2]*elapsed;
-            collision = CEnemiesInst.getCollisionPoint(startPos,newPos,collision,0); 
-            collision = CStoneInst.getCollisionPoint(startPos,newPos,collision,0);
-            collision = CTreesInst.getCollisionPoint(startPos,newPos,collision,0);
+            collision = _gunsAllCollisionGetPoint(startPos,newPos,collision,0);
             
             startPos[0] = this.Pos[0];
             startPos[1] = this.Pos[1] - this.Scale;
@@ -250,16 +255,12 @@ class CBullet
             newPos[0] = startPos[0] + this.Speed[0]*elapsed;
             newPos[1] = startPos[1] + this.Speed[1]*elapsed;
             newPos[2] = startPos[2] + this.Speed[2]*elapsed;
-            collision = CEnemiesInst.getCollisionPoint(startPos,newPos,collision,0);
-            collision = CStoneInst.getCollisionPoint(startPos,newPos,collision,0);
-            collision = CTreesInst.getCollisionPoint(startPos,newPos,collision,0);
+            collision = _gunsAllCollisionGetPoint(startPos,newPos,collision,0);
 
             newPos[0] = this.Pos[0] + this.Speed[0]*elapsed;
             newPos[1] = this.Pos[1] + this.Speed[1]*elapsed;
             newPos[2] = this.Pos[2] + this.Speed[2]*elapsed
-            collision = CEnemiesInst.getCollisionPoint(this.Pos,newPos,collision,0);
-            collision = CStoneInst.getCollisionPoint(this.Pos,newPos,collision,0);
-            collision = CTreesInst.getCollisionPoint(startPos,newPos,collision,0);
+            collision = _gunsAllCollisionGetPoint(this.Pos,newPos,collision,0);
 
             if (collision != null && collision[3]!=null) 
             {
@@ -267,12 +268,7 @@ class CBullet
                 human.BulletCollision();
             }
 
-            if(groundGetY(newPos[0],newPos[2])> newPos[1])
-            {
-                collision = true;
-            }
-
-            if ((collision!=null) || ((timeGetCurrentInS()-this.StartTimeInS) > 3.0))  
+            if ((collision != null) || ((timeGetCurrentInS()-this.StartTimeInS) > 3.0))  
             {
                 this.Scale = 0;
                 this.Speed = [0,0,0];
@@ -284,8 +280,6 @@ class CBullet
 
                 vec3.copy(this.Pos,newPos);
             }
-            // this.Speed[1]-=50*elapsed;;
-            
         }
         else
         {      

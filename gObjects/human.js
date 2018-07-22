@@ -1,4 +1,6 @@
 var CEnemiesInst;
+var CHumansInst;
+
 
 class CEnemies
 {
@@ -199,7 +201,7 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
     newHorizontalPos[1] = this.Pos[1] ;
     
     
-    var horzCollisionPos = pStone.getCollisionPoint(this.Pos,newHorizontalPos,null,0);
+    var horzCollisionPos = collisionObjectGetPoint(this.Pos,newHorizontalPos,null,0);
 
     if (horzCollisionPos==null && pRunning )
     {
@@ -208,7 +210,7 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
         vec3.copy(tmpNewPos,newHorizontalPos);
         this.VSpeed += this.VAcc*elapsed;
         tmpNewPos[1] += this.VSpeed - 5.5;
-        var collisionPos = pStone.getCollisionPoint(newHorizontalPos,tmpNewPos,null,0);
+        var collisionPos = collisionObjectGetPoint(newHorizontalPos,tmpNewPos,null,0);
         var groundY =  groundGetY(tmpNewPos[0],tmpNewPos[2]);
         if(collisionPos!=null) 
         {
@@ -222,10 +224,10 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
 
         //Final Collision
         tmpNewPos[1] += 5.5;
-        var collisionPos1 = pStone.getCollisionPoint(this.Pos,tmpNewPos,null,16.0);
+        var collisionPos1 = collisionObjectGetPoint(this.Pos,tmpNewPos,null,16.0);
         tmpNewPos[1] += 5.0;
         this.Pos[1] += 5.0;
-        var collisionPos2 = pStone.getCollisionPoint(this.Pos,tmpNewPos,null,0);
+        var collisionPos2 = collisionObjectGetPoint(this.Pos,tmpNewPos,null,0);
         
         tmpNewPos[1] -= 5.0;
         this.Pos[1] -= 5.0;	

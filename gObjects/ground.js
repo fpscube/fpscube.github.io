@@ -30,6 +30,18 @@ function groundGetNormalVec(x,z)
   return(vector3);
 }
 
+function groundGetCollisionPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOffset)
+{
+  var collision = pCollision;
+  var groundYLevel = groundGetY(pRayPoint1[0],pRayPoint1[2]);
+	if ((pRayPoint1[1]>=groundYLevel) && (pRayPoint2[1]<groundYLevel))
+	{
+		var collision = [pRayPoint2[0],groundYLevel,pRayPoint2[0]];	
+	}
+	return collision;
+}
+
+
 
 class CGroundSector
 {
