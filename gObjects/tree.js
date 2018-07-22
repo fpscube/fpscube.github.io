@@ -46,7 +46,23 @@ class CTrees
     constructor()
     {
         this.list=[]
-        this.list.push(new CTree());
+        for (var i=0;i<360;i+=30)
+        {
+           var  x = Math.sin(5*degToRad(i))*1000-300;
+           var  z = Math.sin(4*degToRad(i))*1000+60;
+           var  y = groundGetY(x,z) - 8.0;
+
+           if (waterIsUnder(y)) 
+           { 
+               continue;
+            }
+
+          //  this.list.push(new CTree([-350.0,0.0,60.0]));
+            this.list.push(new CTree([x,y,z]));
+
+            console.log(x + ":" + y + ":" + z);
+
+        }
         CTreesInst = this;
         treeShaderProgram = initShaders(treeVertexShader,treeFragmentShader);
     }
@@ -77,9 +93,11 @@ class CTrees
 
 class CTree
 {
-    constructor()
+    constructor(pPos)
     {
-        this.collisionMatrixList = [];       
+        this.collisionMatrixList = [];   
+        this.pos = [];
+        vec3.copy(this.pos,pPos);
     }
 
      
@@ -110,7 +128,7 @@ class CTree
     draw()
     {
         mat4.identity(mvMatrix);
-        mat4.translate(mvMatrix,mvMatrix,[-350.0,0.0,60.0]); 
+        mat4.translate(mvMatrix,mvMatrix,this.pos); 
 
 
         for (var i=0;i<6;i++)

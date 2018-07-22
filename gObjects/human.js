@@ -402,16 +402,18 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos,pHeroDir,pHeroFire)
         var speed = distFeet * elapsedFactor;
         var tmpNewPos=[];
 
+        var rotationAngle = 0;
         do{
             tmpNewPos[2]  = this.Pos[2] - speed * 2.0 * this.Dir[2];
             tmpNewPos[0]  = this.Pos[0] - speed * 2.0 * this.Dir[0];
             tmpNewPos[1]  = groundGetY(tmpNewPos[0], tmpNewPos[2]) ;
             if (waterIsUnder(tmpNewPos[1]))
             {
-                vec3.rotateY(this.Dir,this.Dir,[0,0,0],0.5);
+                rotationAngle+=0.5
+                vec3.rotateY(this.Dir,this.Dir,[0,0,0],rotationAngle);
                 this.AnimDir.running = false;
             }
-        } while(waterIsUnder(tmpNewPos[1]));
+        } while(waterIsUnder(tmpNewPos[1]) && rotationAngle<6.5);
          
         tmpNewPos[1]  = tmpNewPos[1] +5.5 ;
         vec3.copy(this.Pos,tmpNewPos);      
