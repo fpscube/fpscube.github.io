@@ -45,12 +45,20 @@ class CTrees
 {
     constructor()
     {
-        this.list=[]
+        this.list=[];
+        this.hash={}; // 100x100
         for (var i=0;i<360;i+=30)
         {
            var  x = Math.sin(5*degToRad(i))*1000-300;
            var  z = Math.sin(4*degToRad(i))*1000+60;
            var  y = groundGetY(x,z) - 8.0;
+           
+
+           //Hash Table align 100*100
+           var xId = Math.floor(x/100);
+           var zId = Math.floor(z/100);
+           x = xId*100 + 50;
+           z = zId*100 + 50;
 
            if (waterIsUnder(y)) 
            { 
@@ -58,10 +66,10 @@ class CTrees
             }
 
           //  this.list.push(new CTree([-350.0,0.0,60.0]));
-            this.list.push(new CTree([x,y,z]));
-
-            console.log(x + ":" + y + ":" + z);
-
+            var newTree = new CTree([x,y,z]);
+            this.list.push(newTree);
+            if (this.hash[xId] == null) this.hash[xId] = {};
+            this.hash[xId][zId] = newTree;
         }
         CTreesInst = this;
         treeShaderProgram = initShaders(treeVertexShader,treeFragmentShader);
@@ -70,7 +78,22 @@ class CTrees
     
     getCollisionPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOffset)
     {
-        return pCollision;
+        //Hash Table align 100*100
+        var xId = Math.floor(pRayPoint2[0]/100);
+        var zHash= this.hash[xId];
+        var collision = pCollision;
+        if (zHash != null)
+        {
+            var zId = Math.floor(pRayPoint2[2]/100);
+            var foundedTree = zHash[zId];
+            if (foundedTree!=null)
+            {
+                collision = zHash[zId].getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
+
+            }
+           
+        }
+        return collision;
     }
 
     update()
@@ -104,9 +127,9 @@ class CTree
     getCollisionPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOffset)
     {
         var collision = pCollision ;
-        for (var i=0;i<this.treeCollisionMatrixList.length;i++)
+        for (var i=0;i<this.collisionMatrixList.length;i++)
         {
-            collision = Sphere.GetCollisionPos(pRayPoint1,pRayPoint2,this.treeCollisionMatrixList[i],collision,pDistSquaredOffset);
+            collision = Sphere.GetCollisionPos(pRayPoint1,pRayPoint2,this.collisionMatrixList[i],collision,pDistSquaredOffset);
         }
 
         return collision;
@@ -130,7 +153,7 @@ class CTree
         mat4.identity(mvMatrix);
         mat4.translate(mvMatrix,mvMatrix,this.pos); 
 
-
+        this.collisionMatrixList = []; 
         for (var i=0;i<6;i++)
         {
                 shaderVertexColorVector = [0.5+i*0.05,0.25+i*0.05,0.0,1.0]; 
