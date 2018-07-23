@@ -12,6 +12,7 @@ class CGame
 
 		// init time utils
 		timeInit();
+		humansInit();
 		// game data Init	
 		this.HeroDir = [0.88,-0.15,-0.43];
 		this.HeroCollision = false;
@@ -153,9 +154,10 @@ class CGame
 		mat4.lookAt(lookAtMatrix,this.CamPos,viewPos,[0,1,0]);
 		mat4.multiply(pMatrix,pMatrix,lookAtMatrix)
 		
-		this.Trees.draw();
 		groundDraw(this.Hero.Pos[0],this.Hero.Pos[2]);
 		waterDraw();	
+		
+		this.Trees.draw();
 		this.Stone.draw();	 
 		this.Enemies.draw();
 		this.Hero.draw();
