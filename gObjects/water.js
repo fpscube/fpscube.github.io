@@ -19,6 +19,15 @@ function waterGetCollisionPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOff
 	if ((pRayPoint1[1]>=waterYLevel) && (pRayPoint2[1]<waterYLevel))
 	{
 		var collision = [pRayPoint2[0],waterYLevel,pRayPoint2[0]];	
+		if (pCollision!=null)
+		{
+		  var prevSquaredDist = vec3.squaredDistance(pRayPoint1,pCollision);
+		  var squaredDist = vec3.squaredDistance(pRayPoint1,collision);
+		  if(prevSquaredDist<squaredDist)
+		  {
+			  collision = pCollision;
+		  }
+		}
 	}
 	return collision;
 }

@@ -37,7 +37,18 @@ function groundGetCollisionPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOf
   var groundYLevel2 = groundGetY(pRayPoint2[0],pRayPoint2[2]);
 	if ((pRayPoint1[1]>=groundYLevel1) && (pRayPoint2[1]<groundYLevel2))
 	{
-		var collision = [pRayPoint2[0],groundYLevel2,pRayPoint2[0]];	
+    var collision = [pRayPoint2[0],groundYLevel2,pRayPoint2[0]];	
+    
+    if (pCollision!=null)
+    {
+      var prevSquaredDist = vec3.squaredDistance(pRayPoint1,pCollision);
+      var squaredDist = vec3.squaredDistance(pRayPoint1,collision);
+      if(prevSquaredDist<squaredDist)
+      {
+          collision = pCollision;
+      }
+    }
+
 	}
 	return collision;
 }

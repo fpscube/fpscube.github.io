@@ -9,8 +9,14 @@ class CEnemies
     {
         this.humans=[];
         for(var i =0 ;i<pNbEnemies;i++){
-            this.humans.push(new CHuman([i*20,0,0],Math.random()*8));
-		}	
+            y =groundGetY(i*20,0) +30.0;
+            this.humans.push(new CHuman([i*20,y,0],Math.random()*8));
+    	}	
+    
+    
+         //   y =groundGetY(-300,20) +30.0;
+       //     this.humans.push(new CHuman([-300,y,20],2));
+	
         this.NbALive=pNbEnemies;
         this.HitTarget=false;
         this.IsInTarget=false;
@@ -142,9 +148,10 @@ constructor(pPos,pSpeed) {
     `;
 
     this.Pos=pPos;
+    this.NewPos=[];
     this.HSpeed=0;
     this.VSpeed=0;
-    this.VAcc=-100.0;
+    this.VAcc=-10.0;
     this.Dir=[-1,0,1];
     this.HeadDir=[0,0,0];
     this.GunDir=[0,0,0];
@@ -180,19 +187,12 @@ constructor(pPos,pSpeed) {
 }
 
 
-
-
-UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
+computeNewPosition(pRunDir,pRunning,pCollisionFct)
 {
-
     var elapsed = timeGetElapsedInS();
-    var newPos=[];
-    
-    //Store Hero New Position
-    this.HSpeed  =  (pRunning) ? 50 : 0;
 
     //Store current Pos In New Pos
-    vec3.copy(newPos,this.Pos);
+    vec3.copy(this.NewPos,this.Pos);
     
     //Horizontal Collision with Stone
     var newHorizontalPos=[];
@@ -207,69 +207,70 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
     {
         //Vertical Collision to detect new y Pos
         var tmpNewPos=[];
-        vec3.copy(tmpNewPos,newHorizontalPos);
+        vec3.copy(tmpNewPos,newHorizontalPos);  
         this.VSpeed += this.VAcc*elapsed;
         tmpNewPos[1] += this.VSpeed - 5.5;
-        var collisionPos = collisionObjectGetPoint(newHorizontalPos,tmpNewPos,null,0);
-        var groundY =  groundGetY(tmpNewPos[0],tmpNewPos[2]);
+        var collisionPos = pCollisionFct(newHorizontalPos,tmpNewPos,null,0);
         if(collisionPos!=null) 
         {
             tmpNewPos[1] = collisionPos[1];
             this.VSpeed = 0;
         }
-        if(tmpNewPos[1]<groundY) tmpNewPos[1]  = groundY;
-        {
-            this.VSpeed = 0;
-        }
-
+        
         //Final Collision
         tmpNewPos[1] += 5.5;
-        var collisionPos1 = collisionObjectGetPoint(this.Pos,tmpNewPos,null,16.0);
+        var collisionPos1 = pCollisionFct(this.Pos,tmpNewPos,null,16.0);
         tmpNewPos[1] += 5.0;
-        this.Pos[1] += 5.0;
-        var collisionPos2 = collisionObjectGetPoint(this.Pos,tmpNewPos,null,0);
         
+        this.Pos[1] += 5.0;
+        var collisionPos2 = pCollisionFct(this.Pos,tmpNewPos,null,0);        
         tmpNewPos[1] -= 5.0;
         this.Pos[1] -= 5.0;	
 
         if(collisionPos1==null && collisionPos2==null ) 
         {			
-            vec3.copy(newPos,tmpNewPos);
+            vec3.copy(this.NewPos,tmpNewPos);
         }
-        
     }
     else
     {
         //Vertical Collision
-        this.VSpeed += this.VAcc*elapsed;;
-        newPos[1] += this.VSpeed - 5.5;
-        var collisionPos = pStone.getCollisionPoint(this.Pos,newPos,null,0);
-        var groundY =  groundGetY(newPos[0],newPos[2]);
+        this.VSpeed += this.VAcc*elapsed;
+        this.NewPos[1] += this.VSpeed - 5.5;
+        var collisionPos = pCollisionFct(this.Pos,this.NewPos,null,0);
         if(collisionPos!=null) 
         {
-            newPos[1] = collisionPos[1];
+            this.NewPos[1] = collisionPos[1];
             this.VSpeed = 0;
         }
-        if(newPos[1]<groundY)
-        { 
-            newPos[1]  = groundY;
-            this.VSpeed = 0;
-        }
-        newPos[1] += 5.5;
+        this.NewPos[1] += 5.5;
     }
 
+    
+}
+
+
+
+UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
+{
+
+    var elapsed = timeGetElapsedInS();
+    
+    //Store Hero New Position
+    this.HSpeed  =  (pRunning) ? 50 : 0;
+
+    this.computeNewPosition(pRunDir,pRunning,collisionNoWaterGetPoint);
+
     // Bazooka
-    if(gunsCheckCollision(this.Pos,newPos) != null)
+    if(gunsCheckCollision(this.Pos,this.NewPos) != null)
     {
         this.Bazooka = true;
         this.BazookaWeapon = 10;
         this.BazookaState = "Ready";
     }
        
-
-     //Collision Check is finished apply new pos to current
-     vec3.copy(this.Pos,newPos);
-
+    //Collision Check is finished apply new pos to current
+    vec3.copy(this.Pos,this.NewPos);
 
     if(pDead && this.State!= "Falling")
     {
@@ -365,6 +366,7 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos,pHeroDir,pHeroFire)
     if (this.State=="Dead") return;
 
     var elapsed = timeGetElapsedInS();
+    
 
     //Human collision Detection
     this.IsInTarget = false;
@@ -397,7 +399,7 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos,pHeroDir,pHeroFire)
 
         // Position   
         this.AngleRange = this.Speed;
-        var elapsedFactor = ( 8.0*elapsed)/Math.PI;
+        var elapsedFactor = 16.0/Math.PI;
         var distFeet6 = Math.sin(degToRad(this.AngleRange*6.0));
         var distFeet12 = Math.sin(degToRad(this.AngleRange*10.0));
         var distFeet = distFeet6*3.4 + distFeet6*1.9 + distFeet12*1.5;
@@ -406,8 +408,8 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos,pHeroDir,pHeroFire)
 
         var rotationAngle = 0;
         do{
-            tmpNewPos[2]  = this.Pos[2] - speed * 2.0 * this.Dir[2];
-            tmpNewPos[0]  = this.Pos[0] - speed * 2.0 * this.Dir[0];
+            tmpNewPos[2]  = this.Pos[2] - speed * this.Dir[2];
+            tmpNewPos[0]  = this.Pos[0] - speed * this.Dir[0];
             tmpNewPos[1]  = groundGetY(tmpNewPos[0], tmpNewPos[2]) ;
             if (waterIsUnder(tmpNewPos[1]))
             {
@@ -418,7 +420,16 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos,pHeroDir,pHeroFire)
         } while(waterIsUnder(tmpNewPos[1]) && rotationAngle<6.5);
          
         tmpNewPos[1]  = tmpNewPos[1] +5.5 ;
-        vec3.copy(this.Pos,tmpNewPos);      
+
+        
+        vec3.rotateY(this.Dir,this.Dir,[0,0,0],rotationAngle);
+        this.HSpeed = -speed;
+        this.computeNewPosition(this.Dir,true,collisionEnemiesGetPoint);
+
+        vec3.copy(this.Pos,this.NewPos );
+
+
+      //  vec3.copy(this.Pos,tmpNewPos );      
 
         // Gun Target Dir
         //Process history of target position to simulate reaction time of 0,3s
