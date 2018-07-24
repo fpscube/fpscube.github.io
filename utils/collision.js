@@ -10,6 +10,7 @@ function  collisionGetPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOffset)
     return collision;
 } 
 
+
 function  collisionObjectGetPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOffset)
 {
     var collision = pCollision;
