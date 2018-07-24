@@ -1,22 +1,5 @@
 
-
-var gunsFragmentShader= `
-precision lowp float;
-
-varying vec3 v_normal;     
-uniform vec4 uVertexColor;   
-
-void main() {
-  float light;
-
-  light = dot(v_normal, vec3(0.0,1.0,0.0))*0.5 +0.5; 
-
-  gl_FragColor = vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,uVertexColor.a) ;
-}
-`;
-
-
-var gunsBulletFragmentShader= `
+var gunsExpFragmentShader= `
 precision lowp float;
 
 uniform vec4 uVertexColor;   
@@ -24,28 +7,6 @@ uniform vec4 uVertexColor;
 void main() {
   gl_FragColor = uVertexColor;
 }
-`;
-
-var gunsVertexShader = `    
-	attribute vec4 aVertexPosition;
-    attribute vec3 aVertexNormal;
-    
-	uniform mat4 uMVMatrix;
-	uniform mat4 uPMatrix;
-    uniform mat4 uMVInverseTransposeMatrix;    
-    
-    varying vec3 v_normal; 
-    
-	void main() {
-
-
-	// Multiply the position by the matrix.
-	gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
-
-	// orient the normals and pass to the fragment shader
-	v_normal =normalize( mat3(uMVInverseTransposeMatrix) * aVertexNormal);
-
-	}
 `;
 
 var gunsShaderProgram;
@@ -57,9 +18,8 @@ var gunCollisionMatrix;
 var gunBulletList;
 
 function gunsInit()
-{
-    gunsShaderProgram = initShaders(gunsVertexShader,gunsFragmentShader);
-    gunsExpShaderProgram = initShaders(gunsVertexShader,gunsBulletFragmentShader);
+{  
+    gunsExpShaderProgram =  SphereInitShaders(SphereVertexShader,gunsExpFragmentShader);   
    // gunPos = [-50.0,35,0]; 
     gunPos = [10.0,groundGetY(10.0,20.0)+20.0,20];
     gunCollisionMatrix = mat4.create();
@@ -146,7 +106,7 @@ function gunsDrawFct(pPos)
 		mat4.rotate(mvMatrix,mvMatrix,  degToRad(i), [0, 0, 1]);
 		mat4.translate(mvMatrix,mvMatrix,[0.4,0.0,0.0]); 
 			mat4.scale(mvMatrix,mvMatrix,[0.2,0.6,2.5]);
-			Sphere.Draw(gunsShaderProgram);   
+			Sphere.Draw(SphereShaderProgram);   
 		mvPopMatrix(); 
     }
     
@@ -157,7 +117,7 @@ function gunsDrawFct(pPos)
     mvPushMatrix();
     mat4.translate(mvMatrix,mvMatrix,[0.0,0.2,0.7]); 
         mat4.scale(mvMatrix,mvMatrix,[0.2,1.0,0.2]);
-        Sphere.Draw(gunsShaderProgram);   
+        Sphere.Draw(SphereShaderProgram);   
     mvPopMatrix(); 
 
     
@@ -165,7 +125,7 @@ function gunsDrawFct(pPos)
     mat4.translate(mvMatrix,mvMatrix,[1.2,0.6,0.7]); 
 		mat4.rotate(mvMatrix,mvMatrix,  degToRad(20), [0, 0, 1]);
         mat4.scale(mvMatrix,mvMatrix,[1.5,0.2,0.2]);
-        Sphere.Draw(gunsShaderProgram);   
+        Sphere.Draw(SphereShaderProgram);   
     mvPopMatrix(); 
 
 
@@ -188,7 +148,7 @@ function  _gunsAllCollisionGetPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquare
     collision = CTreesInst.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
     collision = CStoneInst.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
     collision = groundGetCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
-    collision = waterGetCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
+    collision = groundWaterGetCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
 
     return collision;
 } 
@@ -300,7 +260,7 @@ class CBullet
         mvPushMatrix();
         mat4.translate(mvMatrix,mvMatrix,this.Pos); 
         mat4.scale(mvMatrix,mvMatrix,[this.Scale,this.Scale,this.Scale]);        
-        Sphere.Draw(this.Explosion?gunsExpShaderProgram:gunsShaderProgram);   
+        Sphere.Draw(this.Explosion?gunsExpShaderProgram:SphereShaderProgram);   
         mvPopMatrix();
     }
 

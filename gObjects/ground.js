@@ -6,6 +6,74 @@ var groundPositions;
 var groundNormals;
 var groundIndices;
 var groundSectorInst;
+var groundWaterYLevel=-28.5;
+var groundShaderProgram;
+
+
+var groundVertexShader = `    
+	attribute vec4 aVertexPosition;
+	attribute vec3 aVertexNormal;
+	uniform mat4 uMVMatrix;
+	uniform mat4 uPMatrix;
+	uniform mat4 uMVInverseTransposeMatrix;    
+	varying vec3 v_normal; 
+	varying vec4 a_position;   
+	varying vec4 v_position; 
+	void main() {
+
+	a_position= aVertexPosition;
+
+	// Multiply the position by the matrix.
+	v_position = uMVMatrix * aVertexPosition;
+	gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
+
+	// orient the normals and pass to the fragment shader
+	v_normal =normalize( mat3(uMVInverseTransposeMatrix) * aVertexNormal);
+
+	}
+`;
+var groundFragmentShader = `
+    precision lowp float;
+    
+    varying vec3 v_normal;   
+    varying vec4 v_position;   
+	varying vec4 a_position;    
+    uniform vec4 uVertexColor;    
+    uniform float uCounter; 
+    uniform float uWaterY;
+    
+    void main() {
+      float light;
+      float lightWater;
+      float waterIndex=0.0;
+      vec4 colorGround;
+      vec4 colorWater;
+
+      waterIndex = 0.0 -(v_position.y - uWaterY) ;
+      if (waterIndex>1.0) waterIndex = 1.0;
+      if (waterIndex<0.0) waterIndex = 0.0;
+
+      float dist = sqrt(v_position.x*v_position.x + v_position.z*v_position.z);
+      float x = sin((dist+ 2.0*uCounter)/17.0)/2.0+ 0.50 + sin((dist+ 3.0*uCounter)/35.0)/2.0+ 0.50 + sin((v_position.x + 10.0*uCounter)/60.0)/2.0+0.50;
+      float z = cos((dist+ uCounter)/7.0)/2.0+ 0.50 + cos((dist+ 4.0*uCounter)/15.0)/2.0+0.50 + cos((dist+ 6.0*uCounter)/35.0)/2.0+ 0.50 +  cos((v_position.x + 10.0*uCounter)/60.0)/2.0+0.50;
+      lightWater = dot(normalize(vec3(x,8.0,z)), vec3(0.0,1.0,0.0));
+  
+      light = dot(v_normal, vec3(0.0,1.0,0.0)); 
+      
+      colorGround = vec4(0.1,0.1,0.1,uVertexColor.a); 
+      colorWater = vec4(0.1,0.1,0.1,uVertexColor.a); 
+      
+     
+      colorGround += vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,0.0) ;
+      colorWater += vec4(0.108*lightWater,0.409*lightWater,0.627*lightWater,0.0) ;
+      
+
+      
+      gl_FragColor = mix(colorGround,colorWater,waterIndex);
+    }
+`;
+
+
 
 function groundGetY(x,z)
 {
@@ -63,6 +131,8 @@ class CGroundSector
    var groundPositions=[];
    var groundNormals=[];
    var groundIndices=[];
+
+   groundShaderProgram = initShaders(groundVertexShader,groundFragmentShader);
   
     for (var ix=0;ix<=pRes;ix+=1)
     {    
@@ -98,7 +168,7 @@ class CGroundSector
     }
   
     
-    gl.useProgram(shaderProgram);
+    gl.useProgram(groundShaderProgram);
   
     // Vertex Buffer
     this.groundVertexBuffer = gl.createBuffer();
@@ -130,23 +200,23 @@ class CGroundSector
   	mat4.identity(mvMatrix)    
   
     gl.bindBuffer(gl.ARRAY_BUFFER, this.groundVertexBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(groundShaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.groundNormalBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(groundShaderProgram.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.groundIndiceBuffer);
     
-    gl.useProgram(shaderProgram);
+    gl.useProgram(groundShaderProgram);
     		
-    gl.uniform4fv (shaderProgram.vertexColorAttribute, shaderVertexColorVector);
+    gl.uniform4fv (groundShaderProgram.vertexColorAttribute, shaderVertexColorVector);
     
-    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+    gl.uniformMatrix4fv(groundShaderProgram.mvMatrixUniform, false, mvMatrix);
+    gl.uniformMatrix4fv(groundShaderProgram.pMatrixUniform, false, pMatrix);
     
     mat4.invert(mvInverseMatrix,mvMatrix);
     mat4.transpose(mvInverseTransposeMatrix,mvInverseMatrix);
-    gl.uniformMatrix4fv(shaderProgram.mvInverseTransposeMatrix, false, mvInverseTransposeMatrix);
+    gl.uniformMatrix4fv(groundShaderProgram.mvInverseTransposeMatrix, false, mvInverseTransposeMatrix);
 
     
     gl.drawElements(gl.TRIANGLES,this.nbElement, gl.UNSIGNED_SHORT,0);
@@ -191,5 +261,48 @@ function groundDraw(pPosX,pPosZ)
   groundSectorInst[ix+1][iz].drawSector();
   groundSectorInst[ix+1][iz-1].drawSector();
   groundSectorInst[ix+1][iz+1].drawSector();
+
+  groundWaterDraw();
   
+}
+
+
+
+function groundWaterGetCollisionPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOffset)
+{
+	var collision = pCollision;
+	if ((pRayPoint1[1]>=groundWaterYLevel) && (pRayPoint2[1]<groundWaterYLevel))
+	{
+		var collision = [pRayPoint2[0],groundWaterYLevel,pRayPoint2[0]];	
+		if (pCollision!=null)
+		{
+		  var prevSquaredDist = vec3.squaredDistance(pRayPoint1,pCollision);
+		  var squaredDist = vec3.squaredDistance(pRayPoint1,collision);
+		  if(prevSquaredDist<squaredDist)
+		  {
+			  collision = pCollision;
+		  }
+		}
+	}
+	return collision;
+}
+
+function groundIsUnderWater(y)
+{
+	return (y<groundWaterYLevel);
+}
+
+function groundWaterDraw()
+{
+
+  shaderWaterY = groundWaterYLevel;
+	mat4.identity(mvMatrix); 
+	mat4.translate(mvMatrix,mvMatrix, [0.0,groundWaterYLevel-2.0,0.0]);	
+	mat4.scale(mvMatrix,mvMatrix,[10000.0,0.0,10000.0]);	
+  mat4.rotate(mvMatrix,mvMatrix,  degToRad(10), [1, 0, 0]);  
+
+	gl.uniform1f (groundShaderProgram.counter, shaderCounter);
+	gl.uniform1f (groundShaderProgram.waterY, shaderWaterY);
+	squareDraw(groundShaderProgram);
+  shaderWaterY = -1000;
 }

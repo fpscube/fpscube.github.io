@@ -24,73 +24,9 @@ function shaderCompil(str,shaderType) {
 }
 
 
-var vertexShader1 = `    
-	attribute vec4 aVertexPosition;
-	attribute vec3 aVertexNormal;
-	uniform mat4 uMVMatrix;
-	uniform mat4 uPMatrix;
-	uniform mat4 uMVInverseTransposeMatrix;    
-	varying vec3 v_normal; 
-	varying vec4 a_position;   
-	varying vec4 v_position; 
-	void main() {
-
-	a_position= aVertexPosition;
-
-	// Multiply the position by the matrix.
-	v_position = uMVMatrix * aVertexPosition;
-	gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
-
-	// orient the normals and pass to the fragment shader
-	v_normal =normalize( mat3(uMVInverseTransposeMatrix) * aVertexNormal);
-
-	}
-`;
-var fragmentShader1 = `
-    precision lowp float;
-    
-    varying vec3 v_normal;   
-    varying vec4 v_position;   
-	varying vec4 a_position;    
-    uniform vec4 uVertexColor;    
-    uniform float uCounter; 
-    uniform float uWaterY;
-    
-    void main() {
-      float light;
-      float lightWater;
-      float waterIndex=0.0;
-      vec4 colorGround;
-      vec4 colorWater;
-
-      waterIndex = 0.0 -(v_position.y - uWaterY) ;
-      if (waterIndex>1.0) waterIndex = 1.0;
-      if (waterIndex<0.0) waterIndex = 0.0;
-
-      float dist = sqrt(v_position.x*v_position.x + v_position.z*v_position.z);
-      float x = sin((dist+ 2.0*uCounter)/17.0)/2.0+ 0.50 + sin((dist+ 3.0*uCounter)/35.0)/2.0+ 0.50 + sin((v_position.x + 10.0*uCounter)/60.0)/2.0+0.50;
-      float z = cos((dist+ uCounter)/7.0)/2.0+ 0.50 + cos((dist+ 4.0*uCounter)/15.0)/2.0+0.50 + cos((dist+ 6.0*uCounter)/35.0)/2.0+ 0.50 +  cos((v_position.x + 10.0*uCounter)/60.0)/2.0+0.50;
-      lightWater = dot(normalize(vec3(x,8.0,z)), vec3(0.0,1.0,0.0));
-  
-      light = dot(v_normal, vec3(0.0,1.0,0.0)); 
-      
-      colorGround = vec4(0.1,0.1,0.1,uVertexColor.a); 
-      colorWater = vec4(0.1,0.1,0.1,uVertexColor.a); 
-      
-     
-      colorGround += vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,0.0) ;
-      colorWater += vec4(0.108*lightWater,0.409*lightWater,0.627*lightWater,0.0) ;
-      
-
-      
-      gl_FragColor = mix(colorGround,colorWater,waterIndex);
-    }
-`;
 
 
 
-
-var shaderProgram;
 
 function initShaders(vertexShaderStr,fragmentShaderStr) {
 
@@ -153,7 +89,6 @@ function webGLStart() {
 	document.addEventListener('pointerlockchange', lockChangeAlert, false);
 	document.addEventListener('mozpointerlockchange', lockChangeAlert, false);
 
-	shaderProgram = initShaders(vertexShader1,fragmentShader1); 
 
 	ctx2d = canvas2D.getContext("2d");
 

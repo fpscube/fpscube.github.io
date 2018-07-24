@@ -1,3 +1,52 @@
+var SquareFragmentShader = `
+precision lowp float;
+   
+uniform vec4 uVertexColor;   
+
+void main() {
+  gl_FragColor = uVertexColor;
+}`;
+
+var SquareVertexShader = `    
+	attribute vec4 aVertexPosition;
+	uniform mat4 uMVMatrix;
+  uniform mat4 uPMatrix;  
+   
+	void main() {
+
+	// Multiply the position by the matrix.
+	gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
+
+	}
+`;
+
+
+var SquareShaderProgram;
+
+function SquareInitShaders(vertexShaderStr,fragmentShaderStr) {
+
+  var vertexShader = shaderCompil(vertexShaderStr,gl.VERTEX_SHADER);
+  var fragmentShader = shaderCompil(fragmentShaderStr,gl.FRAGMENT_SHADER);
+
+  var outShaderProgram = gl.createProgram();
+  gl.attachShader(outShaderProgram, vertexShader);
+  gl.attachShader(outShaderProgram, fragmentShader);
+  gl.linkProgram(outShaderProgram);
+
+  if (!gl.getProgramParameter(outShaderProgram, gl.LINK_STATUS)) {
+      alert("Could not initialise shaders");
+  }
+
+  outShaderProgram.vertexPositionAttribute = gl.getAttribLocation(outShaderProgram, "aVertexPosition");
+  gl.enableVertexAttribArray(outShaderProgram.vertexPositionAttribute);
+
+  outShaderProgram.vertexColorAttribute = gl.getUniformLocation(outShaderProgram, "uVertexColor");
+  outShaderProgram.pMatrixUniform = gl.getUniformLocation(outShaderProgram, "uPMatrix");
+  outShaderProgram.mvMatrixUniform = gl.getUniformLocation(outShaderProgram, "uMVMatrix");
+
+  return outShaderProgram;
+}
+
 var squarePositions = [
     // Front face
     -1.0, -1.0,  0.0,
@@ -28,6 +77,8 @@ var squareIndiceBuffer;
 function squareInit()
 {
 
+  SquareShaderProgram = SquareInitShaders(SquareVertexShader,SquareFragmentShader);
+
   // Vertex Buffer
   squareVertexBuffer = gl.createBuffer();
   squareVertexBuffer.itemSize = 3;
@@ -35,14 +86,7 @@ function squareInit()
   gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(squarePositions), gl.STATIC_DRAW);	
 
-  // Normal Buffer	
-  squareNormalBuffer = gl.createBuffer();
-  squareNormalBuffer.itemSize = 3;
-  squareNormalBuffer.numItems = 4;	
-  gl.bindBuffer(gl.ARRAY_BUFFER, squareNormalBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(squareNormals), gl.STATIC_DRAW);	
-  gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, squareNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
-    
+
   // Index Buffer
   squareIndiceBuffer = gl.createBuffer ();
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareIndiceBuffer);
@@ -65,8 +109,6 @@ function squareDraw(pShaderProgram)
     gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBuffer);
     gl.vertexAttribPointer(pShaderProgram.vertexPositionAttribute, squareVertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, squareNormalBuffer);
-    gl.vertexAttribPointer(pShaderProgram.vertexNormalAttribute, squareNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareIndiceBuffer);
 

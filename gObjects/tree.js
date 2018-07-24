@@ -1,44 +1,3 @@
-
-
-var treeFragmentShader= `
-precision lowp float;
-
-varying vec3 v_normal;     
-uniform vec4 uVertexColor;   
-
-void main() {
-  float light;
-
-  light = dot(v_normal, vec3(0.0,1.0,0.0))*0.5 +0.5; 
-
-  gl_FragColor = vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,uVertexColor.a) ;
-}
-`;
-
-var treeVertexShader = `    
-	attribute vec4 aVertexPosition;
-    attribute vec3 aVertexNormal;
-    
-	uniform mat4 uMVMatrix;
-	uniform mat4 uPMatrix;
-    uniform mat4 uMVInverseTransposeMatrix;    
-    
-    varying vec3 v_normal; 
-    
-	void main() {
-
-
-	// Multiply the position by the matrix.
-	gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
-
-	// orient the normals and pass to the fragment shader
-	v_normal =normalize( mat3(uMVInverseTransposeMatrix) * aVertexNormal);
-
-	}
-`;
-
-var treeShaderProgram;
-
 var CTreesInst;
 
 class CTrees
@@ -60,7 +19,7 @@ class CTrees
            x = xId*100 + 50;
            z = zId*100 + 50;
 
-           if (waterIsUnder(y)) 
+           if (groundIsUnderWater(y)) 
            { 
                continue;
             }
@@ -72,7 +31,6 @@ class CTrees
             this.hash[xId][zId] = newTree;
         }
         CTreesInst = this;
-        treeShaderProgram = initShaders(treeVertexShader,treeFragmentShader);
     }
 
     
@@ -162,7 +120,7 @@ class CTree
                 //  mat4.rotate(mvMatrix,mvMatrix,  degToRad(2), [1, 0, 0]);   
                     mat4.scale(mvMatrix,mvMatrix,[10.0-i*1.0,12.0,10.0-i*1.0]); 
                     this.storeCollisionMatrix(mvMatrix);
-                    Sphere.Draw(treeShaderProgram);   
+                    Sphere.Draw(SphereShaderProgram);   
                 mvPopMatrix(); 
         }
 
@@ -175,7 +133,7 @@ class CTree
                     mat4.rotate(mvMatrix,mvMatrix,  degToRad(-20), [0, 0, 1]);  
                     mat4.scale(mvMatrix,mvMatrix,[40.0,2.0,6.0]); 
                     this.storeCollisionMatrix(mvMatrix);
-                    Sphere.Draw(treeShaderProgram);   
+                    Sphere.Draw(SphereShaderProgram);   
                 mvPopMatrix(); 
         }
 

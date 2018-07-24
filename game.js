@@ -39,7 +39,6 @@ class CGame
 		// init gl object
 		this.Info = new CInfo();
 		squareInit();
-		cubeInit();
 		SphereInit();
 
 		this.Trees = new CTrees();
@@ -47,7 +46,6 @@ class CGame
 		this.Hero = new CHuman([-575,30,81],2);
 
 		groundInit();
-		waterInit();
 		gunsInit();
 					
 
@@ -155,7 +153,6 @@ class CGame
 		mat4.multiply(pMatrix,pMatrix,lookAtMatrix)
 		
 		groundDraw(this.Hero.Pos[0],this.Hero.Pos[2]);
-		waterDraw();	
 		
 		this.Trees.draw();
 		this.Stone.draw();	 

@@ -1,5 +1,73 @@
 var Sphere;
-function SphereInit() {Sphere = new CSphere;}
+var SphereShaderProgram;
+
+
+function SphereInit() 
+{
+    Sphere = new CSphere;
+    SphereShaderProgram = SphereInitShaders(SphereVertexShader,SphereFragmentShader);
+}
+
+function SphereInitShaders(vertexShaderStr,fragmentShaderStr) {
+
+    var vertexShader = shaderCompil(vertexShaderStr,gl.VERTEX_SHADER);
+    var fragmentShader = shaderCompil(fragmentShaderStr,gl.FRAGMENT_SHADER);
+
+    var outShaderProgram = gl.createProgram();
+    gl.attachShader(outShaderProgram, vertexShader);
+    gl.attachShader(outShaderProgram, fragmentShader);
+    gl.linkProgram(outShaderProgram);
+
+    if (!gl.getProgramParameter(outShaderProgram, gl.LINK_STATUS)) {
+        alert("Could not initialise shaders");
+    }
+
+    outShaderProgram.vertexPositionAttribute = gl.getAttribLocation(outShaderProgram, "aVertexPosition");
+    gl.enableVertexAttribArray(outShaderProgram.vertexPositionAttribute);
+
+    outShaderProgram.vertexColorAttribute = gl.getUniformLocation(outShaderProgram, "uVertexColor");
+    outShaderProgram.pMatrixUniform = gl.getUniformLocation(outShaderProgram, "uPMatrix");
+    outShaderProgram.mvMatrixUniform = gl.getUniformLocation(outShaderProgram, "uMVMatrix");
+    outShaderProgram.mvInverseTransposeMatrix = gl.getUniformLocation(outShaderProgram, "uMVInverseTransposeMatrix");
+
+    return outShaderProgram;
+}
+
+
+var SphereFragmentShader = `
+precision lowp float;
+
+varying vec3 v_normal;     
+uniform vec4 uVertexColor;   
+
+void main() {
+  float light;
+
+  light = dot(v_normal, vec3(0.0,1.0,0.0))*0.5 +0.5; 
+  
+  gl_FragColor = vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,uVertexColor.a) ;
+}`;
+
+var SphereVertexShader = `    
+	attribute vec4 aVertexPosition;
+	uniform mat4 uMVMatrix;
+	uniform mat4 uPMatrix;
+	uniform mat4 uMVInverseTransposeMatrix;    
+	varying vec3 v_normal; 
+	varying vec4 a_position;   
+	void main() {
+
+	a_position= aVertexPosition;
+
+	// Multiply the position by the matrix.
+	gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
+
+	// orient the normals and pass to the fragment shader
+	v_normal =normalize( mat3(uMVInverseTransposeMatrix) * vec3(aVertexPosition));
+
+	}
+`;
+
 
 class CSphere
 {
@@ -36,11 +104,6 @@ class CSphere
                 this.positions.push(pos[0]);
                 this.positions.push(pos[1]);
                 this.positions.push(pos[2]);
-                
-                // compute normal position
-                this.normals.push(pos[0]);
-                this.normals.push(pos[1]);
-                this.normals.push(pos[2]);
 
                 if (((iv+1)<=res) && ((iu+1)<=res))
                 {
@@ -56,7 +119,7 @@ class CSphere
             }
         }
          
-        gl.useProgram(shaderProgram);
+        
 
         // Vertex Buffer
         this.vertexBuffer = gl.createBuffer();
@@ -65,31 +128,22 @@ class CSphere
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.positions), gl.STATIC_DRAW);	
 
-        // Normal Buffer	
-        this.normalBuffer = gl.createBuffer();
-        this.normalBuffer.itemSize = 3;
-        this.normalBuffer.numItems = this.normals.length/3;
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.normals), gl.STATIC_DRAW);	
-            
         // Index Buffer
         this.indiceBuffer = gl.createBuffer ();
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indiceBuffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
     }
 
+
+
     Draw(pShaderProgram)
     {
                
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
         gl.vertexAttribPointer(pShaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-    
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
-        gl.vertexAttribPointer(pShaderProgram.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
-    
+
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indiceBuffer);
     
-        
         gl.useProgram(pShaderProgram);
         
         //function setMatrixUniforms(pShaderProgram) {

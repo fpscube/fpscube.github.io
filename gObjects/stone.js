@@ -1,27 +1,12 @@
 
 var CStoneInst;
 
+
 class CStone
 {
 
     constructor(){
-        var fragmentShader= `
-        precision lowp float;
-        
-        varying vec3 v_normal;     
-        uniform vec4 uVertexColor;   
-        
-        void main() {
-          float light;
-
-          light = dot(v_normal, vec3(0.0,1.0,0.0))*0.5 +0.5; 
-          
-          gl_FragColor = vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,uVertexColor.a) ;
-        }
-    `;
-
         CStoneInst = this;
-        this.shaderProgram =  initShaders(vertexShader1,fragmentShader);
         this.CollisionMatrixList = [];
     }
 
@@ -64,7 +49,7 @@ class CStone
             mat4.translate(mvMatrix,mvMatrix,[0.0,20.0,0.0]); 
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(10), [1, 0, 0]);   
             mat4.scale(mvMatrix,mvMatrix,[80.0,10.0,80.0]); 
-            Sphere.Draw(this.shaderProgram);   
+            Sphere.Draw(SphereShaderProgram);   
             this._storeCollisionMatrix(mvMatrix);
         mvPopMatrix();
 
@@ -73,7 +58,7 @@ class CStone
             mat4.translate(mvMatrix,mvMatrix,[-20.0,-5.0,-50.0]);  
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(120), [1, 0, 0]);   
             mat4.scale(mvMatrix,mvMatrix,[20.0,20.0,30.0]); 
-            Sphere.Draw(this.shaderProgram); 
+            Sphere.Draw(SphereShaderProgram); 
         
             this._storeCollisionMatrix(mvMatrix);
         mvPopMatrix();
@@ -85,7 +70,7 @@ class CStone
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(-5), [0, 0,1]);;  
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(84), [1, 0, 0]);   
             mat4.scale(mvMatrix,mvMatrix,[50.0,200.0,10.0]); 
-            Sphere.Draw(this.shaderProgram); 
+            Sphere.Draw(SphereShaderProgram); 
             this._storeCollisionMatrix(mvMatrix);
         mvPopMatrix();
         
@@ -94,7 +79,7 @@ class CStone
             mat4.translate(mvMatrix,mvMatrix,[150.0,20.0,-350.0]);  
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(85), [1, 0, 0]);   
             mat4.scale(mvMatrix,mvMatrix,[20.0,20.0,25.0]); 
-            Sphere.Draw(this.shaderProgram); 
+            Sphere.Draw(SphereShaderProgram); 
             this._storeCollisionMatrix(mvMatrix);
         mvPopMatrix();
 

@@ -77,19 +77,11 @@ class CInfo
 		mat4.identity(mvMatrix);
 		mat4.translate(mvMatrix,mvMatrix, [ gl.viewportWidth/2.0,gl.viewportHeight/2.0,0.0]);
 		mat4.scale(mvMatrix,mvMatrix,[2.0,2.0,1.0]);
-		squareDraw(shaderProgram);	
+		squareDraw(SquareShaderProgram);	
 		
 
 		if(this.GameState == "Win") 	ctx2d.fillText("You Win - " + this.Time,canvas2D.width/2,canvas2D.height/2 );
 		if(this.GameState == "Lose") 	ctx2d.fillText("You Lose ",canvas2D.width/2,canvas2D.height/2 );
-
-
-		// // Life Bar Display			
-		// shaderVertexColorVector = [1.0,1.0,1.0,1.0];
-		// mat4.ortho(pMatrix, -2.0, 10.0, -10.0, 0.5, -1.0, 1.0);	
-		// mat4.identity(mvMatrix);
-		// mat4.scale(mvMatrix,mvMatrix,[this.LifeQt/10,0.1,0.1]);
-		// squareDraw(shaderProgram);
 
 		// Injury Display			
 		if (this.InjuryAlpha>0)
@@ -97,7 +89,7 @@ class CInfo
 			shaderVertexColorVector = [1.0,0.0,0.0,this.InjuryAlpha];
 			mat4.ortho(pMatrix, -1.0, 1.0, -1.0, 1.0, 0.0, 1.0);	
 			mat4.identity(mvMatrix);
-			squareDraw(shaderProgram);
+			squareDraw(SquareShaderProgram);
 		}
 			
 	}

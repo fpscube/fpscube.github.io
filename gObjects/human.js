@@ -4,11 +4,9 @@ var CHumansInst;
 var HumanFragmentShaderEnemyFire= `
 precision lowp float;
     
-varying vec4 v_position; 
 varying vec4 a_position;      
 uniform vec4 uVertexColor;    
 uniform float uCounter; 
-uniform float uWaterY;
 
 void main()
 {
@@ -21,11 +19,9 @@ var HumanFragmentShaderHeroFire = `
 
 precision lowp float;
     
-varying vec4 v_position; 
 varying vec4 a_position;      
 uniform vec4 uVertexColor;    
 uniform float uCounter; 
-uniform float uWaterY;
 
 void main()
 {
@@ -35,31 +31,15 @@ gl_FragColor = vec4(1.0-dist,1.0-dist,0.0,cos(uCounter*6.0)-dist );
 }`;
 
 
-var HumanFragmentShader = `
-precision lowp float;
-
-varying vec3 v_normal;     
-uniform vec4 uVertexColor;   
-
-void main() {
-  float light;
-
-  light = dot(v_normal, vec3(0.0,1.0,0.0))*0.5 +0.5; 
-  
-  gl_FragColor = vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,uVertexColor.a) ;
-}`;
-
 
 
 var HumanFireHeroShaderProgram;
 var HumanFireEnemyShaderProgram;
-var HumanShaderProgram;
 
 function humansInit()
 {
-    HumanFireHeroShaderProgram =  initShaders(vertexShader1,HumanFragmentShaderHeroFire);
-    HumanFireEnemyShaderProgram =  initShaders(vertexShader1,HumanFragmentShaderEnemyFire);
-    HumanShaderProgram =  initShaders(vertexShader1,HumanFragmentShader);   
+    HumanFireHeroShaderProgram =  initShaders(SphereVertexShader,HumanFragmentShaderHeroFire);
+    HumanFireEnemyShaderProgram =  initShaders(SphereVertexShader,HumanFragmentShaderEnemyFire);
 }
 
 class CEnemies
@@ -69,8 +49,15 @@ class CEnemies
     {
         this.humans=[];
         for(var i =0 ;i<pNbEnemies;i++){
-            y =groundGetY(i*20,0) +30.0;
-            this.humans.push(new CHuman([i*20,y,0],Math.random()*8));
+
+            var  x = Math.sin(5*(i/pNbEnemies*2*Math.PI)) *300;
+            var  z = Math.sin(4*(i/pNbEnemies*2*Math.PI)) *300;
+            var  y = groundGetY(x,z) 
+
+            if (!groundIsUnderWater(y))
+            {
+                this.humans.push(new CHuman([x,y+200,z],Math.random()*8));
+            }
     	}	
     
     
@@ -145,7 +132,7 @@ constructor(pPos,pSpeed) {
     this.NewPos=[];
     this.HSpeed=0;
     this.VSpeed=0;
-    this.VAcc=-10.0;
+    this.VAcc=-300.0;
     this.Dir=[-1,0,1];
     this.HeadDir=[0,0,0];
     this.GunDir=[0,0,0];
@@ -177,66 +164,58 @@ constructor(pPos,pSpeed) {
 }
 
 
-computeNewPosition(pRunDir,pRunning,pCollisionFct)
+computeNewVerticalPosition()
+{
+    //Check Vertical Collision 
+    var previousBodyVPos =  [this.NewPos[0],this.Pos[1],this.NewPos[2]];
+    var newFeetVPos =  [this.NewPos[0],this.NewPos[1]-5.5,this.NewPos[2]];
+    var feetCollision = collisionObjectAndGroundGetPoint(previousBodyVPos,newFeetVPos,null,0);
+
+    //If collision  then ajust vertical position
+    if (feetCollision != null) {
+        this.NewPos[1] = feetCollision[1] + 5.5;
+        this.VSpeed = 0;
+    }
+}
+
+computeNewPosition(pRunDir)
 {
     var elapsed = timeGetElapsedInS();
+    var mvCollision = false;
 
     //Store current Pos In New Pos
     vec3.copy(this.NewPos,this.Pos);
-    
-    //Horizontal Collision with Stone
-    var newHorizontalPos=[];
-    newHorizontalPos[0] = this.Pos[0] + this.HSpeed*elapsed*pRunDir[0];
-    newHorizontalPos[2] = this.Pos[2] + this.HSpeed*elapsed*pRunDir[2];
-    newHorizontalPos[1] = this.Pos[1] ;
-    
-    
-    var horzCollisionPos = collisionObjectGetPoint(this.Pos,newHorizontalPos,null,0);
 
-    if (horzCollisionPos==null && pRunning )
+    //Get New Vertical Speed (gravity)     
+    this.VSpeed += this.VAcc*elapsed;
+
+    //Get New Position
+    this.NewPos[0] = this.Pos[0] + this.HSpeed*elapsed*pRunDir[0];
+    this.NewPos[2] = this.Pos[2] + this.HSpeed*elapsed*pRunDir[2];
+    this.NewPos[1] = this.Pos[1] + this.VSpeed*elapsed;
+    
+    //Compute vertical position
+    this.computeNewVerticalPosition();
+
+    // if Running
+    if (this.HSpeed!=0)
     {
-        //Vertical Collision to detect new y Pos
-        var tmpNewPos=[];
-        vec3.copy(tmpNewPos,newHorizontalPos);  
-        this.VSpeed += this.VAcc*elapsed;
-        tmpNewPos[1] += this.VSpeed - 5.5;
-        var collisionPos = pCollisionFct(newHorizontalPos,tmpNewPos,null,0);
-        if(collisionPos!=null) 
-        {
-            tmpNewPos[1] = collisionPos[1];
-            this.VSpeed = 0;
-        }
-        
-        //Final Collision
-        tmpNewPos[1] += 5.5;
-        var collisionPos1 = pCollisionFct(this.Pos,tmpNewPos,null,16.0);
-        tmpNewPos[1] += 5.0;
-        
-        this.Pos[1] += 5.0;
-        var collisionPos2 = pCollisionFct(this.Pos,tmpNewPos,null,0);        
-        tmpNewPos[1] -= 5.0;
-        this.Pos[1] -= 5.0;	
+        // Check Head and Body Collision
+        var collisionBody = collisionObjectAndGroundGetPoint(this.Pos,this.NewPos,null,16);
+        var collisionHead = collisionObjectAndGroundGetPoint(this.Pos,[this.NewPos[0],this.NewPos[1]+5.0,this.NewPos[2]],null,0);
 
-        if(collisionPos1==null && collisionPos2==null ) 
-        {			
-            vec3.copy(this.NewPos,tmpNewPos);
+        // Undo movement and reajust vertical position if collision 
+        if(collisionBody != null || collisionHead != null)
+        {
+            vec3.copy(this.NewPos,this.Pos);
+            mvCollision = true;
+            //Compute vertical position
+            this.computeNewVerticalPosition();
         }
     }
-    else
-    {
-        //Vertical Collision
-        this.VSpeed += this.VAcc*elapsed;
-        this.NewPos[1] += this.VSpeed - 5.5;
-        var collisionPos = pCollisionFct(this.Pos,this.NewPos,null,0);
-        if(collisionPos!=null) 
-        {
-            this.NewPos[1] = collisionPos[1];
-            this.VSpeed = 0;
-        }
-        this.NewPos[1] += 5.5;
-    }
 
-    
+    // Return true if a collision has occured
+    return mvCollision;
 }
 
 
@@ -249,7 +228,7 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
     //Store Hero New Position
     this.HSpeed  =  (pRunning) ? 50 : 0;
 
-    this.computeNewPosition(pRunDir,pRunning,collisionNoWaterGetPoint);
+    this.computeNewPosition(pRunDir);
 
     // Bazooka
     if(gunsCheckCollision(this.Pos,this.NewPos) != null)
@@ -360,7 +339,7 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos,pHeroDir,pHeroFire)
 
     //Human collision Detection
     this.IsInTarget = false;
-    if (cubeIsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Box))
+    if (Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Box))
     {
         for (var i=0;i<this.CollisionMatrixList.length;i++)
         {
@@ -396,30 +375,22 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos,pHeroDir,pHeroFire)
         var speed = distFeet * elapsedFactor;
         var tmpNewPos=[];
 
-        var rotationAngle = 0;
-        do{
-            tmpNewPos[2]  = this.Pos[2] - speed * this.Dir[2];
-            tmpNewPos[0]  = this.Pos[0] - speed * this.Dir[0];
-            tmpNewPos[1]  = groundGetY(tmpNewPos[0], tmpNewPos[2]) ;
-            if (waterIsUnder(tmpNewPos[1]))
-            {
-                rotationAngle+=0.5
-                vec3.rotateY(this.Dir,this.Dir,[0,0,0],rotationAngle);
-                this.AnimDir.running = false;
-            }
-        } while(waterIsUnder(tmpNewPos[1]) && rotationAngle<6.5);
-         
-        tmpNewPos[1]  = tmpNewPos[1] +5.5 ;
+        
+        this.HSpeed = -speed;
+        var objectCollision = this.computeNewPosition(this.Dir);
+        var rotationAngle = -3.14;
+
+        while((groundIsUnderWater(groundGetY(this.NewPos[0],this.NewPos[2])) || objectCollision)  && rotationAngle<3.14)
+        {
+            rotationAngle+=0.5;
+            vec3.rotateY(this.Dir,this.Dir,[0,0,0],rotationAngle);
+            this.AnimDir.running = false;
+            objectCollision = this.computeNewPosition(this.Dir);
+        } 
 
         
-        vec3.rotateY(this.Dir,this.Dir,[0,0,0],rotationAngle);
-        this.HSpeed = -speed;
-        this.computeNewPosition(this.Dir,true,collisionEnemiesGetPoint);
-
         vec3.copy(this.Pos,this.NewPos );
-
-
-      //  vec3.copy(this.Pos,tmpNewPos );      
+            
 
         // Gun Target Dir
         //Process history of target position to simulate reaction time of 0,3s
@@ -554,8 +525,9 @@ _ArmDraw(pAnimCounter,pIsLeft)
     mvPushMatrix();
         mat4.scale(mvMatrix,mvMatrix,[0.4,1.0,0.4]);
         collisionPushMatrix(this.CollisionMatrixList,mvMatrix);
-        Sphere.Draw(HumanShaderProgram); 
+        Sphere.Draw(SphereShaderProgram); 
     mvPopMatrix();    
+    
     
     //ArmDown    
     mat4.translate(mvMatrix,mvMatrix, [0.0,-0.7,0]);
@@ -564,7 +536,7 @@ _ArmDraw(pAnimCounter,pIsLeft)
     mvPushMatrix();
         mat4.scale(mvMatrix,mvMatrix,[0.32,0.8,0.32]);
         collisionPushMatrix(this.CollisionMatrixList,mvMatrix);
-        Sphere.Draw(HumanShaderProgram); 
+        Sphere.Draw(SphereShaderProgram); 
     mvPopMatrix();
     //Hand    
     shaderVertexColorVector = [0.99,0.76,0.67,1.0];  
@@ -572,7 +544,7 @@ _ArmDraw(pAnimCounter,pIsLeft)
     mvPushMatrix();
         mat4.scale(mvMatrix,mvMatrix,[0.25,0.6,0.25]);
         collisionPushMatrix(this.CollisionMatrixList,mvMatrix);
-        Sphere.Draw(HumanShaderProgram); 
+        Sphere.Draw(SphereShaderProgram); 
     mvPopMatrix();   
 
 
@@ -590,16 +562,16 @@ _ArmDraw(pAnimCounter,pIsLeft)
     else
     {
         //Gun    
-        shaderVertexColorVector = [1.0,1.0,1.0,1.0];
-        mat4.translate(mvMatrix,mvMatrix, [0.0,-0.7,0.6]);
+        shaderVertexColorVector = [0.9,0.9,1.0,1.0];
+        mat4.translate(mvMatrix,mvMatrix, [0.0,-0.7,0.55]);
         mvPushMatrix();
-        mat4.scale(mvMatrix,mvMatrix,[0.2,1.0,0.2]);
-        cubeDraw(HumanShaderProgram);
+        mat4.scale(mvMatrix,mvMatrix,[0.3,1.0,0.3]);
+        Sphere.Draw(SphereShaderProgram);
         mvPopMatrix();
         mvPushMatrix();
         mat4.translate(mvMatrix,mvMatrix, [0.0,0.4,-0.5]);
         mat4.scale(mvMatrix,mvMatrix,[0.2,0.2,0.6]);        
-        cubeDraw(HumanShaderProgram);
+        Sphere.Draw(SphereShaderProgram);
         mvPopMatrix();   
         shaderVertexColorVector = [0.99,0.76,0.67,1.0];  
     }
@@ -650,7 +622,7 @@ _LegDraw(pX,pY,pAnimCounter,pIsLeft)
         mvPushMatrix();
             mat4.scale(mvMatrix,mvMatrix,[0.46,1.9,0.5]);
             collisionPushMatrix(this.CollisionMatrixList,mvMatrix);
-            Sphere.Draw(HumanShaderProgram); 
+            Sphere.Draw(SphereShaderProgram); 
         mvPopMatrix();    
         //Molet
         mat4.translate(mvMatrix,mvMatrix, [0.0,-1.3,0]);
@@ -659,7 +631,7 @@ _LegDraw(pX,pY,pAnimCounter,pIsLeft)
         mvPushMatrix();
             mat4.scale(mvMatrix,mvMatrix,[0.4,1.3,0.4]);
             collisionPushMatrix(this.CollisionMatrixList,mvMatrix);
-            Sphere.Draw(HumanShaderProgram); 
+            Sphere.Draw(SphereShaderProgram); 
         mvPopMatrix();
         //Shoes       
         mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
@@ -668,7 +640,7 @@ _LegDraw(pX,pY,pAnimCounter,pIsLeft)
         mvPushMatrix();
             mat4.scale(mvMatrix,mvMatrix,[0.3,0.2,0.7]);
             collisionPushMatrix(this.CollisionMatrixList,mvMatrix);
-            Sphere.Draw(HumanShaderProgram);     
+            Sphere.Draw(SphereShaderProgram);     
         mvPopMatrix();   
 
     mvPopMatrix();
@@ -717,15 +689,18 @@ draw()
         mat4.translate(mvMatrix,mvMatrix, [0.0,0.0,-0.05]);
         mat4.scale(mvMatrix,mvMatrix,[0.8,0.8,0.55]);
         collisionPushMatrix(this.CollisionMatrixList,mvMatrix);
-        Sphere.Draw(HumanShaderProgram); 
+        Sphere.Draw(SphereShaderProgram); 
     mvPopMatrix();
+    
+    /* draw sphere with same shader */
+    Sphere.Optim = true;
  
     // body middle
     mvPushMatrix();    
         mat4.translate(mvMatrix,mvMatrix, [0,1.0,0]);
         mat4.scale(mvMatrix,mvMatrix,[0.8,1.2,0.5]);
         collisionPushMatrix(this.CollisionMatrixList,mvMatrix);
-        Sphere.Draw(HumanShaderProgram);       
+        Sphere.Draw(SphereShaderProgram);       
     mvPopMatrix();     
 
     // body up
@@ -733,7 +708,7 @@ draw()
         mat4.translate(mvMatrix,mvMatrix, [0,2.0,0]);
         mat4.scale(mvMatrix,mvMatrix,[1.0,1.0,0.5]);
         collisionPushMatrix(this.CollisionMatrixList,mvMatrix);
-        Sphere.Draw(HumanShaderProgram);       
+        Sphere.Draw(SphereShaderProgram);       
     mvPopMatrix(); 
 
     // shouldern
@@ -741,7 +716,7 @@ draw()
         mat4.translate(mvMatrix,mvMatrix, [0,2.60,0]);
         mat4.scale(mvMatrix,mvMatrix,[1.5,0.6,0.5]);
         collisionPushMatrix(this.CollisionMatrixList,mvMatrix);
-        Sphere.Draw(HumanShaderProgram);       
+        Sphere.Draw(SphereShaderProgram);       
     mvPopMatrix(); 
 
     shaderVertexColorVector = [0.99,0.76,0.67,1.0]; 
@@ -750,7 +725,7 @@ draw()
         mat4.translate(mvMatrix,mvMatrix, [0,3.5,0]);
         mat4.scale(mvMatrix,mvMatrix,[0.3,0.8,0.3]);
         collisionPushMatrix(this.CollisionMatrixList,mvMatrix);
-        Sphere.Draw(HumanShaderProgram);
+        Sphere.Draw(SphereShaderProgram);
     mvPopMatrix(); 
 
     
@@ -766,7 +741,7 @@ draw()
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(-20), [1, 0, 0]);
             mat4.scale(mvMatrix,mvMatrix,[0.53,0.53,0.53]); 
             collisionPushMatrix(this.CollisionMatrixList,mvMatrix);
-            Sphere.Draw(HumanShaderProgram);
+            Sphere.Draw(SphereShaderProgram);
     	mvPopMatrix();      
     	
         shaderVertexColorVector = [0.99,0.76,0.67,1.0]; 
@@ -776,14 +751,14 @@ draw()
             mat4.translate(mvMatrix,mvMatrix, [0.0,-0.25,0.1]);
             mat4.scale(mvMatrix,mvMatrix,[0.48,0.6,0.5]); 
             collisionPushMatrix(this.CollisionMatrixList,mvMatrix);
-            Sphere.Draw(HumanShaderProgram);
+            Sphere.Draw(SphereShaderProgram);
     	mvPopMatrix();
 
     	//Nose
     	 mvPushMatrix();
             mat4.translate(mvMatrix,mvMatrix, [0.0,-0.2,0.55]);
             mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.1]); 
-            Sphere.Draw(HumanShaderProgram);
+            Sphere.Draw(SphereShaderProgram);
     	mvPopMatrix();
 
     	//Mooth
@@ -791,7 +766,7 @@ draw()
     	 mvPushMatrix();
             mat4.translate(mvMatrix,mvMatrix, [0.0,-0.5,0.55]);
             mat4.scale(mvMatrix,mvMatrix,[0.1,0.025,0.02]); 
-            Sphere.Draw(HumanShaderProgram);
+            Sphere.Draw(SphereShaderProgram);
     	mvPopMatrix();
 
         shaderVertexColorVector = [0.99,0.76,0.67,1.0]; 
@@ -799,7 +774,7 @@ draw()
         mvPushMatrix();
             mat4.translate(mvMatrix,mvMatrix, [0,-0.1,0]);
         	mat4.scale(mvMatrix,mvMatrix,[0.55,0.3,0.2]); 
-            Sphere.Draw(HumanShaderProgram);
+            Sphere.Draw(SphereShaderProgram);
         mvPopMatrix();
 
 		//eyes
@@ -808,13 +783,13 @@ draw()
         mvPushMatrix();
        		mat4.translate(mvMatrix,mvMatrix, [-0.21,0.0,0.0]);
             mat4.scale(mvMatrix,mvMatrix,[0.1,0.08,0.05]);         
-            Sphere.Draw(HumanShaderProgram);    
+            Sphere.Draw(SphereShaderProgram);    
     	mvPopMatrix();
 
         mvPushMatrix();
        		mat4.translate(mvMatrix,mvMatrix, [0.21,0.0,0.0]);
             mat4.scale(mvMatrix,mvMatrix,[0.1,0.08,0.05]);             
-            Sphere.Draw(HumanShaderProgram);  
+            Sphere.Draw(SphereShaderProgram);  
         mvPopMatrix();       
         
         shaderVertexColorVector = [0.5,0.5,0.8,1.0];
@@ -822,17 +797,20 @@ draw()
         mvPushMatrix();
             mat4.translate(mvMatrix,mvMatrix, [-0.21,0.0,0.0]);
             mat4.scale(mvMatrix,mvMatrix,[0.05,0.05,0.05]);         
-            Sphere.Draw(HumanShaderProgram);    
+            Sphere.Draw(SphereShaderProgram);    
         mvPopMatrix();
 
         mvPushMatrix();
             mat4.translate(mvMatrix,mvMatrix, [0.21,0.0,0.0]);
             mat4.scale(mvMatrix,mvMatrix,[0.05,0.05,0.05]);             
-            Sphere.Draw(HumanShaderProgram);  
+            Sphere.Draw(SphereShaderProgram);  
         mvPopMatrix();
 
 
     mvPopMatrix(); 
+
+    
+    Sphere.Optim = false;
 
     //Legs
     this._LegDraw(0.46,0.2,animCounter,true);
@@ -863,7 +841,7 @@ draw()
         mat4.scale(mvMatrix,mvMatrix,[6.0,7.0,6.0]);
         mat4.copy(this.MvMatrix_Box,mvMatrix);
        // shaderVertexColorVector = [1.0,1.0,1.0,0.5];
-       // Sphere.Draw(HumanShaderProgram);         
+       // Sphere.Draw(SphereShaderProgram);         
     mvPopMatrix();
  
 
