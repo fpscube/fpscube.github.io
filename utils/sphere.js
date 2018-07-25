@@ -138,15 +138,21 @@ class CSphere
 
     Draw(pShaderProgram)
     {
-               
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-        gl.vertexAttribPointer(pShaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+        if(gCurrentShaderProgram != pShaderProgram) 
+        {
+            gl.useProgram(pShaderProgram);
+            gCurrentShaderProgram = pShaderProgram;
+        }
 
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indiceBuffer);
-    
-        gl.useProgram(pShaderProgram);
+        if(gCurrentGraphicalObject!=1)   
+        {    
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+            gl.vertexAttribPointer(pShaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indiceBuffer);
+            gCurrentGraphicalObject = 1;
+        }        
         
-        //function setMatrixUniforms(pShaderProgram) {
         gl.uniform4fv (pShaderProgram.vertexColorAttribute, shaderVertexColorVector);
         gl.uniformMatrix4fv(pShaderProgram.mvMatrixUniform, false, mvMatrix);
         gl.uniformMatrix4fv(pShaderProgram.pMatrixUniform, false, pMatrix);

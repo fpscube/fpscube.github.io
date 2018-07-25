@@ -97,20 +97,27 @@ function squareInit()
 function squareDraw(pShaderProgram)
 {
 
-    gl.useProgram(pShaderProgram);
+    if(gCurrentShaderProgram != pShaderProgram) 
+    {
+        gl.useProgram(pShaderProgram);
+        gCurrentShaderProgram = pShaderProgram;
+    }
+
+    if(gCurrentGraphicalObject!=2) 
+    {
+      gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBuffer);
+      gl.vertexAttribPointer(pShaderProgram.vertexPositionAttribute, squareVertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+  
+  
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareIndiceBuffer);
+      gCurrentGraphicalObject = 2;
+    }  
 
     gl.uniform4fv (pShaderProgram.vertexColorAttribute, shaderVertexColorVector);
     gl.uniformMatrix4fv(pShaderProgram.mvMatrixUniform, false, mvMatrix);
     gl.uniformMatrix4fv(pShaderProgram.pMatrixUniform, false, pMatrix);
-    mat4.invert(mvInverseMatrix,mvMatrix);
-    mat4.transpose(mvInverseTransposeMatrix,mvInverseMatrix);
-    gl.uniformMatrix4fv(pShaderProgram.mvInverseTransposeMatrix, false, mvInverseTransposeMatrix);
     
-    gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBuffer);
-    gl.vertexAttribPointer(pShaderProgram.vertexPositionAttribute, squareVertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareIndiceBuffer);
 
     gl.drawElements(gl.TRIANGLES,6, gl.UNSIGNED_SHORT,0);
 }

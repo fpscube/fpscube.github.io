@@ -1,6 +1,8 @@
 var gl;
 var ctx2d;
 var game;
+var gCurrentGraphicalObject = 0;
+var gCurrentShaderProgram = 0;
 
 function lockChangeAlert() {
 	var canvas = document.getElementById("canvas2D");

@@ -195,9 +195,18 @@ class CGroundSector
   drawSector()
   {
 
+    gCurrentGraphicalObject = 0;
+
     shaderWaterY = -2008.5;
     shaderVertexColorVector = [1.0,1.0,0.5,1.0];
-  	mat4.identity(mvMatrix)    
+    mat4.identity(mvMatrix)    
+    
+    if(gCurrentShaderProgram != groundShaderProgram) 
+    {
+        gl.useProgram(groundShaderProgram);
+        gCurrentShaderProgram = groundShaderProgram;
+    }
+
   
     gl.bindBuffer(gl.ARRAY_BUFFER, this.groundVertexBuffer);
     gl.vertexAttribPointer(groundShaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
@@ -206,9 +215,7 @@ class CGroundSector
     gl.vertexAttribPointer(groundShaderProgram.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.groundIndiceBuffer);
-    
-    gl.useProgram(groundShaderProgram);
-    		
+        		
     gl.uniform4fv (groundShaderProgram.vertexColorAttribute, shaderVertexColorVector);
     
     gl.uniformMatrix4fv(groundShaderProgram.mvMatrixUniform, false, mvMatrix);
