@@ -43,7 +43,7 @@ class CGame
 
 		this.Trees = new CTrees();
 		this.Enemies = new CEnemies(30);
-		this.Hero = new CHuman([-575,30,81],2,[-1,0,1]);
+		this.Hero = new CHuman([-575,200,81],2,[-1,0,1]);
 
 		groundInit();
 		gunsInit();

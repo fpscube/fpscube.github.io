@@ -58,7 +58,7 @@ class CEnemies
 
             if (!groundIsUnderWater(y))
             {
-                this.humans.push(new CHuman([x,y+200,z],Math.random()*8,dir));
+                this.humans.push(new CHuman([x,1000,z],Math.random()*8,dir));
             }
     	}	
     
