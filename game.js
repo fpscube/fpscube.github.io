@@ -10,8 +10,12 @@ class CGame
 
  	init() {
 
-		// init time utils
+		squareInit();
+		SphereInit();
+		groundInit();
+
 		timeInit();
+		// init time utils
 		humansInit();
 		// game data Init	
 		this.HeroDir = [0.88,-0.15,-0.43];
@@ -38,14 +42,11 @@ class CGame
 
 		// init gl object
 		this.Info = new CInfo();
-		squareInit();
-		SphereInit();
 
 		this.Trees = new CTrees();
 		this.Enemies = new CEnemies(30);
 		this.Hero = new CHuman([-575,200,81],2,[-1,0,1]);
 
-		groundInit();
 		gunsInit();
 					
 
