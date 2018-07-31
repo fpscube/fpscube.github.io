@@ -7,7 +7,7 @@ class CStone
 
     constructor(){
         CStoneInst = this;
-        this.CollisionMatrixList = [];
+        this.CollisionMatrixList = [];this.turn=0;
     }
 
     _clearCollisionMatrix()
@@ -83,11 +83,41 @@ class CStone
             this._storeCollisionMatrix(mvMatrix);
         mvPopMatrix();
 
+      //Tower
+      this.turn += 0.1;
+        mvPushMatrix();
+          
+       
+            mat4.translate(mvMatrix,mvMatrix,[300.0,20.0,450.0]);  
+            mat4.rotate(mvMatrix,mvMatrix,  degToRad(0), [0, 1, 0]);      
       
-
+      
+      
+            for (var i=70;i<(360);i+=45)
+            {
+                var c = (i%17) / 17.0 +0.5
+                
+                shaderVertexColorVector = [c,c,0.2,1.0]; 
+                mvPushMatrix();   
+                mat4.rotate(mvMatrix,mvMatrix,  degToRad(i+180), [0, 1, 0]);  
+                mat4.translate(mvMatrix,mvMatrix,[0.0,50.0,-60.0]); 
+                mat4.rotate(mvMatrix,mvMatrix,  degToRad(115), [1, 0, 0]);   
+                mat4.scale(mvMatrix,mvMatrix,[60.0,6.0,350]); 
+                Sphere.Draw(SphereShaderProgram);   
+                this._storeCollisionMatrix(mvMatrix);
+                mvPopMatrix(); 
+            }
+      
+      
+          
+        mvPopMatrix();
+      
     }
-    
+
+
 
 
 
 }
+
+
