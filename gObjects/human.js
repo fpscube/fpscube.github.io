@@ -54,9 +54,11 @@ class CEnemies
             var  z = Math.sin(4*(i/pNbEnemies*2*Math.PI)) *300;
             var  y = groundGetY(x,z) 
 
+            var dir = [x,0.0,-z];
+
             if (!groundIsUnderWater(y))
             {
-                this.humans.push(new CHuman([x,y+200,z],Math.random()*8));
+                this.humans.push(new CHuman([x,y+200,z],Math.random()*8,dir));
             }
     	}	
     
@@ -126,14 +128,15 @@ class CEnemies
 class CHuman
 {
 
-constructor(pPos,pSpeed) {
+constructor(pPos,pSpeed,pDir) {
 
     this.Pos=pPos;
     this.NewPos=[];
     this.HSpeed=0;
     this.VSpeed=0;
     this.VAcc=-300.0;
-    this.Dir=[-1,0,1];
+    this.Dir=pDir;
+    vec3.normalize(this.Dir,this.Dir);
     this.HeadDir=[0,0,0];
     this.GunDir=[0,0,0];
     this.Speed=pSpeed;

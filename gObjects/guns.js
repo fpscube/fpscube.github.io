@@ -20,7 +20,6 @@ var gunBulletList;
 function gunsInit()
 {  
     gunsExpShaderProgram =  SphereInitShaders(SphereVertexShader,gunsExpFragmentShader);   
-   // gunPos = [-50.0,35,0]; 
     gunPos = [300.0,5.0,450.0];
     gunPos[1] += groundGetY(gunPos[0],gunPos[2]);
     gunCollisionMatrix = mat4.create();
