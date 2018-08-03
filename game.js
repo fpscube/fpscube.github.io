@@ -15,6 +15,7 @@ class CGame
 		groundInit();
 
 		timeInit();
+		this.Guns = new CGuns();
 		// init time utils
 		humansInit();
 		// game data Init	
@@ -46,9 +47,6 @@ class CGame
 		this.Trees = new CTrees();
 		this.Enemies = new CEnemies(30);
 		this.Hero = new CHuman([-575,200,81],2,[-1,0,1]);
-
-		gunsInit();
-					
 
 	}
 
@@ -134,7 +132,7 @@ class CGame
 		}
 
 		this.Info.update(this.Enemies.IsInTarget,this.Enemies.HitTarget,this.HeroLife,this.Enemies.NbALive,this.State);
-		gunsUpdate();
+		this.Guns.update();
 
 	}
 
@@ -159,9 +157,9 @@ class CGame
 		this.Stone.draw();	 
 		this.Enemies.draw();
 		this.Hero.draw();
+		this.Guns.draw();
 
 		
-		gunsDraw();	
 		//Draw Info 2D
 		this.Info.draw();
 

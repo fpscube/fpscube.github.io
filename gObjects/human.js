@@ -125,10 +125,11 @@ class CEnemies
 }
 
 
+
 class CHuman
 {
 
-constructor(pPos,pSpeed,pDir) {
+constructor(pPos,pSpeed,pDir,pHero) {
 
     this.Pos=pPos;
     this.NewPos=[];
@@ -147,13 +148,11 @@ constructor(pPos,pSpeed,pDir) {
     this.HitTarget = false;
     this.IsTouched = false;
     this.AnimCounter=0;
-    this.Hero = false; 
-
-    this.Bazooka = false;
-    this.BazookaWeapon = 0;
-    this.BazookaState = "Ready";
+    this.Hero = pHero; 
+    this.GunSelected = (this.Hero)?GunsInst.No:GunsInst.Uzi;
     
     this.AnimDir = new CTimeAnim();
+    this.AnimFireToRunning= new CTimeAnim();
     this.AnimReload = new CTimeAnim();
     this.AnimSpeedFall=  new CTimeAnim();
     this.AnimBodyFall = new CTimeAnim();
@@ -231,16 +230,19 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
     //Store Hero New Position
     this.HSpeed  =  (pRunning) ? 50 : 0;
 
+    //Update hero position according position speed and collision
     this.computeNewPosition(pRunDir);
 
-    // Bazooka
-    if(gunsCheckCollision(this.Pos,this.NewPos) != null)
+    // Check of a new gun selection
+    this.GunSelected = GunsInst.checkCollision(this.GunSelected,this.Pos,this.NewPos);
+
+    // Remove guns with no more weapons
+    if(this.GunSelected.WeaponsCount == 0) 
     {
-        this.Bazooka = true;
-        this.BazookaWeapon = 10;
-        this.BazookaState = "Ready";
+        this.GunSelected.Selected = false;
+        this.GunSelected = GunsInst.No;
     }
-       
+
     //Collision Check is finished apply new pos to current
     vec3.copy(this.Pos,this.NewPos);
 
@@ -255,65 +257,51 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
         
         this.Dir[0] = -pRunDir[0];
         this.Dir[1] = 0;
-        this.Dir[2] = -pRunDir[2];    
-        this.State="Running";
+        this.Dir[2] = -pRunDir[2];  
 
-        if(pRunning)
-        {
-            this.AngleRange=4;     
-        }
-        else
-        {
-            this.AngleRange=0.05;
-
-        }
+        this.AngleRange = (pRunning)?4:0;
         vec3.copy(this.HeadDir,this.Dir);
-        
 
-        if(pFire)    
-        {
-            this.HeadDir[0] =  -pFireDir[0];
-            this.HeadDir[1] =  -pFireDir[1];
-            this.HeadDir[2] =  -pFireDir[2];
-            this.State="Fire";
-            this.Hero = true;
+
+        // Human State Machine
+        switch (this.State) {
+            case "Running":
+                if(pFire) 
+                {
+                    this.HeadDir[0] =  -pFireDir[0];
+                    this.HeadDir[1] =  -pFireDir[1];
+                    this.HeadDir[2] =  -pFireDir[2];
+                    this.State="Fire";
+                }   
+                break;
+            case "Fire": 
+            this.GunSelected.fire(this.Pos,pFireDir);
+                this.HeadDir[0] =  -pFireDir[0];
+                this.HeadDir[1] =  -pFireDir[1];
+                this.HeadDir[2] =  -pFireDir[2];          
+                this.State="ReadyToFire";        
+                break;
+            case "ReadyToFire":
+                if(!pFire)
+                {
+                    this.AnimFireToRunning.start(2000,1,0) 
+                    this.State = "FireToRunning"
+                }
+                this.HeadDir[0] =  -pFireDir[0];
+                this.HeadDir[1] =  -pFireDir[1];
+                this.HeadDir[2] =  -pFireDir[2];         
+                break;       
+            case "FireToRunning":
+                this.HeadDir[0] =  -pFireDir[0];
+                this.HeadDir[1] =  -pFireDir[1];
+                this.HeadDir[2] =  -pFireDir[2];   
+                if(pFire) this.State="Fire"; 
+                else if(!this.AnimFireToRunning.running) this.State="Running"; 
+                break;
+            
         }
-        
+
         vec3.copy(this.GunDir,this.HeadDir);
-
-
-
-        //Bazooka to heavy for rotation
-        if (this.BazookaWeapon > 0)
-        {
-            vec3.copy(this.Dir,this.GunDir); 
-            if (this.BazookaState == "Ready" && pFire)
-            {
-                var size = 0.6;
-                var speed = 300;
-                var fireDir = [];
-                fireDir[0] = -this.GunDir[0];
-                fireDir[1] = -this.GunDir[1];
-                fireDir[2] = -this.GunDir[2];
-                var pos = [];
-                pos[0] = this.Pos[0] + this.GunDir[2]*0.8;
-                pos[1] = this.Pos[1];
-                pos[2] = this.Pos[2] -this.GunDir[0]*0.8 ;
-                gunsFire(size,speed,fireDir,pos);
-                this.BazookaState = "Fire";
-                this.BazookaWeapon--;
-            }
-            if(this.BazookaState == "Fire" && !pFire)
-            {
-                this.BazookaState = "Ready";  
-            }
-
-        }
-
-        //Switch gun when no more weapons
-        this.Bazooka = (this.BazookaWeapon >0) ;
-        gunsControl(this.Bazooka );
-
 
         //Orientation and BackWardsRunning
         if (vec3.dot(this.Dir,this.GunDir) <-0.75)
@@ -321,8 +309,7 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
             vec3.scale(this.Dir,this.Dir,-1);
             this.AnimCounter  -= 8.0*elapsed;
             if (this.AnimCounter > 10.0 * Math.PI)  this.AnimCounter = 10.0 * Math.PI - this.AnimCounter;
-        }
-        
+        }        
         else
         {
             this.AnimCounter  += 8.0*elapsed;
@@ -427,7 +414,7 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos,pHeroDir,pHeroFire)
     switch (this.State) {
         case "Running":
             if (dotProd> 0.5 && this.sqrDist < 10000) this.State = "Fire";
-            if (pHeroFire && this.IsInTarget) this.State = "StartFalling";
+            vec3.copy(this.GunDir,this.Dir);
             break;
         case "Fire":       
             //Collision detection
@@ -443,11 +430,9 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos,pHeroDir,pHeroFire)
             //Start  Reload Animation
             this.AnimReload.start(500,0,2*3.14);
             this.State  = "Reload";
-            if (pHeroFire && this.IsInTarget) this.State = "StartFalling";
             break;
         case "Reload":
-            if (pHeroFire && this.IsInTarget)             this.State = "StartFalling";
-            else if (dotProd< 0.5 || this.sqrDist > 10000)   this.State = "Running"; 
+            if (dotProd< 0.5 || this.sqrDist > 10000)   this.State = "Running"; 
             else if (!this.AnimReload.running) this.State = "Fire"; 
             break;
         case "StartFalling":
@@ -498,27 +483,37 @@ _ArmDraw(pAnimCounter,pIsLeft)
     var  armUpAngle=0;
     var  armDownAngle=0;
 
-    if (this.Bazooka && this.Hero)  
-    { 
-        armDownAngle=-90;
-        armUpAngle=0;
+    if(this.GunSelected == GunsInst.Bazooka)
+    {
+            armDownAngle=-90;
+            armUpAngle=0;
     }
-    else
+    else if(this.GunSelected == GunsInst.Uzi)
     {
         switch (this.State) {
             
-            case "Fire":    
+            case "Fire":   
+            case "ReadyToFire": 
             case "Reload":
                 armUpAngle= degToRad(-86);
                 armDownAngle = (Math.sin(this.AnimReload.getValue() + Math.PI/2)-1.0)*this.AngleRange*3.0;
+                break;
+            case "FireToRunning":
+                armUpAngle= degToRad(this.AnimFireToRunning.getValue()**2 * -89 );
+                armDownAngle = 0;
                 break;
             default:
                 armUpAngle =  degToRad(Math.sin(pAnimCounter)*this.AngleRange*6.0);
                 armDownAngle = (Math.sin(pAnimCounter + Math.PI/2)-1.0)*this.AngleRange*3.0;
                 break;
         }
-    }
 
+    }
+    else
+    {
+        armUpAngle =  degToRad(Math.sin(pAnimCounter)*this.AngleRange*6.0);
+        armDownAngle = (Math.sin(pAnimCounter + Math.PI/2)-1.0)*this.AngleRange*3.0;
+    }
     
     mat4.rotate(mvMatrix,mvMatrix,  armUpAngle, [1, 0, 0]);
     
@@ -531,7 +526,6 @@ _ArmDraw(pAnimCounter,pIsLeft)
         Sphere.Draw(SphereShaderProgram); 
     mvPopMatrix();    
     
-    
     //ArmDown    
     mat4.translate(mvMatrix,mvMatrix, [0.0,-0.7,0]);
     mat4.rotate(mvMatrix,mvMatrix, degToRad(armDownAngle), [1, 0, 0]);
@@ -541,6 +535,7 @@ _ArmDraw(pAnimCounter,pIsLeft)
         collisionPushMatrix(this.CollisionMatrixList,mvMatrix);
         Sphere.Draw(SphereShaderProgram); 
     mvPopMatrix();
+
     //Hand    
     shaderVertexColorVector = [0.99,0.76,0.67,1.0];  
     mat4.translate(mvMatrix,mvMatrix, [0.0,-1.0,0.0]);
@@ -550,60 +545,22 @@ _ArmDraw(pAnimCounter,pIsLeft)
         Sphere.Draw(SphereShaderProgram); 
     mvPopMatrix();   
 
-
-    if (this.Bazooka && this.Hero)  
+    //Gun Bazooka
+    if((this.GunSelected == GunsInst.Bazooka) && pIsLeft)
+    {
+        mvPushMatrix();  
+            mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);
+            mat4.translate(mvMatrix,mvMatrix,[0.0,-1.0,-0.5]); 
+            this.GunSelected.draw() ;
+        mvPopMatrix(); 
+    }
+    //Gun Uzi
+    else if(this.GunSelected == GunsInst.Uzi)
     { 
-        if (pIsLeft)
-        {
-            mvPushMatrix();  
-                mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);
-                mat4.translate(mvMatrix,mvMatrix,[0.0,-1.0,-0.5]); 
-                gunsDrawFct();    
-            mvPopMatrix(); 
-        }
+        mat4.translate(mvMatrix,mvMatrix, [0.0,-0.7,0.55]);   
+        this.GunSelected.draw(this.State == "Fire"); 
     } 
-    else
-    {
-        //Gun    
-        shaderVertexColorVector = [0.9,0.9,1.0,1.0];
-        mat4.translate(mvMatrix,mvMatrix, [0.0,-0.7,0.55]);
-        mvPushMatrix();
-        mat4.scale(mvMatrix,mvMatrix,[0.3,1.0,0.3]);
-        Sphere.Draw(SphereShaderProgram);
-        mvPopMatrix();
-        mvPushMatrix();
-        mat4.translate(mvMatrix,mvMatrix, [0.0,0.4,-0.5]);
-        mat4.scale(mvMatrix,mvMatrix,[0.2,0.2,0.6]);        
-        Sphere.Draw(SphereShaderProgram);
-        mvPopMatrix();   
-        shaderVertexColorVector = [0.99,0.76,0.67,1.0];  
-    }
 
-
-    if(this.State == "Fire" && !this.Bazooka)
-    {
-        
-        mvPushMatrix();	
-        mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
-        mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [1, 0, 0]);
-        mat4.scale(mvMatrix,mvMatrix,[0.25,1.0,1.0]);
-        (this.Hero) ? squareDraw(HumanFireHeroShaderProgram) : squareDraw(HumanFireEnemyShaderProgram);
-        mvPopMatrix();
-        mvPushMatrix();	
-        mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
-        mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [1, 0, 0]);
-        mat4.scale(mvMatrix,mvMatrix,[1.2,0.15,1.2]);
-        if (this.Hero)
-        {
-            gl.uniform1f (HumanFireHeroShaderProgram.counter, shaderCounter);
-            squareDraw(HumanFireHeroShaderProgram)
-        }   
-        else
-        {
-             squareDraw(HumanFireEnemyShaderProgram);
-        }
-        mvPopMatrix();
-    }
 }
 
 
@@ -822,20 +779,14 @@ draw()
 
     mvPushMatrix();  
     mat4.translate(mvMatrix,mvMatrix, [-1.2,2.6,0.0]);
-    if(this.State == "Reload" || this.State == "Fire" )
-    {
-        lookAt(this.GunDir);
-    }
+    lookAt(this.GunDir);
     this._ArmDraw(animCounter,true);
     mvPopMatrix();
 
         
     mvPushMatrix();  
     mat4.translate(mvMatrix,mvMatrix, [1.2,2.6,0.0]);
-    if(this.State == "Reload" || this.State == "Fire" )
-    {
-        lookAt(this.GunDir);
-    }
+    lookAt(this.GunDir);
     this._ArmDraw(animCounter  +  Math.PI,false);
     mvPopMatrix();
     
