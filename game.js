@@ -131,7 +131,7 @@ class CGame
 				break;
 		}
 
-		this.Info.update(this.Enemies.IsInTarget,this.Enemies.HitTarget,this.HeroLife,this.Enemies.NbALive,this.State);
+		this.Info.update(this.Enemies.IsInTarget,this.Enemies.HitTarget,this.HeroLife,this.Enemies.NbALive,this.State,this.Hero.GunSelected);
 		this.Guns.update();
 
 	}

@@ -14,10 +14,11 @@ class CInfo
 		this.Win = false;
 		this.GameState = "Play";
 		this.Time = "0:0";
+		this.WeaponsCount = 0;
 	}
 
 
-	update(pEnemieTarget,pInjury,pNbLife,pNbEnemies,pGameState)
+	update(pEnemieTarget,pInjury,pNbLife,pNbEnemies,pGameState,pSelectedGun)
 	{	
 		
 		// if (!this.AnimTextRefresh.running) 
@@ -48,6 +49,8 @@ class CInfo
 			if (timeSec < 10) this.Time += "0";
 			this.Time  +=  timeSec;
 		}
+		this.WeaponsCount  = pSelectedGun.WeaponsCount;
+		if (pSelectedGun == GunsInst.No) this.WeaponsCount = 0;
 		
 	}
 
@@ -63,10 +66,10 @@ class CInfo
 		ctx2d.fillStyle = 'white';
 		ctx2d.globalAlpha = 1.0;
 		ctx2d.font = "14px Arial";
-		// ctx2d.fillText("Life : " + this.LifeQt*10 + "%  -  Enemies : " +  this.NbEnemies + "  -  Fps : " + this.NbFps	,10,15 );
 		ctx2d.fillText(
 		"Life : " + this.LifeQt*10 	+ "%  -  " +
-		"Enemies : " +  this.NbEnemies  + "  -  "  + 
+		"Enemies : " +  this.NbEnemies  + "  -  " +
+		"Weapons : " +  this.WeaponsCount  + "  -  " +
 		"Resolution : " + canvas3D.width + "x" + canvas3D.height  + " - "  + 
 		"Time : " +  this.Time
 		,10,15 );
@@ -82,7 +85,7 @@ class CInfo
 		squareDraw(SquareShaderProgram);	
 		
 		
-		ctx2d.fillStyle = 'black';	
+		ctx2d.fillStyle = 'black'; 	
 		if(this.GameState == "Win") 	ctx2d.fillText("You Win - " + this.Time,canvas2D.width/2,canvas2D.height/2 );
 		if(this.GameState == "Lose") 	ctx2d.fillText("You Lose ",canvas2D.width/2,canvas2D.height/2 );
 
