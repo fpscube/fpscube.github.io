@@ -288,7 +288,8 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
                     this.AnimFireToRunning.start(2000,1,0) 
                     this.State = "FireToRunning"
                 }
-                else if (!this.AnimReload.running)
+                else if (this.GunSelected==GunsInst.Uzi &&
+                        !this.AnimReload.running)
                 {
                     this.State = "Fire"
                 }

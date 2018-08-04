@@ -1,5 +1,4 @@
-
-var gunsExpFragmentShader= `
+var gunsBulletFragmentShader= `
 precision lowp float;
 
 uniform vec4 uVertexColor;   
@@ -15,7 +14,7 @@ class CGuns
 {
     constructor()
     {
-        this.ExpShaderProgram =  SphereInitShaders(SphereVertexShader,gunsExpFragmentShader); 
+        this.BulletShaderProgram =  SphereInitShaders(SphereVertexShader,gunsBulletFragmentShader); 
         
         GunsInst = this;
         
@@ -300,7 +299,7 @@ class CBullet
     {
         var elapsed = timeGetElapsedInS();
 
-        this.Color = [0.9,0.1,0.1,1.0]; 
+        this.Color = [1.0,1.0,0.0,1.0]; 
         var startPos=[];
         var newPos=[];
         var collision ;
@@ -370,7 +369,7 @@ class CBullet
         }
         else
         {      
-            this.Color = [0.9,0.9,0.0,1.0]; 
+            this.Color = [1.0,1.0,0.0,1.0]; 
             this.Scale =  this.ExplosionAnim.coef**2 *this.ScaleExp;
             this.Color[3] = 1.0-(this.ExplosionAnim.coef)**3*0.4;
             if(!this.ExplosionAnim.running)  this.Explosion = false;
@@ -385,9 +384,10 @@ class CBullet
     {
         shaderVertexColorVector = this.Color; 
         mvPushMatrix();
+        
         mat4.translate(mvMatrix,mvMatrix,this.Pos); 
-        mat4.scale(mvMatrix,mvMatrix,[this.Scale,this.Scale,this.Scale]);        
-        Sphere.Draw(this.Explosion?GunsInst.ExpShaderProgram:SphereShaderProgram);   
+        mat4.scale(mvMatrix,mvMatrix,[this.Scale,this.Scale,this.Scale]);  
+        Sphere.Draw(GunsInst.BulletShaderProgram);   
         mvPopMatrix();
     }
 

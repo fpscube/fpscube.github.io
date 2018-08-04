@@ -57,10 +57,12 @@ class CInfo
 		var canvas2D = document.getElementById('canvas2D');
 		var canvas3D = document.getElementById('canvas3D');
 		ctx2d.clearRect(0, 0, canvas2D.width, canvas2D.height); 
-		ctx2d.globalAlpha = 0.2;
+		ctx2d.fillStyle = 'black';
+		ctx2d.globalAlpha = 0.8;
 		ctx2d.fillRect(0,0,canvas2D.width,18);
+		ctx2d.fillStyle = 'white';
 		ctx2d.globalAlpha = 1.0;
-		ctx2d.font = "Bold 15px Arial";
+		ctx2d.font = "14px Arial";
 		// ctx2d.fillText("Life : " + this.LifeQt*10 + "%  -  Enemies : " +  this.NbEnemies + "  -  Fps : " + this.NbFps	,10,15 );
 		ctx2d.fillText(
 		"Life : " + this.LifeQt*10 	+ "%  -  " +
@@ -79,7 +81,8 @@ class CInfo
 		mat4.scale(mvMatrix,mvMatrix,[2.0,2.0,1.0]);
 		squareDraw(SquareShaderProgram);	
 		
-
+		
+		ctx2d.fillStyle = 'black';	
 		if(this.GameState == "Win") 	ctx2d.fillText("You Win - " + this.Time,canvas2D.width/2,canvas2D.height/2 );
 		if(this.GameState == "Lose") 	ctx2d.fillText("You Lose ",canvas2D.width/2,canvas2D.height/2 );
 
