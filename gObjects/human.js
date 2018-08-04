@@ -278,7 +278,8 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
             this.GunSelected.fire(this.Pos,pFireDir);
                 this.HeadDir[0] =  -pFireDir[0];
                 this.HeadDir[1] =  -pFireDir[1];
-                this.HeadDir[2] =  -pFireDir[2];          
+                this.HeadDir[2] =  -pFireDir[2];    
+                this.AnimReload.start(150,0,2*3.14);      
                 this.State="ReadyToFire";        
                 break;
             case "ReadyToFire":
@@ -286,6 +287,10 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
                 {
                     this.AnimFireToRunning.start(2000,1,0) 
                     this.State = "FireToRunning"
+                }
+                else if (!this.AnimReload.running)
+                {
+                    this.State = "Fire"
                 }
                 this.HeadDir[0] =  -pFireDir[0];
                 this.HeadDir[1] =  -pFireDir[1];
@@ -494,6 +499,9 @@ _ArmDraw(pAnimCounter,pIsLeft)
             
             case "Fire":   
             case "ReadyToFire": 
+                armUpAngle= degToRad(-89 );
+                armDownAngle = 0;
+                break;
             case "Reload":
                 armUpAngle= degToRad(-86);
                 armDownAngle = (Math.sin(this.AnimReload.getValue() + Math.PI/2)-1.0)*this.AngleRange*3.0;
