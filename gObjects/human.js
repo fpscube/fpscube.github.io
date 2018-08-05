@@ -126,6 +126,7 @@ class CEnemies
 
 
 
+
 class CHuman
 {
 
@@ -149,8 +150,9 @@ constructor(pPos,pSpeed,pDir,pHero) {
     this.IsTouched = false;
     this.AnimCounter=0;
     this.Hero = pHero; 
-    this.GunSelected = (this.Hero)?GunsInst.No:GunsInst.Uzi;
-    
+
+    this.GunSelected = GunsInst.Uzi;
+
     this.AnimDir = new CTimeAnim();
     this.AnimFireToRunning= new CTimeAnim();
     this.AnimReload = new CTimeAnim();
@@ -220,7 +222,9 @@ computeNewPosition(pRunDir)
     return mvCollision;
 }
 
-
+ChangeGun(){   
+    this.GunSelected = ((this.GunSelected == GunsInst.Uzi))?GunsInst.Bazooka:GunsInst.Uzi;
+}
 
 UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
 {
@@ -240,7 +244,6 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
     if(this.GunSelected.WeaponsCount == 0) 
     {
         this.GunSelected.Selected = false;
-        this.GunSelected = GunsInst.No;
     }
 
     //Collision Check is finished apply new pos to current
@@ -266,7 +269,7 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
         // Human State Machine
         switch (this.State) {
             case "Running":
-                if(pFire) 
+                if(pFire && this.GunSelected.WeaponsCount>0) 
                 {
                     this.HeadDir[0] =  -pFireDir[0];
                     this.HeadDir[1] =  -pFireDir[1];
@@ -275,7 +278,7 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
                 }   
                 break;
             case "Fire": 
-            this.GunSelected.fire(this.Pos,pFireDir);
+                this.GunSelected.fire(this.Pos,pFireDir);
                 this.HeadDir[0] =  -pFireDir[0];
                 this.HeadDir[1] =  -pFireDir[1];
                 this.HeadDir[2] =  -pFireDir[2];    
@@ -289,6 +292,7 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
                     this.State = "FireToRunning"
                 }
                 else if (this.GunSelected==GunsInst.Uzi &&
+                         this.GunSelected.WeaponsCount>0 &&
                         !this.AnimReload.running)
                 {
                     this.State = "Fire"
@@ -301,7 +305,7 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
                 this.HeadDir[0] =  -pFireDir[0];
                 this.HeadDir[1] =  -pFireDir[1];
                 this.HeadDir[2] =  -pFireDir[2];   
-                if(pFire) this.State="Fire"; 
+                if(pFire  && this.GunSelected.WeaponsCount>0) this.State="Fire"; 
                 else if(!this.AnimFireToRunning.running) this.State="Running"; 
                 break;
             
@@ -560,7 +564,7 @@ _ArmDraw(pAnimCounter,pIsLeft)
         mvPushMatrix();  
             mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);
             mat4.translate(mvMatrix,mvMatrix,[0.0,-1.0,-0.5]); 
-            this.GunSelected.draw() ;
+            this.GunSelected.draw(true) ;
         mvPopMatrix(); 
     }
     //Gun Uzi

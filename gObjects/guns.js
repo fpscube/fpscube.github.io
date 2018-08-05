@@ -29,8 +29,6 @@ class CGuns
         this.UziPos = [300.0,5.0,450.0];
         this.UziPos[1] += groundGetY(this.UziPos[0],this.UziPos[2]);
         this.UziCollisionMatrix = mat4.create();
-
-        this.No = new CGunsNo();
     }
 
     update()
@@ -82,8 +80,9 @@ class CGuns
             
             this.BulletList[i].draw();
         }
-    
-        if (!this.Bazooka.Selected)  
+
+        //Bazooka
+        if (this.Bazooka.WeaponsCount < 2)
         {
             mvPushMatrix();
             mat4.translate(mvMatrix,mvMatrix,this.BazookaPos); 
@@ -91,16 +90,15 @@ class CGuns
             mvPushMatrix();
                 mat4.scale(mvMatrix,mvMatrix,[4.0,6.0,10.0]);
                 mat4.copy(this.BazookaCollisionMatrix,mvMatrix) ;
-            mvPopMatrix(); 
-            
-            
+            mvPopMatrix();       
             mat4.scale(mvMatrix,mvMatrix,[3.0,3.0,3.0]);
-            this.Bazooka.draw();
+            this.Bazooka.draw(false);
             mvPopMatrix(); 
         }
-            
-        if (!this.Uzi.Selected)  
+
+        if (this.Uzi.WeaponsCount < 50)
         {
+            //Uzi
             mvPushMatrix();
             mat4.translate(mvMatrix,mvMatrix,this.UziPos);   
             mat4.rotate(mvMatrix,mvMatrix, timeGetAnimRad(), [0 , 1, 0]);   
@@ -108,37 +106,19 @@ class CGuns
             mvPushMatrix();
                 mat4.scale(mvMatrix,mvMatrix,[4.0,4.0,4.0]);
                 mat4.copy(this.UziCollisionMatrix,mvMatrix) ;
-            mvPopMatrix(); 
-            
+            mvPopMatrix();         
             mat4.scale(mvMatrix,mvMatrix,[3.0,3.0,3.0]);
-            
             mat4.translate(mvMatrix,mvMatrix,[-1,0,0]);
             this.Uzi.draw();
             mat4.translate(mvMatrix,mvMatrix,[2,0,0]); 
             this.Uzi.draw();
             mvPopMatrix(); 
         }
+        
     }
 }
 
 
-class CGunsNo
-{   
-    constructor()
-    {
-        this.Selected = false;
-        this.WeaponsCount = 1;
-    }
-    
-    fire(pPos,pDir)
-    {
-
-    }
-    draw(pFire,pHero)
-    {
-
-    }
-}
 
 class CGunsUzi
 {
@@ -208,7 +188,7 @@ class CGunsBazooka
     {
         this.Selected = false;
         this.FireReady= true;
-        this.WeaponsCount = 10;
+        this.WeaponsCount = 0;
     }
 
     
@@ -218,7 +198,7 @@ class CGunsBazooka
         this.WeaponsCount--;
     }
 
-    draw()
+    draw(pHero)
     {
         var toogle=0;
 
@@ -238,7 +218,7 @@ class CGunsBazooka
             mvPopMatrix(); 
         }
 
-        if(this.Selected)
+        if(pHero)
         {            
             mvPushMatrix();
             mat4.translate(mvMatrix,mvMatrix,[0.0,0.2,0.7]); 

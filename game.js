@@ -58,7 +58,7 @@ class CGame
 		shaderCounter = timeGetCurrentInS()*10;
 
 		// Get Media Info
-		this.HeroFire = mediaIsKey("Fire"); 
+		this.HeroFire = mediaIsKey("Fire");
 		this.CamMvVec = mediaGetCamMvVector();
 		this.MediaRunAngle = mediaGetRunAngle();
 		this.HeroRunning = mediaIsRunning();
@@ -71,6 +71,10 @@ class CGame
 		this.CamDir[2] += mvVector[2]*this.CamMvVec[0];
 		vec3.normalize(this.CamDir,this.CamDir);
 
+		//Change Gun
+		if(mediaWheelEvt()) {
+			this.Hero.ChangeGun();
+		}
 		// Game State Machine
 		switch (this.State) {
 			case "Play":

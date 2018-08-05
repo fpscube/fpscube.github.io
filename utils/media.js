@@ -4,6 +4,7 @@ var gMediaTouchStartPos={};
 var gMediaCamMvVec=[0,0];
 var gMediaTouchMvInProgress=0;
 var gMediaFireTouch=0;
+var gMediaWheelEvt=0;
 
 // ######### evt Handler ##############// 
 
@@ -53,7 +54,7 @@ function mediaSetKeyUpFct(evt)
 }
 
 function mediaIsKey(name)
-{
+{   
     return (gMediaKeyPressed[name]>0);
 }
 
@@ -66,6 +67,17 @@ function mediaSetMouseDownFct(evt){
     fullScreenRequest();
 	if (evt.button==0)
     gMediaKeyPressed["Fire"]=1;
+}
+
+
+function mediaWheelFct(evt){	
+    gMediaWheelEvt=1;
+}
+
+function mediaWheelEvt(){   
+    var ret = gMediaWheelEvt;
+    gMediaWheelEvt = 0;
+    return (ret);
 }
 
 function mediaGetCamMvVector()
