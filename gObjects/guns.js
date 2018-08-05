@@ -36,7 +36,7 @@ class CGuns
         var deleteList=[];
         for(var i =0 ;i<this.BulletList.length;i++){
             
-            if (this.BulletList[i].hasExplosed())
+            if (this.BulletList[i].HasExplosed)
             {
                 deleteList.push(i);
             }
@@ -57,7 +57,7 @@ class CGuns
         {
             pCurrentGun.Selected = false;
             this.Bazooka.Selected = true;
-            this.Bazooka.WeaponsCount = 10;
+            this.Bazooka.WeaponsCount = 50;
             return this.Bazooka;
         }
         else if(!this.Uzi.Selected && 
@@ -188,7 +188,7 @@ class CGunsBazooka
     {
         this.Selected = false;
         this.FireReady= true;
-        this.WeaponsCount = 0;
+        this.WeaponsCount = 50;
     }
 
     
@@ -263,17 +263,13 @@ class CBullet
         this.Scale = pSize;
         this.ScaleExp = pSizeExp;
         this.Explosion = false;
+        this.HasExplosed = false;
         this.Color = [0.9,0.8,0.1,0.8]; 
         this.ExplosionAnim = new CTimeAnim();
         this.StartTimeInS = timeGetCurrentInS();
         this.LifeTime = pLifeTime;
     }
 
-    hasExplosed()
-    {
-        return (this.Explosion && this.ExplosionAnim.running==false)
-    }
-    
 
     update()
     {
@@ -352,10 +348,20 @@ class CBullet
             this.Color = [1.0,1.0,0.0,1.0]; 
             this.Scale =  this.ExplosionAnim.coef**2 *this.ScaleExp;
             this.Color[3] = 1.0-(this.ExplosionAnim.coef)**3*0.4;
-            if(!this.ExplosionAnim.running)  this.Explosion = false;
-            var humanList = CEnemiesInst.getHumansInSphere(this.Pos,this.Scale); 
-            for(var i =0 ;i<humanList.length;i++){
-                humanList[i].BulletCollision();
+            if(!this.ExplosionAnim.running) 
+            {
+                var humanList = CEnemiesInst.getHumansInSphere(this.Pos,this.Scale); 
+                for(var i =0 ;i<humanList.length;i++){
+                    humanList[i].BulletCollision();
+                }
+                var humanSquaredDist = vec3.squaredDistance(GameInst.Hero.Pos,this.Pos);
+                var squaredScale =  this.Scale**2;
+                if (humanSquaredDist < squaredScale)
+                {           
+                    var coef = humanSquaredDist/squaredScale 
+                    GameInst.HeroLife -= Math.floor((1-coef)*10);
+                }
+                this.HasExplosed = true;
             }
         }
     }

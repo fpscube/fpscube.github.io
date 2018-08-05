@@ -1,6 +1,6 @@
 var gl;
 var ctx2d;
-var game;
+var GameInst;
 var gCurrentGraphicalObject = 0;
 var gCurrentShaderProgram = 0;
 
@@ -73,8 +73,8 @@ function degToRad(degrees) {return degrees * Math.PI / 180;}
 
 function tick() {
 
-	game.update();
-	game.draw();
+	GameInst.update();
+	GameInst.draw();
 	requestAnimFrame(tick);
 }
 
@@ -94,7 +94,7 @@ function webGLStart() {
 
 	ctx2d = canvas2D.getContext("2d");
 
-	game = new CGame();
+	GameInst = new CGame();
 
 	tick();
 }
