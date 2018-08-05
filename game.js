@@ -77,8 +77,8 @@ class CGame
 				// Update Hero Direction and Hero Horz Speed
 				if (this.HeroRunning ){
 					vec3.rotateY(this.HeroDir,this.CamDir,[0,0,0],this.MediaRunAngle);
-				}			
-				this.Hero.UpdateHero(this.HeroDir,this.HeroRunning,this.HeroFire,this.CamDir,this.HeroLife<=0,this.Stone);
+				}
+				this.Hero.UpdateHero(this.HeroDir,this.HeroRunning,this.HeroFire,this.CamDir,this.HeroLife<=0,this.Stone);			
 				
 				// if hero use bazzoka collision is not treated by enemies and turn when fire
 				if(this.Hero.Bazooka)	this.HeroFire=false;

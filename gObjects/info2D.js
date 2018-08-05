@@ -70,8 +70,8 @@ class CInfo
 		"Life : " + this.LifeQt*10 	+ "%  -  " +
 		"Enemies : " +  this.NbEnemies  + "  -  " +
 		"Weapons : " +  this.WeaponsCount  + "  -  " +
-		"Resolution : " + canvas3D.width + "x" + canvas3D.height  + " - "  + 
-		"Time : " +  this.Time
+		"Time : " +  this.Time +  " - "  +
+		"Resolution : " + canvas3D.width + "x" + canvas3D.height 
 		,10,15 );
 		ctx2d.font = "Bold 100px Arial  ";
 		ctx2d.globalAlpha = 0.5;

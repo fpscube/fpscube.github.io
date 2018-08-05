@@ -373,7 +373,7 @@ class CBullet
             this.Scale =  this.ExplosionAnim.coef**2 *this.ScaleExp;
             this.Color[3] = 1.0-(this.ExplosionAnim.coef)**3*0.4;
             if(!this.ExplosionAnim.running)  this.Explosion = false;
-            var humanList = CEnemiesInst.getHumansInSphere(this.Pos,this.Scale);
+            var humanList = CEnemiesInst.getHumansInSphere(this.Pos,this.Scale); 
             for(var i =0 ;i<humanList.length;i++){
                 humanList[i].BulletCollision();
             }

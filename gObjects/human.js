@@ -285,7 +285,7 @@ UpdateHero(pRunDir,pRunning,pFire,pFireDir,pDead,pStone)
             case "ReadyToFire":
                 if(!pFire)
                 {
-                    this.AnimFireToRunning.start(2000,1,0) 
+                    this.AnimFireToRunning.start(800,0,1) 
                     this.State = "FireToRunning"
                 }
                 else if (this.GunSelected==GunsInst.Uzi &&
@@ -508,7 +508,7 @@ _ArmDraw(pAnimCounter,pIsLeft)
                 armDownAngle = (Math.sin(this.AnimReload.getValue() + Math.PI/2)-1.0)*this.AngleRange*3.0;
                 break;
             case "FireToRunning":
-                armUpAngle= degToRad(this.AnimFireToRunning.getValue()**2 * -89 );
+                armUpAngle= degToRad((1-this.AnimFireToRunning.getValue()**3) * -89 );
                 armDownAngle = 0;
                 break;
             default:
