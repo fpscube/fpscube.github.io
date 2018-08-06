@@ -34,6 +34,7 @@ class CGame
 		this.EndAnim = new CTimeAnim();
 		this.Screen = new CScreen("canvas3D","canvas2D");
 		this.Stone = new CStone();
+		this.Vehicules = new CVehicules();
 
 		// gl init
 		gl.clearColor(0x00, 0xbf, 0xff, 1.0);	
@@ -136,6 +137,7 @@ class CGame
 		}
 
 		this.Info.update(this.Enemies.IsInTarget,this.Enemies.HitTarget,this.HeroLife,this.Enemies.NbALive,this.State,this.Hero.GunSelected);
+		this.Vehicules.update();
 		this.Guns.update();
 
 	}
@@ -160,6 +162,7 @@ class CGame
 		this.Trees.draw();
 		this.Stone.draw();	 
 		this.Enemies.draw();
+		this.Vehicules.draw();	
 		this.Hero.draw();
 		this.Guns.draw();
 

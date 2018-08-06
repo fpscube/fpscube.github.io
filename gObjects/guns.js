@@ -52,16 +52,14 @@ class CGuns
 
     checkCollision(pCurrentGun,pPos1,pPos2)
     {
-        if(!this.Bazooka.Selected && 
-            Sphere.GetCollisionPos(pPos1,pPos2,this.BazookaCollisionMatrix,null,0) != null)
+        if( Sphere.GetCollisionPos(pPos1,pPos2,this.BazookaCollisionMatrix,null,0) != null)
         {
             pCurrentGun.Selected = false;
             this.Bazooka.Selected = true;
             this.Bazooka.WeaponsCount = 50;
             return this.Bazooka;
         }
-        else if(!this.Uzi.Selected && 
-            Sphere.GetCollisionPos(pPos1,pPos2,this.UziCollisionMatrix,null,0) != null)
+        else if(Sphere.GetCollisionPos(pPos1,pPos2,this.UziCollisionMatrix,null,0) != null)
         {
             pCurrentGun.Selected = false;
             this.Uzi.Selected = true;
@@ -82,7 +80,7 @@ class CGuns
         }
 
         //Bazooka
-        if (this.Bazooka.WeaponsCount < 2)
+        if (this.Bazooka.WeaponsCount < 50)
         {
             mvPushMatrix();
             mat4.translate(mvMatrix,mvMatrix,this.BazookaPos); 
@@ -96,7 +94,7 @@ class CGuns
             mvPopMatrix(); 
         }
 
-        if (this.Uzi.WeaponsCount < 50)
+        if (this.Uzi.WeaponsCount < 100)
         {
             //Uzi
             mvPushMatrix();
@@ -125,7 +123,7 @@ class CGunsUzi
     constructor()
     {
         this.Selected = false;
-        this.WeaponsCount = 100;
+        this.WeaponsCount = 90;
     }
 
     fire(pPos,pDir)
@@ -188,7 +186,7 @@ class CGunsBazooka
     {
         this.Selected = false;
         this.FireReady= true;
-        this.WeaponsCount = 50;
+        this.WeaponsCount = 40;
     }
 
     
