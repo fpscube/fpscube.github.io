@@ -124,5 +124,4 @@ class CVehicules
             Sphere.Draw(SphereShaderProgram);   
         mvPopMatrix();
     }
-
 }
