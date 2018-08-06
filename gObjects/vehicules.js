@@ -5,7 +5,7 @@ class CVehicules
 
     constructor()
     {
-        this.Pos = [-650,0,180];
+        this.Pos = [-750,0,280];
         this.GearPos = [];
         this.GearDir= [];
         this.GearSpeed= [];
@@ -45,6 +45,7 @@ class CVehicules
         
         mat4.translate(mvMatrix,mvMatrix,this.Pos); 
 
+        //Gear
         for (var i=0;i<4;i++)
         {
             
@@ -56,6 +57,7 @@ class CVehicules
             
         }
 
+        //Structure
         shaderVertexColorVector = [0.2,0.2,0.2,1.0]; 
 
         mvPushMatrix();
@@ -82,16 +84,7 @@ class CVehicules
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [0, 1, 0]);  
             mat4.scale(mvMatrix,mvMatrix,[0.8,0.8,10.0]);
             Sphere.Draw(SphereShaderProgram);   
-        mvPopMatrix();
-        
-
-        shaderVertexColorVector = [0.6,0.2,0.2,1.0]; 
-        mvPushMatrix();
-            mat4.translate(mvMatrix,mvMatrix,[0,1.0,-10]); 
-            mat4.rotate(mvMatrix,mvMatrix,  degToRad(-15), [1, 0, 0]); 
-            mat4.scale(mvMatrix,mvMatrix,[3.8,2.8,7]);
-            Sphere.Draw(SphereShaderProgram);   
-        mvPopMatrix();
+        mvPopMatrix();        
 
         mvPushMatrix();
             mat4.translate(mvMatrix,mvMatrix,[0,2.9,-4]); ; 
@@ -99,9 +92,17 @@ class CVehicules
             mat4.scale(mvMatrix,mvMatrix,[0.6,0.6,5.8]); 
             Sphere.Draw(SphereShaderProgram);   
         mvPopMatrix();
+        
 
-
+        //Body
         shaderVertexColorVector = [0.2,0.2,0.8,1.0]; 
+        mvPushMatrix();
+            mat4.translate(mvMatrix,mvMatrix,[0,1.0,-10]); 
+            mat4.rotate(mvMatrix,mvMatrix,  degToRad(-15), [1, 0, 0]); 
+            mat4.scale(mvMatrix,mvMatrix,[3.8,2.8,7]);
+            Sphere.Draw(SphereShaderProgram);   
+        mvPopMatrix();
+
         mvPushMatrix();
             mat4.translate(mvMatrix,mvMatrix,[0,4.2,1.2]); 
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(-5), [1, 0, 0]); 

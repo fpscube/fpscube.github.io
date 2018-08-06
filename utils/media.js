@@ -5,6 +5,8 @@ var gMediaCamMvVec=[0,0];
 var gMediaTouchMvInProgress=0;
 var gMediaFireTouch=0;
 var gMediaWheelEvt=0;
+var gMediaWheelLastEvt=0;
+
 
 // ######### evt Handler ##############// 
 
@@ -70,11 +72,16 @@ function mediaSetMouseDownFct(evt){
 }
 
 
-function mediaWheelFct(evt){	
-    gMediaWheelEvt=1;
+function mediaWheelFct(evt){
+    if((timeGetCurrentInMs() - gMediaWheelLastEvt) > 100)
+    {
+        gMediaWheelLastEvt = timeGetCurrentInMs();
+        gMediaWheelEvt=1;
+    }        
+   	
 }
 
-function mediaWheelEvt(){   
+function mediaWheelEvt(){ 
     var ret = gMediaWheelEvt;
     gMediaWheelEvt = 0;
     return (ret);
