@@ -308,7 +308,7 @@ UpdateHero(pFire,pFireDir,pDead)
         vec3.copy(this.GunDir,this.HeadDir);
 
         //Orientation and BackWardsRunning
-        if (vec3.dot(this.Dir,this.GunDir) <-0.75)
+        if (vec3.dot(this.Dir,this.GunDir) < -0.25 )
         {
             vec3.scale(this.Dir,this.Dir,-1);
             this.AnimCounter  -= 8.0*elapsed;
