@@ -12,6 +12,7 @@ class CGame
 
 		// Data Init
 		timeInit();
+		mediaInit();
 		this.HeroLife = 10;
 		this.CamPos = [-370,13,100]; 
 		this.SpeedCoef=50;

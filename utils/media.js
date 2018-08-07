@@ -1,12 +1,22 @@
 
-var gMediaKeyPressed={};
-var gMediaTouchStartPos={};
-var gMediaCamMvVec=[0,0];
-var gMediaTouchMvInProgress=0;
-var gMediaFireTouch=0;
-var gMediaWheelEvt=0;
-var gMediaWheelLastEvt=0;
+var gMediaKeyPressed;
+var gMediaTouchStartPos;
+var gMediaCamMvVec;
+var gMediaTouchMvInProgress;
+var gMediaFireTouch;
+var gMediaWheelEvt;
+var gMediaWheelLastEvt;
 
+function mediaInit()
+{
+    gMediaKeyPressed={};
+    gMediaTouchStartPos={};
+    gMediaCamMvVec=[0,0];
+    gMediaTouchMvInProgress=0;
+    gMediaFireTouch=0;
+    gMediaWheelEvt=0;
+    gMediaWheelLastEvt=0;  
+}
 
 // ######### evt Handler ##############// 
 
