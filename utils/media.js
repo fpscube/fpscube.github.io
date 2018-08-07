@@ -95,7 +95,7 @@ function mediaGetCamMvVector()
 }
 
 
-function mediaIsRunning(){
+function mediaIsMvtAsked(){
 
     return (
         gMediaKeyPressed["Up"]==1 || 
@@ -107,7 +107,7 @@ function mediaIsRunning(){
 }
 
 
-function mediaGetRunAngle()
+function mediaGetMvAngle()
 {
     var angle = 0;
     if (gMediaKeyPressed["Up"] && gMediaKeyPressed["Left"]) {angle = Math.PI/4;}

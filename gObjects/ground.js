@@ -312,4 +312,6 @@ function groundWaterDraw()
 	gl.uniform1f (groundShaderProgram.waterY, shaderWaterY);
 	squareDraw(groundShaderProgram);
   shaderWaterY = -1000;
+  
+	mat4.identity(mvMatrix)
 }

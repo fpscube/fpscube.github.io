@@ -202,7 +202,7 @@ function lookAt(pVec3Dir)
     mat4.getTranslation(translationVector,mvMatrix);
     mat4.identity(mvMatrix);
     mat4.translate(mvMatrix,mvMatrix, translationVector);
-    mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],pVec3Dir,[0,1,0]);
+    mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],[-pVec3Dir[0],-pVec3Dir[1],-pVec3Dir[2]],[0,1,0]);
     mat4.invert(lookAtMatrix,lookAtMatrix);
     mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
 }

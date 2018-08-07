@@ -10,31 +10,14 @@ class CGame
 
  	init() {
 
-		squareInit();
-		SphereInit();
-		groundInit();
-
+		// Data Init
 		timeInit();
-		this.Guns = new CGuns();
-		// init time utils
-		humansInit();
-		// game data Init	
-		this.HeroDir = [0.88,-0.15,-0.43];
-		this.HeroCollision = false;
 		this.HeroLife = 10;
-		//this.HeroLife = 100000000000000;
-		this.HeroFire=false;
-		this.HeroRunning=false;
-		this.MediaRunAngle=0;
-
 		this.CamPos = [-370,13,100]; 
 		this.SpeedCoef=50;
 		this.CamDir = [0.88,-0.15,-0.43];
 		this.State = "Play"
 		this.EndAnim = new CTimeAnim();
-		this.Screen = new CScreen("canvas3D","canvas2D");
-		this.Stone = new CStone();
-		this.Vehicules = new CVehicules();
 
 		// gl init
 		gl.clearColor(0x00, 0xbf, 0xff, 1.0);	
@@ -42,13 +25,19 @@ class CGame
 		gl.enable(gl.BLEND);
 		gl.enable(gl.DEPTH_TEST);      
 
-		// init gl object
+		// init gl object		
+		squareInit();
+		SphereInit();
+		groundInit();
+		humansInit();
+		this.Screen = new CScreen("canvas3D","canvas2D");
+		this.Guns = new CGuns();
+		this.Stone = new CStone();
+		this.Vehicules = new CVehicules();
 		this.Info = new CInfo();
-
 		this.Trees = new CTrees();
 		this.Enemies = new CEnemies(30);
-		this.Hero = new CHuman([-575,200,81],2,[-1,0,1]);
-
+		this.Hero = new CHuman([-575,200,81],2,[1,0,-1]);
 	}
 
 	update() {
@@ -59,10 +48,7 @@ class CGame
 		shaderCounter = timeGetCurrentInS()*10;
 
 		// Get Media Info
-		this.HeroFire = mediaIsKey("Fire");
 		this.CamMvVec = mediaGetCamMvVector();
-		this.MediaRunAngle = mediaGetRunAngle();
-		this.HeroRunning = mediaIsRunning();
 
 		//Update Camera Direction
 		var mvVector = vec3.create();
@@ -80,20 +66,62 @@ class CGame
 		switch (this.State) {
 			case "Play":
 				// Update Hero Direction and Hero Horz Speed
-				if (this.HeroRunning ){
-					vec3.rotateY(this.HeroDir,this.CamDir,[0,0,0],this.MediaRunAngle);
-				}
-				this.Hero.UpdateHero(this.HeroDir,this.HeroRunning,this.HeroFire,this.CamDir,this.HeroLife<=0,this.Stone);			
 				
-				// if hero use bazzoka collision is not treated by enemies and turn when fire
-				if(this.Hero.Bazooka)	this.HeroFire=false;
+				if(this.Hero.State !="Vehicule"){
+	
+					// if Running process hero dir function of camdir and media angle
+					if (mediaIsMvtAsked()){
+						vec3.rotateY(this.Hero.Dir,this.CamDir,[0,0,0],mediaGetMvAngle());
+						this.Hero.Dir[1]=0;
+						vec3.normalize(this.Hero.Dir,this.Hero.Dir);
+						this.Hero.HSpeed = 50;
+					}
+					else
+					{
+						this.Hero.HSpeed = 0;
+					}
 
-				//Update Cam Position				
-				var projDir = [];
-				vec3.rotateY(projDir,this.CamDir,[0,0,0],0.125);
-				this.CamPos[0] = this.Hero.Pos[0] - projDir[0]*15;
-				this.CamPos[2] = this.Hero.Pos[2] - projDir[2]*15;
-				this.CamPos[1] = this.Hero.Pos[1] + 5.5 ;
+					this.Hero.UpdateHero(mediaIsKey("Fire"),this.CamDir,this.HeroLife<=0);	
+
+					//Update Cam Position function of CamDir and Hero Position			
+					var projDir = [];
+					vec3.rotateY(projDir,this.CamDir,[0,0,0],0.125);
+					this.CamPos[0] = this.Hero.Pos[0] - projDir[0]*15;
+					this.CamPos[2] = this.Hero.Pos[2] - projDir[2]*15
+					this.CamPos[1] = this.Hero.Pos[1] + 5.5 ;
+				}
+				else
+				{						
+					if (mediaIsMvtAsked()){
+						vec3.rotateY(this.Vehicules.Dir,this.CamDir,[0,0,0],mediaGetMvAngle());
+						this.Vehicules.Dir[1]=0;
+						vec3.normalize(this.Vehicules.Dir,this.Vehicules.Dir);
+						this.Vehicules.Acc = 30;
+					}
+					else
+					{
+						this.Vehicules.Acc = -50;
+					}								
+					this.Vehicules.update();
+					vec3.copy(this.Hero.Pos,this.Vehicules.DriverPos);
+					vec3.copy(this.Hero.Dir,this.Vehicules.Dir);
+					this.Hero.HSpeed = 0;
+					this.Hero.UpdateHero(mediaIsKey("Fire"),this.CamDir,this.HeroLife<=0);
+					
+					this.CamPos[0] = this.Vehicules.Pos[0] - this.CamDir[0]*30;
+					this.CamPos[2] = this.Vehicules.Pos[2] - this.CamDir[2]*30
+					this.CamPos[1] = this.Vehicules.Pos[1] + 10.5 ;
+
+					if (mediaIsKey("Fire") )
+					{
+						this.Hero.Pos[0] += 20;
+						this.Hero.Pos[1] += 20;
+						this.Hero.Pos[2] += 20;
+						this.Hero.State = "Running";
+					}
+				}
+
+
 
 				// Update Enemies
 				this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,this.HeroFire);
@@ -126,9 +154,9 @@ class CGame
 				// Update Enemies
 				this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,false);				
 				
-				this.Hero.UpdateHero(this.HeroDir,false,false,this.CamDir,this.HeroLife<=0,this.Stone);
+				this.Hero.UpdateHero(false,this.CamDir,this.HeroLife<=0);
 
-				if (this.HeroFire && !this.EndAnim.running)
+				if (mediaIsKey("Fire") && !this.EndAnim.running)
 				{
 					this.init();
 				}
@@ -137,7 +165,6 @@ class CGame
 		}
 
 		this.Info.update(this.Enemies.IsInTarget,this.Enemies.HitTarget,this.HeroLife,this.Enemies.NbALive,this.State,this.Hero.GunSelected);
-		this.Vehicules.update();
 		this.Guns.update();
 
 	}
