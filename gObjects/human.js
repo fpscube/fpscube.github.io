@@ -307,6 +307,12 @@ UpdateHero(pFire,pFireDir,pDead)
 
         vec3.copy(this.GunDir,this.HeadDir);
 
+        //Bazooka to heavy
+        if(this.GunSelected == GunsInst.Bazooka)
+        {
+            vec3.copy(this.Dir,this.GunDir);
+        }
+
         //Orientation and BackWardsRunning
         if (vec3.dot(this.Dir,this.GunDir) < -0.25 )
         {
@@ -319,6 +325,7 @@ UpdateHero(pFire,pFireDir,pDead)
             this.AnimCounter  += 8.0*elapsed;
             if (this.AnimCounter < -10.0 * Math.PI)  this.AnimCounter = -10.0 * Math.PI - this.AnimCounter;
         }
+
 
     }
 }
