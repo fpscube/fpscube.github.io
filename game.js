@@ -109,8 +109,8 @@ class CGame
 					this.Hero.HSpeed = 0;
 					this.Hero.UpdateHero(false,this.CamDir,this.HeroLife<=0);
 					
-					this.CamPos[0] = this.Vehicules.Pos[0] - this.CamDir[0]*30;
-					this.CamPos[2] = this.Vehicules.Pos[2] - this.CamDir[2]*30
+					this.CamPos[0] = this.Vehicules.Pos[0] - this.CamDir[0]*40;
+					this.CamPos[2] = this.Vehicules.Pos[2] - this.CamDir[2]*40
 					this.CamPos[1] = this.Vehicules.Pos[1] + 10.5 ;
 
 					if (mediaIsKey("Fire") )
