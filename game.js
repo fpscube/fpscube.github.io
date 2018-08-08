@@ -82,6 +82,7 @@ class CGame
 						this.Hero.HSpeed = 0;
 					}
 
+					this.Vehicules.update();
 					this.Hero.UpdateHero(mediaIsKey("Fire"),this.CamDir,this.HeroLife<=0);	
 
 					//Update Cam Position function of CamDir and Hero Position			
@@ -96,12 +97,17 @@ class CGame
 					vec3.copy(this.Vehicules.WheelDir,this.CamDir);
 					this.Vehicules.WheelDir[1]=0;
 					vec3.normalize(this.Vehicules.WheelDir,this.Vehicules.WheelDir);
-					this.Vehicules.Acc= (mediaIsMvtAsked()) ?30:-50;						
+					if(mediaIsMvtAsked()){
+						this.Vehicules.Acc = (Math.abs(mediaGetMvAngle())<Math.PI/4)?30:-100;
+					}
+					else{
+						this.Vehicules.Acc = -40;
+					}						
 					this.Vehicules.update();
 					vec3.copy(this.Hero.Pos,this.Vehicules.DriverPos);
 					vec3.copy(this.Hero.Dir,this.Vehicules.Dir);
 					this.Hero.HSpeed = 0;
-					this.Hero.UpdateHero(mediaIsKey("Fire"),this.CamDir,this.HeroLife<=0);
+					this.Hero.UpdateHero(false,this.CamDir,this.HeroLife<=0);
 					
 					this.CamPos[0] = this.Vehicules.Pos[0] - this.CamDir[0]*30;
 					this.CamPos[2] = this.Vehicules.Pos[2] - this.CamDir[2]*30
@@ -109,10 +115,9 @@ class CGame
 
 					if (mediaIsKey("Fire") )
 					{
-						this.Hero.Pos[0] += 20;
-						this.Hero.Pos[1] += 20;
-						this.Hero.Pos[2] += 20;
+						vec3.copy(this.Hero.Pos,this.Vehicules.DriverOutPos);
 						this.Hero.State = "Running";
+						this.Vehicules.Acc = -40;
 					}
 				}
 

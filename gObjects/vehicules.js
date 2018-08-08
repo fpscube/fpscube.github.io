@@ -9,6 +9,7 @@ class CVehicules
     {
         this.Pos = [-650,0,80];
         this.DriverPos =[-550,0,80];
+        this.DriverOutPos =[-550,0,80];
         this.Pos[1] = groundGetY(this.Pos[0],this.Pos[2]) + 3.0;
         this.NewPos = [-550,0,80];
         this.Dir = [1,0,0]; 
@@ -21,7 +22,6 @@ class CVehicules
         VehiculesInst = this;
 
     }
-
     
     storeCollisionMatrix(pMvMatrix)
     {
@@ -80,6 +80,9 @@ class CVehicules
         this.DriverPos[0] =  this.Pos[0]-this.Dir[0]*4.0;
         this.DriverPos[2] =  this.Pos[2]-this.Dir[2]*4.0;
         this.DriverPos[1] =  this.Pos[1]+1.6;
+        this.DriverOutPos[0]  =  this.Pos[0]+this.Dir[2]*10.0;
+        this.DriverOutPos[2]  =  this.Pos[2]-this.Dir[0]*10.0;
+        this.DriverOutPos[1]  =  this.Pos[1]+5;
 
 
 
