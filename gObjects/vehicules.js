@@ -12,6 +12,8 @@ class CVehicules
         this.Pos[1] = groundGetY(this.Pos[0],this.Pos[2]) + 3.0;
         this.NewPos = [-550,0,80];
         this.Dir = [1,0,0]; 
+        this.WheelDir = [1,0,0]; 
+        this.LastWheelDir = [1,0,0]; 
         this.HSpeed = 0;
         this.VSpeed= 0;
         this.Acc = 0;
@@ -40,18 +42,37 @@ class CVehicules
     }
 
 
-
     update()
     {
         var elapsed = timeGetElapsedInS();
+
+        var dotWheel = vec3.dot(this.Dir,this.WheelDir);
+        if(dotWheel<0.5) 
+        {    
+            var wheelDir  = [];   
+            vec3.rotateY(wheelDir,this.Dir,[0,0,0],Math.acos(0.5));
+            dotWheel = vec3.dot(wheelDir,this.WheelDir);
+            if(dotWheel<-0.5)    
+                vec3.rotateY(this.WheelDir,this.Dir,[0,0,0],-Math.acos(0.5));
+            else
+                vec3.rotateY(this.WheelDir,this.Dir,[0,0,0],Math.acos(0.5));
+        }
 
         this.HSpeed += (this.Acc -1) *elapsed;
         if(this.HSpeed<0) this.HSpeed=0;
         
         if(this.HSpeed>150) this.HSpeed=150;
 
-        this.Pos[0] = this.Pos[0] + this.HSpeed*elapsed*this.Dir[0];
-        this.Pos[2] = this.Pos[2] + this.HSpeed*elapsed*this.Dir[2];
+        if(this.HSpeed>0)
+        {
+            this.Dir[0] = (this.Dir[0]*this.HSpeed/5 + this.WheelDir[0]);
+            this.Dir[2] = (this.Dir[2]*this.HSpeed/5 + this.WheelDir[2]);
+            vec3.normalize(this.Dir,this.Dir);
+        }
+         
+
+        this.Pos[0] = this.Pos[0] + this.HSpeed*elapsed* this.Dir[0];
+        this.Pos[2] = this.Pos[2] + this.HSpeed*elapsed* this.Dir[2];
       //  this.Pos[1] = this.Pos[1] + this.VSpeed*elapsed;
         
         this.Pos[1] = groundGetY(this.Pos[0],this.Pos[2]) + 3.0;
@@ -59,6 +80,10 @@ class CVehicules
         this.DriverPos[0] =  this.Pos[0]-this.Dir[0]*4.0;
         this.DriverPos[2] =  this.Pos[2]-this.Dir[2]*4.0;
         this.DriverPos[1] =  this.Pos[1]+1.6;
+
+
+
+
     }
 
     draw()
@@ -70,11 +95,28 @@ class CVehicules
         
         mat4.translate(mvMatrix,mvMatrix,this.Pos);
     
-        lookAt([this.Dir[0],0,this.Dir[2]]); 
+        lookAt(this.Dir); 
         
         mat4.scale(mvMatrix,mvMatrix,[0.5,0.5,0.5]);
 
-        //Gear
+        //Front Wheel
+        mvPushMatrix();
+            mat4.translate(mvMatrix,mvMatrix,[-8,0,13]);
+            lookAt(this.WheelDir); 
+            mat4.scale(mvMatrix,mvMatrix,[1.0,2.5,2.5]);
+            this.storeCollisionMatrix(mvMatrix);
+            Sphere.Draw(SphereShaderProgram); 
+        mvPopMatrix();
+
+        mvPushMatrix();
+            mat4.translate(mvMatrix,mvMatrix,[8,0,13]);  
+            lookAt(this.WheelDir); 
+            mat4.scale(mvMatrix,mvMatrix,[1.0,2.5,2.5]);
+            this.storeCollisionMatrix(mvMatrix);
+            Sphere.Draw(SphereShaderProgram); 
+        mvPopMatrix();
+
+        //Back Wheel    
         mvPushMatrix();
             mat4.translate(mvMatrix,mvMatrix,[-8,0,-13]); 
             mat4.scale(mvMatrix,mvMatrix,[2.0,5,5]);
@@ -83,26 +125,11 @@ class CVehicules
         mvPopMatrix();
 
         mvPushMatrix();
-            mat4.translate(mvMatrix,mvMatrix,[-8,0,13]); 
-            mat4.scale(mvMatrix,mvMatrix,[2.0,5,5]);
-            this.storeCollisionMatrix(mvMatrix);
-            Sphere.Draw(SphereShaderProgram); 
-        mvPopMatrix();
-    
-        mvPushMatrix();
         mat4.translate(mvMatrix,mvMatrix,[8,0,-13]); 
             mat4.scale(mvMatrix,mvMatrix,[2.0,5,5]);
             this.storeCollisionMatrix(mvMatrix);
             Sphere.Draw(SphereShaderProgram); 
         mvPopMatrix();
-
-        mvPushMatrix();
-        mat4.translate(mvMatrix,mvMatrix,[8,0,13]);  
-            mat4.scale(mvMatrix,mvMatrix,[2.0,5,5]);
-            this.storeCollisionMatrix(mvMatrix);
-            Sphere.Draw(SphereShaderProgram); 
-        mvPopMatrix();
-
 
         //Structure
         shaderVertexColorVector = [0.2,0.2,0.2,1.0]; 

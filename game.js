@@ -92,17 +92,11 @@ class CGame
 					this.CamPos[1] = this.Hero.Pos[1] + 5.5 ;
 				}
 				else
-				{						
-					if (mediaIsMvtAsked()){
-						vec3.rotateY(this.Vehicules.Dir,this.CamDir,[0,0,0],mediaGetMvAngle());
-						this.Vehicules.Dir[1]=0;
-						vec3.normalize(this.Vehicules.Dir,this.Vehicules.Dir);
-						this.Vehicules.Acc = 30;
-					}
-					else
-					{
-						this.Vehicules.Acc = -50;
-					}								
+				{				
+					vec3.copy(this.Vehicules.WheelDir,this.CamDir);
+					this.Vehicules.WheelDir[1]=0;
+					vec3.normalize(this.Vehicules.WheelDir,this.Vehicules.WheelDir);
+					this.Vehicules.Acc= (mediaIsMvtAsked()) ?30:-50;						
 					this.Vehicules.update();
 					vec3.copy(this.Hero.Pos,this.Vehicules.DriverPos);
 					vec3.copy(this.Hero.Dir,this.Vehicules.Dir);

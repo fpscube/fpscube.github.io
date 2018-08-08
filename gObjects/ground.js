@@ -313,5 +313,4 @@ function groundWaterDraw()
 	squareDraw(groundShaderProgram);
   shaderWaterY = -1000;
   
-	mat4.identity(mvMatrix)
 }
