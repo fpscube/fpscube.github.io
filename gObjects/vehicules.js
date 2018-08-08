@@ -8,6 +8,7 @@ class CVehicules
     constructor()
     {
         this.Pos = [-650,0,80];
+        this.BackPos = [-650,0,80];
         this.DriverPos =[-550,0,80];
         this.DriverOutPos =[-550,0,80];
         this.Pos[1] = groundGetY(this.Pos[0],this.Pos[2]) + 3.0;
@@ -45,11 +46,8 @@ class CVehicules
     update()
     {
         var elapsed = timeGetElapsedInS();
-
         var dotWheel = vec3.dot(this.Dir,this.WheelDir);
         var dotMax = (this.HSpeed/150)**2*0.499 + 0.5;
-        console.log(dotMax);
-        console.log(dotWheel);
         if(dotWheel<dotMax) 
         {    
             var orthoDir  = [];   
@@ -73,22 +71,33 @@ class CVehicules
 
         if(this.HSpeed>0)
         {
-
             this.Dir[0] = (this.Dir[0]*13 + this.WheelDir[0]*this.HSpeed*elapsed);
             this.Dir[2] = (this.Dir[2]*13 + this.WheelDir[2]*this.HSpeed*elapsed);
             vec3.normalize(this.Dir,this.Dir);
+
+            this.Pos[0] = this.Pos[0] + this.HSpeed*elapsed* this.Dir[0];
+            this.Pos[2] = this.Pos[2] + this.HSpeed*elapsed* this.Dir[2];
+            this.Pos[1] = groundGetY(this.Pos[0],this.Pos[2]) + 2.0;
         }
-         
+                 
 
-        this.Pos[0] = this.Pos[0] + this.HSpeed*elapsed* this.Dir[0];
-        this.Pos[2] = this.Pos[2] + this.HSpeed*elapsed* this.Dir[2];
-      //  this.Pos[1] = this.Pos[1] + this.VSpeed*elapsed;
-        
-        this.Pos[1] = groundGetY(this.Pos[0],this.Pos[2]) + 3.0;
+        this.BackPos[0] = this.Pos[0] - this.Dir[0]*13;
+        this.BackPos[2] = this.Pos[2] - this.Dir[2]*13;
+        this.BackPos[1] = groundGetY(this.BackPos[0],this.BackPos[2]) + 2.0;
 
-        this.DriverPos[0] =  this.Pos[0]-this.Dir[0]*10.5;
-        this.DriverPos[2] =  this.Pos[2]-this.Dir[2]*10.5;
-        this.DriverPos[1] =  this.Pos[1]+1.6;
+        this.Dir[1] =  (this.Pos[1] - this.BackPos[1])/13;  
+
+        var tmpDir =[];     
+        vec3.normalize(tmpDir,this.Dir);
+        this.DriverPos[0] =  this.Pos[0]-tmpDir[0]*10.5;
+        this.DriverPos[2] =  this.Pos[2]-tmpDir[2]*10.5;
+        this.DriverPos[1] =  this.Pos[1]-tmpDir[1]*10.5;        
+		vec3.cross(tmpDir,this.Dir,[0,1,0]);
+		vec3.cross(tmpDir,tmpDir,this.Dir);
+        this.DriverPos[0] += tmpDir[0]*1.5;
+        this.DriverPos[2] +=  tmpDir[2]*1.5;
+        this.DriverPos[1] +=  tmpDir[1]*1.5;   
+
         this.DriverOutPos[0]  =  this.Pos[0]+this.Dir[2]*10.0;
         this.DriverOutPos[2]  =  this.Pos[2]-this.Dir[0]*10.0;
         this.DriverOutPos[1]  =  this.Pos[1]+5;

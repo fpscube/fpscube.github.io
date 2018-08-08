@@ -106,6 +106,7 @@ class CGame
 					this.Vehicules.update();
 					vec3.copy(this.Hero.Pos,this.Vehicules.DriverPos);
 					vec3.copy(this.Hero.Dir,this.Vehicules.Dir);
+					vec3.normalize(this.Hero.Dir,this.Hero.Dir);
 					this.Hero.HSpeed = 0;
 					this.Hero.UpdateHero(false,this.CamDir,this.HeroLife<=0);
 					

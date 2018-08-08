@@ -615,7 +615,7 @@ _LegDraw(pX,pY,pAnimCounter)
         mat4.translate(mvMatrix,mvMatrix, [pX,pY,posZ]);
         if (this.State != "Falling" && this.State != "Disappear")
         {
-            lookAt([this.Dir[0],0,this.Dir[2]]);
+            lookAt(this.Dir);
         }
         mat4.rotate(mvMatrix,mvMatrix, legUpAngle, [1, 0, 0]);
         mat4.translate(mvMatrix,mvMatrix, [0,-1.9,0]);
