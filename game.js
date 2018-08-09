@@ -101,7 +101,7 @@ class CGame
 						this.Vehicules.Acc = (Math.abs(mediaGetMvAngle())<Math.PI/4)?30:-100;
 					}
 					else{
-						this.Vehicules.Acc = -40;
+						this.Vehicules.Acc = -20;
 					}						
 					this.Vehicules.update();
 					vec3.copy(this.Hero.Pos,this.Vehicules.DriverPos);
@@ -118,7 +118,9 @@ class CGame
 					{
 						vec3.copy(this.Hero.Pos,this.Vehicules.DriverOutPos);
 						this.Hero.State = "Running";
-						this.Vehicules.Acc = -40;
+						this.Hero.Dir[1]=0;
+						vec3.normalize(this.Hero.Dir,this.Hero.Dir);
+						this.Vehicules.Acc = -60;
 					}
 				}
 

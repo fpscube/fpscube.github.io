@@ -20,6 +20,7 @@ class CVehicules
         this.VSpeed= 0;
         this.Acc = 0;
         this.collisionMatrixList = [];   
+        this.EnterCollisionMatrix = mat4.create();
         VehiculesInst = this;
 
     }
@@ -34,14 +35,19 @@ class CVehicules
     checkCollision(pRayPoint1,pRayPoint2)
     {
         var collision = null ;
-        for (var i=0;i<this.collisionMatrixList.length;i++)
-        {
-            collision = Sphere.GetCollisionPos(pRayPoint1,pRayPoint2,this.collisionMatrixList[i],collision,0);
-        }
-
+        collision = Sphere.GetCollisionPos(pRayPoint1,pRayPoint2,this.EnterCollisionMatrix,collision,0);
         return (collision!=null);
     }
 
+    getCollisionPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOffset)
+    {
+        var collision = pCollision ;
+        for (var i=0;i<this.collisionMatrixList.length;i++)
+        {
+            collision = Sphere.GetCollisionPos(pRayPoint1,pRayPoint2,this.collisionMatrixList[i],collision,pDistSquaredOffset);
+        }
+        return collision;
+    }
 
     update()
     {
@@ -119,6 +125,12 @@ class CVehicules
         lookAt(this.Dir); 
         mat4.translate(mvMatrix,mvMatrix,[0,0,-6.5]);
         
+        //Collision
+        mvPushMatrix();
+            mat4.scale(mvMatrix,mvMatrix,[9.0,7.0,11]);
+            mat4.copy(this.EnterCollisionMatrix,mvMatrix);
+        mvPopMatrix();
+
 
         //Front Wheel
         mvPushMatrix();
