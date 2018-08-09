@@ -66,8 +66,17 @@ class CGame
 		// Game State Machine
 		switch (this.State) {
 			case "Play":
+				// Vehicule Exit
+				if (mediaIsKey("Fire")  && this.Hero.State =="Vehicule")
+				{
+					vec3.copy(this.Hero.Pos,this.Vehicules.DriverOutPos);
+					this.Hero.State = "Running";
+					this.Hero.Dir[1]=0;
+					vec3.normalize(this.Hero.Dir,this.Hero.Dir);
+					this.Vehicules.Acc = -60;
+				}
+
 				// Update Hero Direction and Hero Horz Speed
-				
 				if(this.Hero.State !="Vehicule"){
 	
 					// if Running process hero dir function of camdir and media angle
@@ -114,14 +123,7 @@ class CGame
 					this.CamPos[2] = this.Vehicules.Pos[2] - this.CamDir[2]*40
 					this.CamPos[1] = this.Vehicules.Pos[1] + 10.5 ;
 
-					if (mediaIsKey("Fire") )
-					{
-						vec3.copy(this.Hero.Pos,this.Vehicules.DriverOutPos);
-						this.Hero.State = "Running";
-						this.Hero.Dir[1]=0;
-						vec3.normalize(this.Hero.Dir,this.Hero.Dir);
-						this.Vehicules.Acc = -60;
-					}
+					
 				}
 
 

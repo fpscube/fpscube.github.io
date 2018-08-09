@@ -60,7 +60,7 @@ class CVehicules
     {
         var elapsed = timeGetElapsedInS();
         var dotWheel = vec3.dot(this.Dir,this.WheelDir);
-        var dotMax = (this.HSpeed/150)**2*0.499 + 0.5;
+        var dotMax = 0.5 + (this.HSpeed/150)*0.499;
         if(dotWheel<dotMax) 
         {    
             var orthoDir  = [];   
