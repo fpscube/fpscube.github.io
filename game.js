@@ -181,7 +181,7 @@ class CGame
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 		//Perceptive projection
-		mat4.perspective(pMatrix,45, gl.viewportWidth / gl.viewportHeight, 1.0, 1000.0);
+		mat4.perspective(pMatrix,45, gl.viewportWidth / gl.viewportHeight, 1.0, 10000.0);
 
 		// Camera managment
 		var lookAtMatrix = mat4.create();

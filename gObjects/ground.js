@@ -305,7 +305,7 @@ function groundWaterDraw()
   shaderWaterY = groundWaterYLevel;
 	mat4.identity(mvMatrix); 
 	mat4.translate(mvMatrix,mvMatrix, [0.0,groundWaterYLevel-2.0,0.0]);	
-	mat4.scale(mvMatrix,mvMatrix,[10000.0,0.0,10000.0]);	
+	mat4.scale(mvMatrix,mvMatrix,[20000.0,0.0,20000.0]);	
   mat4.rotate(mvMatrix,mvMatrix,  degToRad(10), [1, 0, 0]);  
 
 	gl.uniform1f (groundShaderProgram.counter, shaderCounter);
