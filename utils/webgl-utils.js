@@ -206,3 +206,16 @@ function lookAt(pVec3Dir)
     mat4.invert(lookAtMatrix,lookAtMatrix);
     mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
 }
+
+function lookAtN(pVec3Dir,pNormalDir)
+{
+    var lookAtMatrix = mat4.create();
+    var translationVector = vec3.create();
+    mat4.getTranslation(translationVector,mvMatrix);
+    mat4.identity(mvMatrix);
+    mat4.translate(mvMatrix,mvMatrix, translationVector);
+    mat4.lookAt(lookAtMatrix,[0.0,0.0,0.0],[-pVec3Dir[0],-pVec3Dir[1],-pVec3Dir[2]],pNormalDir);
+    mat4.invert(lookAtMatrix,lookAtMatrix);
+    mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
+}
+
