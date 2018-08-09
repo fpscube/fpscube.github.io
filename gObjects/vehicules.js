@@ -59,6 +59,14 @@ class CVehicules
     update()
     {
         var elapsed = timeGetElapsedInS();
+
+        //Set Y of  WheelDir and Dir to 0
+        this.WheelDir[1] = 0;
+        this.Dir[1] =0;
+        vec3.normalize(this.WheelDir,this.WheelDir);
+        vec3.normalize(this.Dir,this.Dir);
+
+        // Compute Rotation Max of Front Wheels
         var dotWheel = vec3.dot(this.Dir,this.WheelDir);
         var dotMax = 0.5 + (this.HSpeed/150)*0.499;
         if(dotWheel<dotMax) 
@@ -72,38 +80,33 @@ class CVehicules
                 vec3.rotateY(this.WheelDir,this.Dir,[0,0,0],Math.acos(dotMax));
         }
 
+        // Compute Horizontal Speed
         this.HSpeed += this.Acc *elapsed;
-
-        // Speed Limit
         if(this.HSpeed<=0)
         {
             this.HSpeed=0; 
             vec3.copy(this.WheelDir,this.Dir);
         }        
         if(this.HSpeed>150) this.HSpeed=150;
+        
+        this.Dir[0] = (this.Dir[0]*13 + this.WheelDir[0]*this.HSpeed*elapsed);
+        this.Dir[2] = (this.Dir[2]*13 + this.WheelDir[2]*this.HSpeed*elapsed);
+        vec3.normalize(this.Dir,this.Dir);
 
-        if(this.HSpeed>0)
-        {
-            this.Dir[0] = (this.Dir[0]*13 + this.WheelDir[0]*this.HSpeed*elapsed);
-            this.Dir[2] = (this.Dir[2]*13 + this.WheelDir[2]*this.HSpeed*elapsed);
-            vec3.normalize(this.Dir,this.Dir);
-
-            this.Pos[0] = this.Pos[0] + this.HSpeed*elapsed* this.Dir[0];
-            this.Pos[2] = this.Pos[2] + this.HSpeed*elapsed* this.Dir[2];
-            this.Pos[1] = groundGetY(this.Pos[0],this.Pos[2]) + 2.0;
-        }
-                 
+        this.Pos[0] = this.Pos[0] + this.HSpeed*elapsed* this.Dir[0];
+        this.Pos[2] = this.Pos[2] + this.HSpeed*elapsed* this.Dir[2];
+        this.Pos[1] = groundGetY(this.Pos[0],this.Pos[2]) + 2.0;
+    
 
         this.BackPos[0] = this.Pos[0] - this.Dir[0]*13;
         this.BackPos[2] = this.Pos[2] - this.Dir[2]*13;
         this.BackPos[1] = groundGetY(this.BackPos[0],this.BackPos[2]) + 2.0;
 
         this.Dir[1] =  (this.Pos[1] - this.BackPos[1])/13;  
+        vec3.normalize(this.Dir,this.Dir);
       
         vec3.cross(this.CrossDir,this.Dir,[0,1,0]);
-        vec3.normalize(this.CrossDir,this.CrossDir);
-        var nmDir =[];     
-        vec3.normalize(nmDir,this.Dir);
+        vec3.normalize(this.CrossDir,this.CrossDir);   
 
         // Process Wheel Pos
         this.WheelFLPos[0] = this.Pos[0]-this.CrossDir[0]*4.0;
@@ -129,15 +132,15 @@ class CVehicules
         vec3.normalize(axeDir,axeDir);  
         vec3.normalize(frontAxeDir,frontAxeDir);  
         vec3.normalize(bckAxeDir,bckAxeDir); 
-        vec3.cross(this.NormalDir,nmDir,axeDir);
-        vec3.cross(this.FWheelNormalDir,nmDir,frontAxeDir);
-        vec3.cross(this.BWheelNormalDir,nmDir,bckAxeDir);
+        vec3.cross(this.NormalDir,this.Dir,axeDir);
+        vec3.cross(this.FWheelNormalDir,this.Dir,frontAxeDir);
+        vec3.cross(this.BWheelNormalDir,this.Dir,bckAxeDir);
         
         
         // Process Driver Pos
-        this.DriverPos[0] =  this.Pos[0]-nmDir[0]*10.5;
-        this.DriverPos[2] =  this.Pos[2]-nmDir[2]*10.5;
-        this.DriverPos[1] =  this.Pos[1]-nmDir[1]*10.5;  
+        this.DriverPos[0] =  this.Pos[0]-this.Dir[0]*10.5;
+        this.DriverPos[2] =  this.Pos[2]-this.Dir[2]*10.5;
+        this.DriverPos[1] =  this.Pos[1]-this.Dir[1]*10.5;  
         this.DriverPos[0] += this.NormalDir[0]*1.5;
         this.DriverPos[2] +=  this.NormalDir[2]*1.5;
         this.DriverPos[1] +=  this.NormalDir[1]*1.5;   

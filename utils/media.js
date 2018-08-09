@@ -38,8 +38,8 @@ function mediaMouseMove(evt) {
 function mediaSetKeyDownFct(evt)
 {
     if (evt.key=="ArrowUp" || evt.key=="z" ){
-      gMediaKeyPressed["Up"]=1;
-      gMediaKeyPressed["Down"]=0;
+        gMediaKeyPressed["Up"]=1;
+        gMediaKeyPressed["Down"]=0;
     }
     else if (evt.key=="ArrowDown" || evt.key=="s" ){
         gMediaKeyPressed["Up"]=0;

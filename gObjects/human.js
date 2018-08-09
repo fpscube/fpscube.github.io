@@ -310,7 +310,8 @@ UpdateHero(pFire,pFireDir,pDead)
         //Bazooka to heavy
         if(this.GunSelected == GunsInst.Bazooka)
         {
-            vec3.copy(this.Dir,this.GunDir);
+            this.Dir[0]=this.GunDir[0];
+            this.Dir[2]=this.GunDir[2];
         }
 
         //Orientation and BackWardsRunning

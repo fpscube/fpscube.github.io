@@ -105,8 +105,6 @@ class CGame
 				else
 				{				
 					vec3.copy(this.Vehicules.WheelDir,this.CamDir);
-					this.Vehicules.WheelDir[1]=0;
-					vec3.normalize(this.Vehicules.WheelDir,this.Vehicules.WheelDir);
 					if(mediaIsMvtAsked()){
 						this.Vehicules.Acc = (Math.abs(mediaGetMvAngle())<Math.PI/4)?30:-100;
 					}
