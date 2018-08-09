@@ -19,6 +19,7 @@ class CGame
 		this.CamDir = [0.88,-0.15,-0.43];
 		this.State = "Play"
 		this.EndAnim = new CTimeAnim();
+		this.LastFire = 0;
 
 		// gl init
 		gl.clearColor(0x00, 0xbf, 0xff, 1.0);	
@@ -67,7 +68,7 @@ class CGame
 		switch (this.State) {
 			case "Play":
 				// Vehicule Exit
-				if (mediaIsKey("Fire")  && this.Hero.State =="Vehicule")
+				if (this.LastFire && !mediaIsKey("Fire") &&  this.Hero.State =="Vehicule")
 				{
 					vec3.copy(this.Hero.Pos,this.Vehicules.DriverOutPos);
 					this.Hero.State = "Running";
@@ -161,7 +162,7 @@ class CGame
 				
 				this.Hero.UpdateHero(false,this.CamDir,this.HeroLife<=0);
 
-				if (mediaIsKey("Fire") && !this.EndAnim.running)
+				if (this.LastFire && !mediaIsKey("Fire") && !this.EndAnim.running)
 				{
 					this.init();
 				}
@@ -171,6 +172,7 @@ class CGame
 
 		this.Info.update(this.Enemies.IsInTarget,this.Enemies.HitTarget,this.HeroLife,this.Enemies.NbALive,this.State,this.Hero.GunSelected);
 		this.Guns.update();
+		this.LastFire = mediaIsKey("Fire");
 
 	}
 

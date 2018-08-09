@@ -493,19 +493,19 @@ _ArmDraw(pAnimCounter,pIsLeft)
     //Arm Part 1
     var  armUpAngle=0;
     var  armDownAngle=0;
-
-    if(this.GunSelected == GunsInst.Bazooka)
+    if (this.State=="Vehicule")
     {
-            armDownAngle=degToRad(-90);
-            armUpAngle=0;
+        armUpAngle= degToRad(-60 );
+        armDownAngle =  degToRad(-15);
+    }
+    else if(this.GunSelected == GunsInst.Bazooka)
+    {
+        armDownAngle=degToRad(-90);
+        armUpAngle=0;
     }
     else if(this.GunSelected == GunsInst.Uzi)
     {
         switch (this.State) {
-            case "Vehicule":  
-                armUpAngle= degToRad(-60 );
-                armDownAngle =  degToRad(-15);
-                break;
             case "Fire":   
             case "ReadyToFire": 
                 armUpAngle= degToRad(-89 );
