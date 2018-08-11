@@ -83,7 +83,7 @@ class CVehicules
 
     constructor()
     {
-        this.Pos = [-550,0,80];
+        this.Pos = [-600,0,90];
         this.Pos[1] = groundGetY(this.Pos[0],this.Pos[2]) + 10.0;  
 
         this.Power = 0;
@@ -154,14 +154,13 @@ class CVehicules
     {
         var elapsed = timeGetElapsedInS();
 
-        //Project Wheel Dir to x y plane
-
         //Project WheelDir to Dir plane
         vec3.normalize(this.WheelDir,this.WheelDir);
         vec3.cross(this.WheelDir,this.FrontNormalDir,this.WheelDir,);
         vec3.normalize(this.WheelDir,this.WheelDir);
         vec3.cross(this.WheelDir,this.WheelDir,this.FrontNormalDir);
         vec3.normalize(this.WheelDir,this.WheelDir);
+
         //Compute Rotation Max of Front Wheels
         var dotWheel = vec3.dot(this.Dir,this.WheelDir);
         var dotMax = 0.5 + (vec3.length(this.FrontPt.Speed)/150)*0.5;
