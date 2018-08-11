@@ -74,7 +74,8 @@ class CGame
 					this.Hero.State = "Running";
 					this.Hero.Dir[1]=0;
 					vec3.normalize(this.Hero.Dir,this.Hero.Dir);
-					this.Vehicules.Acc = -60;
+					this.Vehicules.Power = 0;
+					this.Vehicules.FrontPt.Speed = [0,0,0];
 				}
 
 				// Update Hero Direction and Hero Horz Speed
@@ -86,7 +87,7 @@ class CGame
 						this.Hero.Dir[1]=0;
 						vec3.normalize(this.Hero.Dir,this.Hero.Dir);
 						this.Hero.HSpeed = 50;
-					}
+					}	
 					else
 					{
 						this.Hero.HSpeed = 0;
@@ -105,11 +106,13 @@ class CGame
 				else
 				{				
 					vec3.copy(this.Vehicules.WheelDir,this.CamDir);
-					if(mediaIsMvtAsked()){
-						this.Vehicules.Acc = (Math.abs(mediaGetMvAngle())<Math.PI/4)?30:-100;
+					if(mediaIsMvtAsked())
+					{
+						this.Vehicules.Power = (Math.abs(mediaGetMvAngle())<Math.PI/4)?60:-100;
 					}
-					else{
-						this.Vehicules.Acc = -20;
+					else
+					{
+						this.Vehicules.Power = 0;
 					}						
 					this.Vehicules.update();
 					vec3.copy(this.Hero.Pos,this.Vehicules.DriverPos);
