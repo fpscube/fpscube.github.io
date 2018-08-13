@@ -167,26 +167,26 @@ class CVehicules
         vec3.normalize(this.WheelDir,this.WheelDir);
 
         //Compute Rotation Max of Front Wheels
-        var dotWheel = vec3.dot(this.Dir,this.WheelDir);
-        var dotMax = 0.5 + (vec3.length(this.FrontPt.Speed)/150)*0.5;
-       
+        var dotWheel = vec3.dot(this.Dir,this.WheelDir);    
+        var dotMax = 0.5 + (vec3.length(this.FrontPt.Speed)/150)*0.5;        
+        var dotSpeedDir = vec3.dot(this.FrontPt.Speed,this.WheelDir);
+    
         if (dotMax>1.0) dotMax=0.999;
         if(dotWheel<dotMax) 
         {    
             var orthoDir  = [];   
             vec3.rotateY(orthoDir,this.Dir,[0,0,0],Math.PI/2);
             dotWheel = vec3.dot(orthoDir,this.WheelDir);
-            if(dotWheel<0.0)    
-                vec3.rotateY(this.WheelDir,this.Dir,[0,0,0],-Math.acos(dotMax));
-            else
-                vec3.rotateY(this.WheelDir,this.Dir,[0,0,0],Math.acos(dotMax));
+            var angle = Math.acos(dotMax);
+            angle =(dotWheel<0.0)?-angle:angle;    
+            vec3.rotateY(this.WheelDir,this.Dir,[0,0,0],angle);
         }
-
-
-       var dotSpeedDir = vec3.dot(this.FrontPt.Speed,this.WheelDir);
+       
+       dotSpeedDir = vec3.dot(this.FrontPt.Speed,this.WheelDir);
        var speed = vec3.length(this.FrontPt.Speed);
        if(dotSpeedDir<0) //Backward
-       {
+       {    
+            if(this.Power<0) this.Power = this.Power/10;
             speed = -speed;
        }
        if(this.FrontPt.Ground) vec3.scale(this.FrontPt.Speed,this.WheelDir,speed);  
