@@ -336,10 +336,10 @@ class CVehicules
 
 
         //Front Wheel   
-        var wheelInfoTab = [[ 4, 6.5,this.WheelDir,this.FrontNormalDir,-5],
-                        [-4, 6.5,this.WheelDir,this.FrontNormalDir,5],
-                        [ 4,-6.5,this.Dir,this.BackNormalDir,-5],
-                        [-4,-6.5,this.Dir,this.BackNormalDir,5]];
+        var wheelInfoTab = [[ 4, 6.5,this.WheelDir,this.FrontNormalDir,-25],
+                        [-4, 6.5,this.WheelDir,this.FrontNormalDir,25],
+                        [ 4,-6.5,this.Dir,this.BackNormalDir,-25],
+                        [-4,-6.5,this.Dir,this.BackNormalDir,25]];
 
 
         
