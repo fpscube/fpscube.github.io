@@ -126,7 +126,6 @@ class CEnemies
 
 
 
-
 class CHuman
 {
 
@@ -140,6 +139,7 @@ constructor(pPos,pSpeed,pDir,pHero) {
 
     this.Dir=pDir;
     vec3.normalize(this.Dir,this.Dir);
+    this.NormalDir=[0,1,0];
     this.HeadDir=[0,0,0];
     this.GunDir=[0,0,0];
 
@@ -166,6 +166,9 @@ constructor(pPos,pSpeed,pDir,pHero) {
     this.CollisionMatrixList = [];
 
     this.sqrDist = vec3.squaredDistance(this.Pos,pPos);
+
+    
+    this.HumanPhy = new CHumanPhysical();
 
 }
 
@@ -255,11 +258,13 @@ UpdateHero(pFire,pFireDir,pDead)
     }
 
 
-    if(pDead && this.State!= "Falling")
+    if(pDead && this.State!= "FallingHero")
     {
         this.AnimSpeedFall.start(1000,this.AngleRange,1);
         this.AnimBodyFall.start(1000,0,1);
-        this.State = "Falling";
+        this.State = "FallingHero";
+        this.HSpeed = 0;
+        this.VSpeed = 0;
     }
     else if (!pDead)
     {
@@ -350,7 +355,7 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos)
         }   
     }  
     
-    if (this.State!="Disappear")
+    if (this.State!="Disappear"  &&  this.State!="StartFalling"  &&  this.State!="Falling" )
     {
         //  Speed 
         this.Speed += elapsed*this.Acc;
@@ -448,9 +453,15 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos)
             else if (!this.AnimReload.running) this.State = "Fire"; 
             break;
         case "StartFalling":
-            this.AnimSpeedFall.start(1000,this.AngleRange,1);
-            this.AnimBodyFall.start(1000,0,1);
-            this.State = "Falling";
+
+            this.HumanPhy.update(); 
+            vec3.subtract(this.NormalDir,this.HumanPhy.Pos1,this.HumanPhy.Pos2);
+            vec3.normalize(this.NormalDir,this.NormalDir); 
+            vec3.cross(this.Dir,this.NormalDir,this.Dir); 
+            vec3.cross(this.Dir,this.Dir,this.NormalDir); 
+            vec3.normalize(this.Dir,this.Dir); 
+            if(this.HumanPhy.Ground1 && this.HumanPhy.Ground2) this.State = "Falling"; 
+
             break;
         case "Falling":
             if (!this.AnimSpeedFall.running){
@@ -460,21 +471,32 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos)
             this.AngleRange= this.AnimSpeedFall.getValue();
             break;
         case "Disappear":
-            if (!this.AnimDead.running) this.State = "Dead";
-            this.AngleRange= 1;
-            break;
+           if (!this.AnimDead.running) this.State = "Dead";
+           this.AngleRange= 1;
+           break;
         case "Dead":
             break;
     }
 
 };
 
-BulletCollision()
+BulletCollision(pDir,pSpeed)
 {
+
     if(!this.IsDead()) 
     {
         this.State = "StartFalling";
-    } 
+         
+        this.HumanPhy = new CHumanPhysical();
+        vec3.scale(this.HumanPhy.Speed,pDir,pSpeed*100);
+        this.HumanPhy.Pos1[0] = this.Pos[0] + this.NormalDir[0]*4.0;
+        this.HumanPhy.Pos1[1] = this.Pos[1] + this.NormalDir[1]*4.0;
+        this.HumanPhy.Pos1[2] = this.Pos[2] + this.NormalDir[2]*4.0;
+        this.HumanPhy.Pos2 = this.Pos;
+
+
+    }
+
 }
 
 GetCollisionPoint(pRayPoint1,pRayPoint2,pLastCollPt,pDistSquaredOffset)
@@ -614,10 +636,6 @@ _LegDraw(pX,pY,pAnimCounter)
     mvPushMatrix();  
         shaderVertexColorVector = [0.2,0.2,0.2,1.0]; 
         mat4.translate(mvMatrix,mvMatrix, [pX,pY,posZ]);
-        if (this.State != "Falling" && this.State != "Disappear")
-        {
-            lookAt(this.Dir);
-        }
         mat4.rotate(mvMatrix,mvMatrix, legUpAngle, [1, 0, 0]);
         mat4.translate(mvMatrix,mvMatrix, [0,-1.9,0]);
         mvPushMatrix();
@@ -663,25 +681,31 @@ draw()
     //body movement
     mat4.translate(mvMatrix,mvMatrix, this.Pos);
 
-    lookAt(this.Dir);
+    // Falling Annimation
+    if (this.State == "Falling" || this.State == "Disappear")
+    {
+        var disapeardCoef = this.AnimDead.getValue()**2;
+        if (this.State == "Disappear")  mat4.translate(mvMatrix,mvMatrix, [0,-disapeardCoef*5.0,0]);
+    }
+
+    
+    lookAtN(this.Dir,this.NormalDir);
+    
+    // Falling Annimation
+    if (this.State == "FallingHero" )
+    {
+        var bodyFallCoef = this.AnimBodyFall.getValue()**2;
+        mat4.translate(mvMatrix,mvMatrix, [0,-5,0]);
+        mat4.rotate(mvMatrix,mvMatrix,  degToRad(bodyFallCoef*90), [1, 0, 0]);
+        mat4.translate(mvMatrix,mvMatrix, [0,5,0]);
+    }
+
     
 
     mat4.rotate(mvMatrix,mvMatrix,  degToRad(this.AngleRange*1.0) , [1, 0, 0]);
     mat4.translate(mvMatrix,mvMatrix, [0,Math.sin(animCounter*2.0)*this.AngleRange/40.0,0]);
     mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.sin(animCounter)*this.AngleRange*0.5), [0, 0, 1]);
 
-
-    // Falling Annimation
-    if (this.State == "Falling" || this.State == "Disappear")
-    {
-        var bodyFallCoef = this.AnimBodyFall.getValue()**2;
-        var disapeardCoef = this.AnimDead.getValue()**2;
-        //mat4.translate(mvMatrix,mvMatrix, [0,bodyFallCoef*40,0]);
-        if (this.State == "Disappear")  mat4.translate(mvMatrix,mvMatrix, [0,-disapeardCoef*5.0,0]);
-        mat4.translate(mvMatrix,mvMatrix, [0,-5,0]);
-        mat4.rotate(mvMatrix,mvMatrix,  degToRad(bodyFallCoef*90), [1, 0, 0]);
-        mat4.translate(mvMatrix,mvMatrix, [0,5,0]);
-    }
 
 
     // body down

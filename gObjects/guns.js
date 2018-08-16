@@ -258,6 +258,7 @@ class CBullet
         this.Pos=[pPos[0],pPos[1],pPos[2]];
         this.Dir=[pDir[0],pDir[1],pDir[2]];
         this.Speed=[pDir[0]*pSpeed,pDir[1]*pSpeed,pDir[2]*pSpeed];
+        this.SpeedCoef=pSpeed;
         this.Scale = pSize;
         this.ScaleExp = pSizeExp;
         this.Explosion = false;
@@ -325,7 +326,7 @@ class CBullet
             if (collision != null && collision[3]!=null) 
             {
                 var human = collision[3];
-                human.BulletCollision();
+                human.BulletCollision(this.Dir,1);
             }
 
             if ((collision != null) || ((timeGetCurrentInS()-this.StartTimeInS) > this.LifeTime))  
@@ -350,7 +351,10 @@ class CBullet
             {
                 var humanList = CEnemiesInst.getHumansInSphere(this.Pos,this.Scale); 
                 for(var i =0 ;i<humanList.length;i++){
-                    humanList[i].BulletCollision();
+                    var expDir=[];
+                    vec3.subtract(expDir,humanList[i].Pos,this.Pos);
+                    vec3.normalize(expDir,expDir);
+                    humanList[i].BulletCollision(expDir,2);
                 }
                 var humanSquaredDist = vec3.squaredDistance(GameInst.Hero.Pos,this.Pos);
                 var squaredScale =  this.Scale**2;
