@@ -155,7 +155,7 @@ class CGame
 				vec3.rotateY(projDir,this.CamDir,[0,0,0],0.125);
 				this.CamPos[0] = this.Hero.Pos[0] - projDir[0]*15;
 				this.CamPos[2] = this.Hero.Pos[2] - projDir[2]*15;
-				this.CamPos[1] = groundGetY(this.CamPos[0],this.CamPos[2]) + 11.0 ;
+				this.CamPos[1] = this.Hero.Pos[1] + 10.5 ;
 
 				// Update Enemies
 				this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,false);				
