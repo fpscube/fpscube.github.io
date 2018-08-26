@@ -20,13 +20,14 @@ class CGame
 		this.EndAnim = new CTimeAnim();
 		this.LastFire = 0;
 
-		// gl init
-		gl.clearColor(0x00, 0xbf, 0xff, 1.0);	
+		// gl init	
+		gl.clearColor(0x00, 0xbf, 0xff, 1.0);
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		gl.enable(gl.BLEND);
 		gl.enable(gl.DEPTH_TEST);      
 
-		// init gl object		
+		// init gl object	
+		shadowMapInit();
 		squareInit();
 		SphereInit();
 		groundInit();
@@ -39,6 +40,8 @@ class CGame
 		this.Trees = new CTrees();
 		this.Enemies = new CEnemies(30);
 		this.Hero = new CHuman([-575,200,81],2,[1,0,-1]);
+
+		
 	}
 
 	update() {
@@ -178,6 +181,7 @@ class CGame
 
 	draw() {
 
+
 		// new viewport and clear Display 
 		this.Screen.updateViewPortAndCanvasSize(gl);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -199,15 +203,41 @@ class CGame
 		this.Vehicules.draw();	
 		this.Hero.draw();
 		this.Guns.draw();
-
-		
-		//Draw Info 2D
+	
 		this.Info.draw();
 
 
+		
+		shadowMapStart();
+			gl.viewport(0, 0,256,256);
+			// new viewport and clear Display 
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+			//Perceptive projection
+			var lookAtMatrix = mat4.create();			
+			mat4.ortho(pMatrix, -1500.0, 1500.0, -1500.0, 1500.0, 0.0, 4000.0);	
+			mat4.lookAt(lookAtMatrix,[0,1000,0],[0,0,0],[1,0,0]);
+			mat4.multiply(pMatrix,pMatrix,lookAtMatrix)
+
+			groundDraw(this.Hero.Pos[0],this.Hero.Pos[2]);
+			this.Trees.draw();
+			this.Stone.draw();	 
+			//this.Enemies.draw();
+			//this.Vehicules.draw();	
+			//this.Hero.draw();
+			//this.Guns.draw();
+	
+		shadowMapStop();
+
+
+
+		//Draw Info 2D
+		gl.viewport(0, 0,256,256);
+		mat4.identity(mvMatrix);
+		mat4.ortho(pMatrix, -1.0, 1.0, -1.0, 1.0, 0.0, 1.0);	
+		mat4.identity(mvMatrix);
+		squareDraw(SquareShaderProgramTexDbg);
 
 	}
 
 }
-
-
