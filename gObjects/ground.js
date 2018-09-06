@@ -8,24 +8,28 @@ var groundIndices;
 var groundSectorInst;
 var groundWaterYLevel=-29.5;
 var groundShaderProgram;
+var groundShaderNormalProgram;
 
 
-var groundVertexShader = `    
+var groundVertexShader = `   
+precision lowp float;  
+const mat4 texUnitConverter = mat4(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.5, 1.0); 
 	attribute vec4 aVertexPosition;
 	attribute vec3 aVertexNormal;
 	uniform mat4 uMVMatrix;
 	uniform mat4 uPMatrix;
 	uniform mat4 uMVInverseTransposeMatrix;    
-	varying vec3 v_normal; 
-	varying vec4 a_position;   
-	varying vec4 v_position; 
+	uniform mat4 uShadowMatrix;    
+	varying vec3 v_normal;  
+	varying vec4 v_position;  
+  varying vec4 v_shadowPos;
 	void main() {
 
-	a_position= aVertexPosition;
+	v_position = uMVMatrix * aVertexPosition;
 
 	// Multiply the position by the matrix.
-	v_position = uMVMatrix * aVertexPosition;
-	gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
+  v_shadowPos =  texUnitConverter * uShadowMatrix * uMVMatrix * aVertexPosition;
+  gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
 
 	// orient the normals and pass to the fragment shader
 	v_normal =normalize( mat3(uMVInverseTransposeMatrix) * aVertexNormal);
@@ -33,21 +37,36 @@ var groundVertexShader = `
 	}
 `;
 var groundFragmentShader = `
-    precision lowp float;
-    
+precision lowp float;  
     varying vec3 v_normal;   
-    varying vec4 v_position;   
-	varying vec4 a_position;    
+    varying vec4 v_position;
+    varying vec4 v_shadowPos;      
     uniform vec4 uVertexColor;    
     uniform float uCounter; 
     uniform float uWaterY;
+    uniform sampler2D uTexture;
     
+
     void main() {
       float light;
       float lightWater=1.0;
       float waterIndex=0.0;
       vec4 colorGround;
       vec4 colorWater;
+      vec4 color;
+
+      float shadowCoef = 0.0;
+      float step = 1.0/6000.0;
+      float depth = v_shadowPos.z ;
+      if(v_shadowPos.x>0.0 && v_shadowPos.x<1.0 && v_shadowPos.y>0.0 && v_shadowPos.y <1.0 )
+      {
+        if(texture2D(uTexture , vec2(v_shadowPos.x + -0.94201624*step, v_shadowPos.y + -0.39906216 *step)).y < depth) shadowCoef += 1.0;
+        if(texture2D(uTexture , vec2(v_shadowPos.x +  0.94558609*step, v_shadowPos.y + -0.76890725 *step)).y < depth) shadowCoef += 1.0;
+        if(texture2D(uTexture , vec2(v_shadowPos.x + -0.094184101*step, v_shadowPos.y + -0.92938870 *step)).y < depth) shadowCoef += 1.0;
+        if(texture2D(uTexture , vec2(v_shadowPos.x +  0.34495938*step, v_shadowPos.y + 0.29387760 *step)).y < depth) shadowCoef += 1.0;
+      
+        shadowCoef = shadowCoef*0.04 ;
+      }
 
       if(v_position.y < uWaterY) 
       {
@@ -69,8 +88,11 @@ var groundFragmentShader = `
       colorWater += vec4(0.108*lightWater,0.409*lightWater,0.627*lightWater,0.0) ;
       
 
+      color = mix(colorGround,colorWater,waterIndex);
+
       
-      gl_FragColor = mix(colorGround,colorWater,waterIndex);
+     gl_FragColor = vec4(color.x*(1.0-shadowCoef),color.y*(1.0-shadowCoef),color.z*(1.0-shadowCoef),1.0);
+      
     }
 `;
 
@@ -133,7 +155,8 @@ class CGroundSector
    var groundNormals=[];
    var groundIndices=[];
 
-   groundShaderProgram = initShaders(groundVertexShader,groundFragmentShader);
+   groundShaderNormalProgram = initShaders(groundVertexShader,groundFragmentShader);
+   groundShaderProgram = groundShaderNormalProgram;
   
     for (var ix=0;ix<=pRes;ix+=1)
     {    
@@ -221,6 +244,7 @@ class CGroundSector
     
     gl.uniformMatrix4fv(groundShaderProgram.mvMatrixUniform, false, mvMatrix);
     gl.uniformMatrix4fv(groundShaderProgram.pMatrixUniform, false, pMatrix);
+    gl.uniformMatrix4fv(groundShaderProgram.pShadowMatrixUniform, false, pShadowMatrix);
     
     mat4.invert(mvInverseMatrix,mvMatrix);
     mat4.transpose(mvInverseTransposeMatrix,mvInverseMatrix);
@@ -270,8 +294,9 @@ function groundDraw(pPosX,pPosZ)
   groundSectorInst[ix+1][iz-1].drawSector();
   groundSectorInst[ix+1][iz+1].drawSector();
 
+  gl.disable(gl.CULL_FACE);   
   groundWaterDraw();
-  
+  gl.enable(gl.CULL_FACE);   
 }
 
 

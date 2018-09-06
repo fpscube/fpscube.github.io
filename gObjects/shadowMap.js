@@ -1,6 +1,6 @@
 
 var shadowMapFramebuffer ;
-var shadowMapDepthTextureSize = 256;
+var shadowMapDepthTextureSize = 8192  ;
 var shadowMapDepthTexture;
 
 function shadowMapInit()
@@ -10,7 +10,7 @@ function shadowMapInit()
     gl.bindTexture(gl.TEXTURE_2D, shadowMapDepthTexture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, shadowMapDepthTextureSize, shadowMapDepthTextureSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB , shadowMapDepthTextureSize, shadowMapDepthTextureSize, 0, gl.RGB , gl.UNSIGNED_BYTE, null);
 
     shadowMapFramebuffer = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, shadowMapFramebuffer);
