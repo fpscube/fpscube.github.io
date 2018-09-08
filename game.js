@@ -240,6 +240,12 @@ class CGame
 
 			this.initPhase++;
 		}	
+		//Debug shadow map Texture
+		// gl.viewport(0, 0,256,256);
+		// mat4.identity(mvMatrix);
+		// mat4.ortho(pMatrix, -1.0, 1.0, -1.0, 1.0, 0.0, 1.0);	
+		// mat4.identity(mvMatrix);
+		// squareDraw(SquareShaderProgramTexDbg);
 
 
 	}
