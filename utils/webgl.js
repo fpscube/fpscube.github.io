@@ -1,8 +1,8 @@
 var gl;
 var ctx2d;
 var GameInst;
-var gCurrentGraphicalObject = 0;
-var gCurrentShaderProgram = 0;
+var gCurrentGraphicalObject = -1;
+var gCurrentShaderProgram = -1;
 
 function lockChangeAlert() {
 	var canvas = document.getElementById("canvas2D");
@@ -43,6 +43,8 @@ function initShaders(vertexShaderStr,fragmentShaderStr) {
 	if (!gl.getProgramParameter(outShaderProgram, gl.LINK_STATUS)) {
 		alert("Could not initialise shaders");
 	}
+	
+	outShaderProgram.texture = gl.getUniformLocation(outShaderProgram, 'uTexture');
 
 	outShaderProgram.vertexPositionAttribute = gl.getAttribLocation(outShaderProgram, "aVertexPosition");
 	gl.enableVertexAttribArray(outShaderProgram.vertexPositionAttribute);
@@ -55,6 +57,7 @@ function initShaders(vertexShaderStr,fragmentShaderStr) {
 	outShaderProgram.waterY = gl.getUniformLocation(outShaderProgram, "uWaterY");
 	outShaderProgram.pMatrixUniform = gl.getUniformLocation(outShaderProgram, "uPMatrix");
 	outShaderProgram.mvMatrixUniform = gl.getUniformLocation(outShaderProgram, "uMVMatrix");
+	outShaderProgram.pShadowMatrixUniform  = gl.getUniformLocation(outShaderProgram, "uShadowMatrix");
 	outShaderProgram.mvInverseTransposeMatrix = gl.getUniformLocation(outShaderProgram, "uMVInverseTransposeMatrix");
 
 	return outShaderProgram;
@@ -67,6 +70,7 @@ var mvMatrix = mat4.create();
 var mvInverseMatrix = mat4.create();
 var mvInverseTransposeMatrix = mat4.create();
 var pMatrix = mat4.create();
+var pShadowMatrix = mat4.create();
 
 function degToRad(degrees) {return degrees * Math.PI / 180;}
 

@@ -8,6 +8,20 @@ void main() {
 }
 `;
 
+var gunsFragmentShaderFire= `
+precision lowp float;
+    
+varying vec4 a_position;      
+uniform vec4 uVertexColor;    
+uniform float uCounter; 
+
+void main()
+{
+float dist = a_position.z*a_position.z + a_position.x*a_position.x;
+gl_FragColor = vec4(1.0,1.0,1.0,1.0-dist); 
+
+}`;
+
 var GunsInst;
 
 class CGuns
@@ -15,7 +29,7 @@ class CGuns
     constructor()
     {
         this.BulletShaderProgram =  SphereInitShaders(SphereVertexShader,gunsBulletFragmentShader); 
-        
+   
         GunsInst = this;
         
         this.BulletList = [];
@@ -123,7 +137,8 @@ class CGunsUzi
     constructor()
     {
         this.Selected = false;
-        this.WeaponsCount = 90;
+        this.WeaponsCount = 90;       
+        this.FireShaderProgram =  SphereInitShaders(SphereVertexShader,gunsFragmentShaderFire);
     }
 
     fire(pPos,pDir)
@@ -157,23 +172,14 @@ class CGunsUzi
             
             mvPushMatrix();	
             mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
-            mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [1, 0, 0]);
-            mat4.scale(mvMatrix,mvMatrix,[0.25,1.0,1.0]);
-            (pHero) ? squareDraw(HumanFireHeroShaderProgram) : squareDraw(HumanFireEnemyShaderProgram);
+            mvPushMatrix();	
+            mat4.scale(mvMatrix,mvMatrix,[1.0,0.0,0.25]);
+            Sphere.Draw(this.FireShaderProgram);
             mvPopMatrix();
             mvPushMatrix();	
-            mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
-            mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [1, 0, 0]);
-            mat4.scale(mvMatrix,mvMatrix,[1.2,0.15,1.2]);
-            if (pHero)
-            {
-                gl.uniform1f (HumanFireHeroShaderProgram.counter, shaderCounter);
-                squareDraw(HumanFireHeroShaderProgram)
-            }   
-            else
-            {
-                squareDraw(HumanFireEnemyShaderProgram);
-            }
+            mat4.scale(mvMatrix,mvMatrix,[0.25,0.0,1.0]);
+            Sphere.Draw(this.FireShaderProgram);
+            mvPopMatrix();
             mvPopMatrix();
         }
     }

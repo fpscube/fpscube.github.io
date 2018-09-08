@@ -1,46 +1,6 @@
 var CEnemiesInst;
 var CHumansInst;
 
-var HumanFragmentShaderEnemyFire= `
-precision lowp float;
-    
-varying vec4 a_position;      
-uniform vec4 uVertexColor;    
-uniform float uCounter; 
-
-void main()
-{
-float dist = a_position.y*a_position.y + a_position.x*a_position.x;
-gl_FragColor = vec4(uVertexColor.x,uVertexColor.y,uVertexColor.z,1.0-dist); 
-
-}`;
-
-var HumanFragmentShaderHeroFire = `
-
-precision lowp float;
-    
-varying vec4 a_position;      
-uniform vec4 uVertexColor;    
-uniform float uCounter; 
-
-void main()
-{
-float dist = a_position.y*a_position.y + a_position.x*a_position.x;
-gl_FragColor = vec4(1.0-dist,1.0-dist,0.0,cos(uCounter*6.0)-dist ); 
-
-}`;
-
-
-
-
-var HumanFireHeroShaderProgram;
-var HumanFireEnemyShaderProgram;
-
-function humansInit()
-{
-    HumanFireHeroShaderProgram =  initShaders(SphereVertexShader,HumanFragmentShaderHeroFire);
-    HumanFireEnemyShaderProgram =  initShaders(SphereVertexShader,HumanFragmentShaderEnemyFire);
-}
 
 class CEnemies
 {

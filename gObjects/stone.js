@@ -38,17 +38,18 @@ class CStone
         return collision;
     }
 
-    draw()
+    draw(pShadow)
     {
         this._clearCollisionMatrix();
 
         mat4.identity(mvMatrix);
-        
+        var  scaleShadow = 1.0;
+        if (pShadow) scaleShadow = 0.01;
         shaderVertexColorVector = [0.82,0.82,0.82,1.0];
         mvPushMatrix();
             mat4.translate(mvMatrix,mvMatrix,[0.0,20.0,0.0]); 
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(10), [1, 0, 0]);   
-            mat4.scale(mvMatrix,mvMatrix,[80.0,10.0,80.0]); 
+            mat4.scale(mvMatrix,mvMatrix,[80.0,10.0*scaleShadow,80.0]); 
             Sphere.Draw(SphereShaderProgram);   
             this._storeCollisionMatrix(mvMatrix);
         mvPopMatrix();
@@ -69,7 +70,7 @@ class CStone
             mat4.translate(mvMatrix,mvMatrix,[150.0,30.0,-500.0])
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(-5), [0, 0,1]);;  
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(84), [1, 0, 0]);   
-            mat4.scale(mvMatrix,mvMatrix,[50.0,200.0,10.0]); 
+            mat4.scale(mvMatrix,mvMatrix,[50.0,200.0,10.0*scaleShadow]); 
             Sphere.Draw(SphereShaderProgram); 
             this._storeCollisionMatrix(mvMatrix);
         mvPopMatrix();
