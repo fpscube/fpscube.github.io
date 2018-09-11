@@ -219,3 +219,28 @@ function lookAtN(pVec3Dir,pNormalDir)
     mat4.multiply(mvMatrix,mvMatrix,lookAtMatrix,mvMatrix);
 }
 
+
+var arr=[];	
+var ctxAud  = new AudioContext();
+
+function sineWaveAt(sampleNumber, tone) {
+  var sampleFreq = ctxAud.sampleRate / tone
+  return Math.sin(sampleNumber / (sampleFreq / (Math.PI*2)))
+}
+
+	
+for (var i = 0; i < ctxAud.sampleRate *0.5; i++) {
+  var sec = i/ctxAud.sampleRate ;
+  arr[i] = sineWaveAt(i, 50+(400*(1.0-sec)))*(0.5-sec) ;
+}
+
+function playSound() {
+  var buf = new Float32Array(arr.length)
+  for (var i = 0; i < arr.length; i++) buf[i] = arr[i]
+  var buffer = ctxAud.createBuffer(1, buf.length, ctxAud.sampleRate)
+  buffer.copyToChannel(buf, 0)
+  var source = ctxAud.createBufferSource();
+  source.buffer = buffer;
+  source.connect(ctxAud.destination);
+  source.start(0);
+}

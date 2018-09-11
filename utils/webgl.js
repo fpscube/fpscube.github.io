@@ -1,5 +1,6 @@
 var gl;
 var ctx2d;
+var ctxAud;
 var GameInst;
 var gCurrentGraphicalObject = -1;
 var gCurrentShaderProgram = -1;
@@ -83,6 +84,8 @@ function tick() {
 }
 
 function webGLStart() {
+	window.AudioContext = window.AudioContext || window.webkitAudioContext;
+	
 	var canvas3D = document.getElementById("canvas3D");
 	var canvas2D = document.getElementById("canvas2D");
 
@@ -97,6 +100,7 @@ function webGLStart() {
 
 
 	ctx2d = canvas2D.getContext("2d");
+	ctxAud  = new AudioContext();
 
 	GameInst = new CGame();
 

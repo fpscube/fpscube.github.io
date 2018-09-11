@@ -243,6 +243,7 @@ UpdateHero(pFire,pFireDir,pDead)
                 }   
                 break;
             case "Fire": 
+            playSound();
                 vec3.copy(this.HeadDir,pFireDir);
                 this.GunSelected.fire(this.Pos,pFireDir);
                 this.AnimReload.start(150,0,2*3.14);      
