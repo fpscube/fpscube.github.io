@@ -220,23 +220,88 @@ function lookAtN(pVec3Dir,pNormalDir)
 }
 
 
-var arr=[];	
 var ctxAud  = new AudioContext();
 
-function sineWaveAt(sampleNumber, tone) {
-  var sampleFreq = ctxAud.sampleRate / tone
-  return Math.sin(sampleNumber / (sampleFreq / (Math.PI*2)))
-}
-
 	
-for (var i = 0; i < ctxAud.sampleRate *0.5; i++) {
-  var sec = i/ctxAud.sampleRate ;
-  arr[i] = sineWaveAt(i, 50+(400*(1.0-sec)))*(0.5-sec) ;
+var filterBuffer;
+var filterSum;
+var filterSize;
+
+function filterInit(size)
+{
+  filterBuffer=[];
+  filterSum=0;
+  filterSize=size;	
+  for (var i=0;i<size;i++)
+  {
+    filterBuffer.push(0);
+  }
+}	
+function filter(input)
+{
+  filterBuffer.push(input);
+  filterSum+=input;
+  var sVal = filterBuffer.shift();
+  filterSum-=sVal;
+  return filterSum/filterSize;
+}	
+
+
+var fireGunConfig = [[0.1,2,1.0],[0.3,5,0.8],[0.5,8,0.4],[1.0,10,0.1],[2.0,15,0.01]];
+
+var gunWav=[];
+
+for (var i = 0; i < ctxAud.sampleRate * 2.0; i++) 
+{
+  gunWav[i]=0;
+}
+  
+for (var confI = 0;confI<fireGunConfig.length;confI++)
+{
+  seconds = fireGunConfig[confI][0];
+  filterInit(fireGunConfig[confI][1]);
+  var count = ctxAud.sampleRate * seconds;
+  for (var i = 0; i < count; i++) {
+    var sec = i/ctxAud.sampleRate ;
+    gunWav[i] += filter((Math.random() -0.5)*(sec-seconds)/seconds)*fireGunConfig[confI][2];
+  }	
 }
 
-function playSound() {
-  var buf = new Float32Array(arr.length)
-  for (var i = 0; i < arr.length; i++) buf[i] = arr[i]
+filterInit(5);
+for (var i = 0; i < ctxAud.sampleRate * 2.0; i++) 
+{
+  gunWav[i]=filter(gunWav[i]);
+}
+
+var expConfig = [[0.5,8,0.4],[1.0,10,0.3],[2.0,15,0.4],[2.5,20,0.6],[3.0,25,0.4]];
+var expWav=[];
+
+for (var i = 0; i < ctxAud.sampleRate * 3.0; i++) 
+{
+  expWav[i]=0;
+}
+
+for (var confI = 0;confI<expConfig.length;confI++)
+{
+  seconds = expConfig[confI][0];
+  filterInit(expConfig[confI][1]);
+  var count = ctxAud.sampleRate * seconds;
+  for (var i = 0; i < count; i++) {
+    var sec = i/ctxAud.sampleRate ;
+    expWav[i] += filter((Math.random() -0.5)*(sec-seconds)/seconds)*expConfig[confI][2];
+  }	
+}
+
+
+filterInit(10);
+for (var i = 0; i < ctxAud.sampleRate * 3.0; i++) 
+{
+  expWav[i]=filter(expWav[i]);
+}
+
+function playSound(wav) {
+  var buf = new Float32Array(wav.length)
+  for (var i = 0; i < wav.length; i++) buf[i] = wav[i]
   var buffer = ctxAud.createBuffer(1, buf.length, ctxAud.sampleRate)
   buffer.copyToChannel(buf, 0)
   var source = ctxAud.createBufferSource();

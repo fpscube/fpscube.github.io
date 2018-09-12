@@ -1,6 +1,5 @@
 var gl;
 var ctx2d;
-var ctxAud;
 var GameInst;
 var gCurrentGraphicalObject = -1;
 var gCurrentShaderProgram = -1;
@@ -100,7 +99,6 @@ function webGLStart() {
 
 
 	ctx2d = canvas2D.getContext("2d");
-	ctxAud  = new AudioContext();
 
 	GameInst = new CGame();
 

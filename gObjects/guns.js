@@ -341,6 +341,7 @@ class CBullet
                 this.Speed = [0,0,0];
                 this.Explosion = true;
                 this.ExplosionAnim.start(400,0,1);
+                if(this.ScaleExp> 5.0) playSound(expWav);
                 this.Color = [0.9,0.5,0.0,0.9]; 
             }
             else{

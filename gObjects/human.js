@@ -243,7 +243,7 @@ UpdateHero(pFire,pFireDir,pDead)
                 }   
                 break;
             case "Fire": 
-            playSound();
+            playSound(gunWav);
                 vec3.copy(this.HeadDir,pFireDir);
                 this.GunSelected.fire(this.Pos,pFireDir);
                 this.AnimReload.start(150,0,2*3.14);      
@@ -394,7 +394,8 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos)
             if (dotProd> 0.5 && this.sqrDist < 10000) this.State = "Fire";
             vec3.copy(this.GunDir,this.Dir);
             break;
-        case "Fire":       
+        case "Fire":  
+            playSound(gunWav);     
             //Collision detection
             var targetDir =  vec3.create();	
             var fireVector =  vec3.create();
