@@ -105,6 +105,7 @@ class CGame
 					this.CamPos[0] = this.Hero.Pos[0] - projDir[0]*15;
 					this.CamPos[2] = this.Hero.Pos[2] - projDir[2]*15
 					this.CamPos[1] = this.Hero.Pos[1] + 5.5 ;
+					this.Vehicules.EngineOn = false;
 				}
 				else
 				{				
@@ -127,6 +128,7 @@ class CGame
 					this.CamPos[0] = this.Vehicules.Pos[0] - this.CamDir[0]*40;
 					this.CamPos[2] = this.Vehicules.Pos[2] - this.CamDir[2]*40
 					this.CamPos[1] = this.Vehicules.Pos[1] + 10.5 ;
+					this.Vehicules.EngineOn = true;
 
 					
 				}

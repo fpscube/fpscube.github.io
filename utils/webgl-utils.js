@@ -267,7 +267,7 @@ for (var confI = 0;confI<fireGunConfig.length;confI++)
   }	
 }
 
-filterInit(5);
+filterInit(7);
 for (var i = 0; i < ctxAud.sampleRate * 2.0; i++) 
 {
   gunWav[i]=filter(gunWav[i]);
@@ -308,4 +308,28 @@ function playSound(wav) {
   source.buffer = buffer;
   source.connect(ctxAud.destination);
   source.start(0);
+}
+
+// create Oscillator node
+var oscillator = ctxAud.createOscillator();
+var gainMaster = ctxAud.createGain();
+var biquadFilter = ctxAud.createBiquadFilter();
+
+oscillator.type = 'sawtooth';
+oscillator.start();
+oscillator.frequency.setValueAtTime(0,0); // value in hertz
+
+gainMaster.gain.value = 0.5;
+
+biquadFilter.type = "lowpass";
+biquadFilter.frequency.setValueAtTime(250,0);
+biquadFilter.gain.setValueAtTime(25, 0);
+
+oscillator.connect(biquadFilter);
+biquadFilter.connect(gainMaster);
+gainMaster.connect(ctxAud.destination);
+
+function playCarSound(freq)
+{
+    oscillator.frequency.setValueAtTime(freq,0); // value in hertz
 }

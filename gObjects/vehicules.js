@@ -12,6 +12,7 @@ class CVehicules
         this.Pos[1] = groundGetY(this.Pos[0],this.Pos[2]) + 10.0;  
 
         this.Power = 0;
+        this.EngineOn = false;
 
         this.Dir = [1,0,0]; 
         this.WheelDir = [1,0,0]; 
@@ -236,6 +237,13 @@ class CVehicules
         this.DriverOutPos[0]  =  this.Pos[0]+this.FrontAxisDir[0]*10.0;
         this.DriverOutPos[2]  =  this.Pos[2]+this.FrontAxisDir[2]*10.0;
         this.DriverOutPos[1]  =  this.Pos[1]+this.FrontAxisDir[1]*10.0 + 5.0;
+
+        //Engine sound
+        var soundCoef = vec3.length(this.FrontPt.Speed)/5 + 40.0;
+
+        if(!this.EngineOn) soundCoef=0;
+        playCarSound(soundCoef);
+
 
 
     }
