@@ -319,7 +319,7 @@ oscillator.type = 'sawtooth';
 oscillator.start();
 oscillator.frequency.setValueAtTime(0,0); // value in hertz
 
-gainMaster.gain.value = 0.5;
+gainMaster.gain.value = 0.0;
 
 biquadFilter.type = "lowpass";
 biquadFilter.frequency.setValueAtTime(250,0);
@@ -332,4 +332,6 @@ gainMaster.connect(ctxAud.destination);
 function playCarSound(freq)
 {
     oscillator.frequency.setValueAtTime(freq,0); // value in hertz
+    gainMaster.gain.value = (freq==0)?  0.0:0.5;
+    
 }
