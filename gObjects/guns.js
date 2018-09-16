@@ -143,6 +143,7 @@ class CGunsUzi
 
     fire(pPos,pDir)
     {
+        playSound(wavList[0]);
         GunsInst.BulletList.push(new CBullet([pPos[0]+pDir[2]*1.0 + pDir[0]*5.0  ,pPos[1]+2.5 + pDir[1]*5.0,pPos[2]-pDir[0]*1.0 + pDir[2]*5.0 ],pDir,0.3,1,2000,0.4));
         GunsInst.BulletList.push(new CBullet([pPos[0]-pDir[2]*1.0  + pDir[0]*5.0  ,pPos[1]+2.5 + pDir[1]*5.0,pPos[2]+ pDir[0]*1.0 + pDir[2]*5.0],pDir,0.3,1,2000,0.4));
         //   GunsInst.BulletList.push(new CBullet([pPos[0],pPos[1]+2.5,pPos[2]],pDir,1,10,0));
@@ -198,6 +199,7 @@ class CGunsBazooka
     
     fire(pPos,pDir)
     {
+        playSound(wavList[1]);
         GunsInst.BulletList.push(new CBullet(pPos,pDir,0.6,70,300,3));
         this.WeaponsCount--;
     }
@@ -341,7 +343,7 @@ class CBullet
                 this.Speed = [0,0,0];
                 this.Explosion = true;
                 this.ExplosionAnim.start(400,0,1);
-                if(this.ScaleExp> 5.0) playSound(expWav);
+                if(this.ScaleExp> 5.0) playSound(wavList[2]);
                 this.Color = [0.9,0.5,0.0,0.9]; 
             }
             else{
