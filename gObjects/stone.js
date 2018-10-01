@@ -98,7 +98,7 @@ class CStone
             mat4.translate(mvMatrix,mvMatrix,[0.0,50.0,-60.0]); 
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(115), [1, 0, 0]);   
             mat4.scale(mvMatrix,mvMatrix,[60.0,6.0,350]); 
-            Sphere.Draw(SphereShaderProgram);   
+            Sphere.Draw(SphereShaderGlowProgram);   
             this._storeCollisionMatrix(mvMatrix);
             mvPopMatrix(); 
         }               
@@ -117,7 +117,7 @@ class CStone
             mat4.translate(mvMatrix,mvMatrix,[0.0,50.0,-60.0]); 
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(140), [1, 0, 0]);   
             mat4.scale(mvMatrix,mvMatrix,[60.0,6.0,350]); 
-            Sphere.Draw(SphereShaderProgram);   
+            Sphere.Draw(SphereShaderGlowProgram);   
             this._storeCollisionMatrix(mvMatrix);
             mvPopMatrix(); 
         }             

@@ -3,15 +3,18 @@ var SphereShaderNormalProgram;
 var SphereWithShadowShaderProgram;
 var SphereShadowMapShaderProgram;
 var SphereShaderProgram;
+var SphereShaderGlowProgram;
 
 
 function SphereInit() 
 {
     Sphere = new CSphere;
     SphereShaderNormalProgram = SphereInitShaders(SphereVertexShader,SphereFragmentShader);
+    SphereShaderNormalGlowProgram = SphereInitShaders(SphereVertexShader,SphereFragmentGlowRayShader);
     SphereWithShadowShaderProgram = SphereInitShaders(SphereVertexShader,SphereFragmentWithShadowShader);
     SphereShadowMapShaderProgram = SphereInitShaders(SphereVertexShadowMapShader,SphereFragmentShadowMapShader);
     SphereShaderProgram = SphereShaderNormalProgram;
+    SphereShaderGlowProgram = SphereShaderNormalGlowProgram;
 }
 
 function SphereInitShaders(vertexShaderStr,fragmentShaderStr) {
@@ -99,11 +102,13 @@ uniform sampler2D uTexture;
 varying vec3 v_normal;     
 varying vec4 v_position;
 varying vec4 v_shadowPos;
+  varying vec4 a_position;     
 
 
 void main() {
   float dotNorm = dot(v_normal, vec3(0.0,1.0,0.0));
-  float light = dotNorm*0.5 + 0.5;
+  float light = dotNorm*0.5 + 0.5; 
+  
 
   float shadowCoef = 0.0;
   float step = 1.0/800.0;
@@ -118,20 +123,35 @@ void main() {
     shadowCoef = shadowCoef*0.04 ;
   }
 
-  
   gl_FragColor = vec4(uVertexColor.x*light*(1.0-shadowCoef),uVertexColor.y*light*(1.0-shadowCoef),uVertexColor.z*light*(1.0-shadowCoef),uVertexColor.a);
+}`;
+
+var SphereFragmentGlowRayShader = `
+precision lowp float;
+uniform vec4 uVertexColor; 
+varying vec3 v_normal;
+varying vec4 a_position;      
+
+void main() {
+  float light = dot(v_normal, vec3(0.0,1.0,0.0))*0.5 + 0.5;
+  if ((a_position.x > 0.2) && (a_position.x <0.3)) light = light  + (1.0-abs((a_position.x-0.25)*20.0))* 2.0;
+  if ((a_position.x < -0.2) && (a_position.x >-0.3)) light = light  + (1.0-abs((a_position.x+0.25)*20.0))* 0.4;
+ 
+  gl_FragColor = vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,uVertexColor.a);
 }`;
 
 var SphereFragmentShader = `
 precision lowp float;
 uniform vec4 uVertexColor; 
-varying vec3 v_normal;     
+varying vec3 v_normal;
+varying vec4 a_position;      
 
 void main() {
   float light = dot(v_normal, vec3(0.0,1.0,0.0))*0.5 + 0.5;
  
   gl_FragColor = vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,uVertexColor.a);
 }`;
+
 
 
 

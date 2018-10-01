@@ -133,7 +133,7 @@ class CTree
                     mat4.rotate(mvMatrix,mvMatrix,  degToRad(-20), [0, 0, 1]);  
                     mat4.scale(mvMatrix,mvMatrix,[40.0,2.0,6.0]); 
                     this.storeCollisionMatrix(mvMatrix);
-                    Sphere.Draw(SphereShaderProgram);   
+                    Sphere.Draw(SphereShaderGlowProgram);   
                 mvPopMatrix(); 
         }
 

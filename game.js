@@ -204,6 +204,7 @@ class CGame
 		
 		groundDraw(this.Hero.Pos[0],this.Hero.Pos[2]);
 		//Draw Shadow Map		
+		SphereShaderGlowProgram = SphereShaderNormalGlowProgram;
 		SphereShaderProgram = SphereShaderNormalProgram;
 		this.Trees.draw();
 		this.Stone.draw(false);	 
@@ -220,7 +221,8 @@ class CGame
 		//Draw Shadow Map	
 		if(this.initPhase<2)
 		{
-			SphereShaderProgram = SphereShadowMapShaderProgram;
+			SphereShaderProgram = SphereShadowMapShaderProgram
+			SphereShaderGlowProgram = SphereShadowMapShaderProgram;
 			shadowMapStart();
 				mat4.identity(mvMatrix);
 				gl.viewport(0, 0,shadowMapDepthTextureSize,shadowMapDepthTextureSize);
