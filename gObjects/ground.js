@@ -12,22 +12,18 @@ var groundShaderNormalProgram;
 
 
 var groundVertexShader = ` 
-const mat4 texUnitConverter = mat4(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.5, 1.0); 
 	attribute vec4 aVertexPosition;
 	attribute vec3 aVertexNormal;
 	uniform mat4 uMVMatrix;
 	uniform mat4 uPMatrix;
 	uniform mat4 uMVInverseTransposeMatrix;    
-	uniform mat4 uShadowMatrix;    
 	varying vec3 v_normal;  
 	varying vec4 v_position;  
-  varying vec4 v_shadowPos;
 	void main() {
 
 	v_position = uMVMatrix * aVertexPosition;
 
 	// Multiply the position by the matrix.
-  v_shadowPos =  texUnitConverter * uShadowMatrix * uMVMatrix * aVertexPosition;
   gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
 
 	// orient the normals and pass to the fragment shader
@@ -38,12 +34,10 @@ const mat4 texUnitConverter = mat4(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 
 var groundFragmentShader = `
 precision lowp float;  
     varying vec3 v_normal;   
-    varying vec4 v_position;
-    varying vec4 v_shadowPos;      
+    varying vec4 v_position;      
     uniform vec4 uVertexColor;    
     uniform float uCounter; 
     uniform float uWaterY;
-    uniform sampler2D uTexture;
     
 
     void main() {
@@ -54,28 +48,17 @@ precision lowp float;
       vec4 colorWater;
       vec4 color;
 
-      float shadowCoef = 0.0;
-      float step = 1.0/6000.0;
-      float depth = v_shadowPos.z ;
-      if(v_shadowPos.x>0.0 && v_shadowPos.x<1.0 && v_shadowPos.y>0.0 && v_shadowPos.y <1.0 )
-      {
-        if(texture2D(uTexture , vec2(v_shadowPos.x + -0.94201624*step, v_shadowPos.y + -0.39906216 *step)).y < depth) shadowCoef += 1.0;
-        if(texture2D(uTexture , vec2(v_shadowPos.x +  0.94558609*step, v_shadowPos.y + -0.76890725 *step)).y < depth) shadowCoef += 1.0;
-        if(texture2D(uTexture , vec2(v_shadowPos.x + -0.094184101*step, v_shadowPos.y + -0.92938870 *step)).y < depth) shadowCoef += 1.0;
-        if(texture2D(uTexture , vec2(v_shadowPos.x +  0.34495938*step, v_shadowPos.y + 0.29387760 *step)).y < depth) shadowCoef += 1.0;
-      
-        shadowCoef = shadowCoef*0.04 ;
-      }
-
       if(v_position.y < uWaterY) 
       {
-        float dist = sqrt(v_position.x*v_position.x + v_position.z*v_position.z);
+        float dist = length(vec3(v_position));
+        float dist2 = length(vec3(v_position) - vec3(1000.0,0.0,5000.0));
+        float dist3 = length(vec3(v_position) - vec3(5000.0,0.0,300.0));
         waterIndex = 0.0 -(v_position.y - uWaterY) ;
         if (waterIndex>1.0) waterIndex = 1.0;
         if (waterIndex<0.0) waterIndex = 0.0;
-        float x = sin((dist+ 2.0*uCounter)/17.0)/2.0+ 0.50 + sin((dist+ 3.0*uCounter)/35.0)/2.0+ 0.50 + sin((v_position.x + 10.0*uCounter)/60.0)/2.0+0.50;
-        float z = cos((dist+ uCounter)/7.0)/2.0+ 0.50 + cos((dist+ 4.0*uCounter)/15.0)/2.0+0.50 + cos((dist+ 6.0*uCounter)/35.0)/2.0+ 0.50 +  cos((v_position.x + 10.0*uCounter)/60.0)/2.0+0.50;
-        lightWater = dot(normalize(vec3(x,8.0,z)), vec3(0.0,1.0,0.0));
+        float x = (sin((dist+ 2.0*uCounter)/30.0) + sin((dist2+ 3.0*uCounter)/35.0) + sin((dist3 + 10.0*uCounter)/60.0))/6.0 + 0.5;
+        if (dist>5000.0) x=0.2;
+        lightWater = x*0.5 ;
       }
   
       light = dot(v_normal, vec3(0.0,1.0,0.0)); 
@@ -84,13 +67,14 @@ precision lowp float;
       colorWater = vec4(0.1,0.1,0.1,uVertexColor.a); 
       
       colorGround += vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,0.0) ;
-      colorWater += vec4(0.108*lightWater,0.409*lightWater,0.627*lightWater,0.0) ;
-      
+      if(lightWater>0.45) lightWater = 0.45  + (lightWater -0.45) *20.0;
+      colorWater += vec4(0.025*lightWater,0.100*lightWater,0.170*lightWater,0.0) ;
+
 
       color = mix(colorGround,colorWater,waterIndex);
 
       
-     gl_FragColor = vec4(color.x*(1.0-shadowCoef),color.y*(1.0-shadowCoef),color.z*(1.0-shadowCoef),1.0);
+     gl_FragColor = vec4(color.x,color.y,color.z,1.0);
       
     }
 `;
@@ -156,7 +140,6 @@ function groundInitShaders(vertexShaderStr,fragmentShaderStr) {
 	if (!gl.getProgramParameter(outShaderProgram, gl.LINK_STATUS)) {
 		alert("Could not initialise shaders");
 	}
-	outShaderProgram.texture = gl.getUniformLocation(outShaderProgram, 'uTexture');
 	gl.uniform1i(outShaderProgram.texture, 0)
 
 	outShaderProgram.vertexPositionAttribute = gl.getAttribLocation(outShaderProgram, "aVertexPosition");
@@ -165,7 +148,7 @@ function groundInitShaders(vertexShaderStr,fragmentShaderStr) {
 	outShaderProgram.vertexNormalAttribute = gl.getAttribLocation(outShaderProgram, "aVertexNormal");
 	gl.enableVertexAttribArray(outShaderProgram.vertexNormalAttribute);
 
-    outShaderProgram.vertexColorAttribute = gl.getUniformLocation(outShaderProgram, "uVertexColor");
+  outShaderProgram.vertexColorAttribute = gl.getUniformLocation(outShaderProgram, "uVertexColor");
 	outShaderProgram.counter = gl.getUniformLocation(outShaderProgram, "uCounter");
 	outShaderProgram.waterY = gl.getUniformLocation(outShaderProgram, "uWaterY");
 	outShaderProgram.pMatrixUniform = gl.getUniformLocation(outShaderProgram, "uPMatrix");
@@ -251,7 +234,7 @@ class CGroundSector
     gCurrentGraphicalObject = 0;
 
     shaderWaterY = -2008.5;
-    shaderVertexColorVector = [1.0,1.0,0.5,1.0];
+    shaderVertexColorVector = [0.8,0.8,0.4,1.0];
     mat4.identity(mvMatrix)    
     
     if(gCurrentShaderProgram != groundShaderProgram) 
@@ -275,7 +258,6 @@ class CGroundSector
     
     gl.uniformMatrix4fv(groundShaderProgram.mvMatrixUniform, false, mvMatrix);
     gl.uniformMatrix4fv(groundShaderProgram.pMatrixUniform, false, pMatrix);
-    gl.uniformMatrix4fv(groundShaderProgram.pShadowMatrixUniform, false, pShadowMatrix);
     
     mat4.invert(mvInverseMatrix,mvMatrix);
     mat4.transpose(mvInverseTransposeMatrix,mvInverseMatrix);
@@ -368,5 +350,7 @@ function groundWaterDraw()
 	gl.uniform1f (groundShaderProgram.waterY, shaderWaterY);
 	Sphere.Draw(groundShaderProgram);
   shaderWaterY = -1000;
+
+
   
 }

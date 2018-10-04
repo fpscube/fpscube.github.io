@@ -44,7 +44,6 @@ function initShaders(vertexShaderStr,fragmentShaderStr) {
 		alert("Could not initialise shaders");
 	}
 	
-	outShaderProgram.texture = gl.getUniformLocation(outShaderProgram, 'uTexture');
 
 	outShaderProgram.vertexPositionAttribute = gl.getAttribLocation(outShaderProgram, "aVertexPosition");
 	gl.enableVertexAttribArray(outShaderProgram.vertexPositionAttribute);
@@ -57,7 +56,6 @@ function initShaders(vertexShaderStr,fragmentShaderStr) {
 	outShaderProgram.waterY = gl.getUniformLocation(outShaderProgram, "uWaterY");
 	outShaderProgram.pMatrixUniform = gl.getUniformLocation(outShaderProgram, "uPMatrix");
 	outShaderProgram.mvMatrixUniform = gl.getUniformLocation(outShaderProgram, "uMVMatrix");
-	outShaderProgram.pShadowMatrixUniform  = gl.getUniformLocation(outShaderProgram, "uShadowMatrix");
 	outShaderProgram.mvInverseTransposeMatrix = gl.getUniformLocation(outShaderProgram, "uMVInverseTransposeMatrix");
 
 	return outShaderProgram;
@@ -70,7 +68,6 @@ var mvMatrix = mat4.create();
 var mvInverseMatrix = mat4.create();
 var mvInverseTransposeMatrix = mat4.create();
 var pMatrix = mat4.create();
-var pShadowMatrix = mat4.create();
 
 function degToRad(degrees) {return degrees * Math.PI / 180;}
 

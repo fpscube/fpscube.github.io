@@ -1,9 +1,7 @@
 var Sphere;
-var SphereShaderNormalProgram;
-var SphereWithShadowShaderProgram;
-var SphereShadowMapShaderProgram;
 var SphereShaderProgram;
 var SphereShaderGlowProgram;
+var SphereShaderSkyProgram;
 
 
 function SphereInit() 
@@ -11,8 +9,7 @@ function SphereInit()
     Sphere = new CSphere;
     SphereShaderNormalProgram = SphereInitShaders(SphereVertexShader,SphereFragmentShader);
     SphereShaderNormalGlowProgram = SphereInitShaders(SphereVertexShader,SphereFragmentGlowRayShader);
-    SphereWithShadowShaderProgram = SphereInitShaders(SphereVertexShader,SphereFragmentWithShadowShader);
-    SphereShadowMapShaderProgram = SphereInitShaders(SphereVertexShadowMapShader,SphereFragmentShadowMapShader);
+    SphereShaderSkyProgram = SphereInitShaders(SphereVertexShader,SphereFragmentShaderSky);
     SphereShaderProgram = SphereShaderNormalProgram;
     SphereShaderGlowProgram = SphereShaderNormalGlowProgram;
 }
@@ -37,32 +34,10 @@ function SphereInitShaders(vertexShaderStr,fragmentShaderStr) {
     outShaderProgram.vertexColorAttribute = gl.getUniformLocation(outShaderProgram, "uVertexColor");
     outShaderProgram.pMatrixUniform = gl.getUniformLocation(outShaderProgram, "uPMatrix");
     outShaderProgram.mvMatrixUniform = gl.getUniformLocation(outShaderProgram, "uMVMatrix");
-    outShaderProgram.pShadowMatrixUniform = gl.getUniformLocation(outShaderProgram, "uShadowMatrix");
     outShaderProgram.mvInverseTransposeMatrix = gl.getUniformLocation(outShaderProgram, "uMVInverseTransposeMatrix");
-    outShaderProgram.texture = gl.getUniformLocation(outShaderProgram, 'uTexture');
 
     return outShaderProgram;
 }
-
-var SphereVertexShadowMapShader = `    
-precision lowp float;
-    attribute vec4 aVertexPosition;  
-	uniform mat4 uMVMatrix;
-    uniform mat4 uPMatrix;
-        void main() {
-        gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
-	}
-`;
-
-
-var SphereFragmentShadowMapShader = `
-precision lowp float;
-
-void main() {
-  float depth;
-  depth = gl_FragCoord.z;
-  gl_FragColor = vec4(depth,depth,depth,1.0);
-}`;
 
 
 
@@ -72,19 +47,15 @@ var SphereVertexShader = `
 	attribute vec4 aVertexPosition;
 	uniform mat4 uMVMatrix;
 	uniform mat4 uPMatrix;
-	uniform mat4 uShadowMatrix;
 	uniform mat4 uMVInverseTransposeMatrix;    
 	varying vec3 v_normal; 
 	varying vec4 a_position;  
 	varying vec4 v_position;  
-    varying vec4 v_shadowPos; 
 
 	void main() {
 	a_position = aVertexPosition;
     v_position = uMVMatrix * aVertexPosition;    
-
-	// Multiply the position by the matrix.
-    v_shadowPos =  texUnitConverter * uShadowMatrix * uMVMatrix * aVertexPosition;     
+ 
 
 	gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
 
@@ -94,37 +65,6 @@ var SphereVertexShader = `
 	}
 `;
 
-var SphereFragmentWithShadowShader= `
-precision lowp float;
-
-uniform vec4 uVertexColor; 
-uniform sampler2D uTexture;  
-varying vec3 v_normal;     
-varying vec4 v_position;
-varying vec4 v_shadowPos;
-  varying vec4 a_position;     
-
-
-void main() {
-  float dotNorm = dot(v_normal, vec3(0.0,1.0,0.0));
-  float light = dotNorm*0.5 + 0.5; 
-  
-
-  float shadowCoef = 0.0;
-  float step = 1.0/800.0;
-  float depth = v_shadowPos.z ;
-  if(v_shadowPos.x>0.0 && v_shadowPos.x<1.0 && v_shadowPos.y>0.0 && v_shadowPos.y <1.0 )
-  {
-    if(texture2D(uTexture , vec2(v_shadowPos.x + -0.94201624*step, v_shadowPos.y + -0.39906216 *step)).y < depth) shadowCoef += 1.0;
-    if(texture2D(uTexture , vec2(v_shadowPos.x +  0.94558609*step, v_shadowPos.y + -0.76890725 *step)).y < depth) shadowCoef += 1.0;
-    if(texture2D(uTexture , vec2(v_shadowPos.x + -0.094184101*step, v_shadowPos.y + -0.92938870 *step)).y < depth) shadowCoef += 1.0;
-    if(texture2D(uTexture , vec2(v_shadowPos.x +  0.34495938*step, v_shadowPos.y + 0.29387760 *step)).y < depth) shadowCoef += 1.0;
-  
-    shadowCoef = shadowCoef*0.04 ;
-  }
-
-  gl_FragColor = vec4(uVertexColor.x*light*(1.0-shadowCoef),uVertexColor.y*light*(1.0-shadowCoef),uVertexColor.z*light*(1.0-shadowCoef),uVertexColor.a);
-}`;
 
 var SphereFragmentGlowRayShader = `
 precision lowp float;
@@ -151,6 +91,43 @@ void main() {
  
   gl_FragColor = vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,uVertexColor.a);
 }`;
+
+
+var SphereFragmentShaderSky = `
+precision lowp float;
+uniform vec4 uVertexColor; 
+varying vec3 v_normal;
+varying vec4 a_position;    
+
+
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+
+void main() {
+  float light = dot(v_normal, vec3(0.0,1.0,0.0))*0.5 + 0.5;
+  if ((a_position.x > 0.2) && (a_position.x <0.3)) light = light  + (1.0-abs((a_position.x-0.25)*20.0))* 2.0;
+  if ((a_position.x < -0.2) && (a_position.x >-0.3)) light = light  + (1.0-abs((a_position.x+0.25)*20.0))* 0.4;
+ 
+  float x = floor((a_position.x)*20.0) + 0.5;
+  float y = floor((a_position.y)*20.0) + 0.5;
+  float z = floor((a_position.z)*20.0) + 0.5;
+
+  float star =  rand(vec2(x,z));
+  if (star>0.8) 
+  {
+    float deltax = abs(x-a_position.x*20.0)*10.0;
+    float deltay = abs(y-a_position.y*20.0)*10.0;
+    float deltaz = abs(z-a_position.z*20.0)*10.0;
+    float dist =  deltax*deltax + deltay*deltay + deltaz*deltaz;
+    if(dist>1.0)  dist = 1.0;
+    light += (1.0-dist)*12.0 ;
+  } 
+
+  gl_FragColor = vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,uVertexColor.a);
+}`;
+
 
 
 
@@ -246,7 +223,6 @@ class CSphere
         gl.uniform4fv (pShaderProgram.vertexColorAttribute, shaderVertexColorVector);
         gl.uniformMatrix4fv(pShaderProgram.mvMatrixUniform, false, mvMatrix);
         gl.uniformMatrix4fv(pShaderProgram.pMatrixUniform, false, pMatrix);
-        gl.uniformMatrix4fv(pShaderProgram.pShadowMatrixUniform, false, pShadowMatrix);
         mat4.invert(mvInverseMatrix,mvMatrix);
         mat4.transpose(mvInverseTransposeMatrix,mvInverseMatrix);
         gl.uniformMatrix4fv(pShaderProgram.mvInverseTransposeMatrix, false, mvInverseTransposeMatrix);

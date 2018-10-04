@@ -21,14 +21,13 @@ class CGame
 		this.LastFire = 0;
 
 		// gl init
-		gl.clearColor(0x00, 0xbf, 0xff, 1.0);	
+		gl.clearColor(6.0/256.0, 10.0/256.0, 42.0/256.0, 1.0);	
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		gl.enable(gl.BLEND);
 		gl.enable(gl.DEPTH_TEST); 
 		gl.enable(gl.CULL_FACE);     
 
 		// init gl object	
-		shadowMapInit();
 		squareInit();
 		SphereInit();
 		groundInit();
@@ -40,7 +39,7 @@ class CGame
 		this.Trees = new CTrees();
 		this.Enemies = new CEnemies(30);
 		this.Hero = new CHuman([-575,200,81],2,[1,0,-1]);
-		this.initPhase=0   ;
+		
 
 		
 	}
@@ -183,11 +182,7 @@ class CGame
 	}
 
 	draw() {
-
-
 		
-		//Perceptive projection
-		mat4.perspective(pMatrix,45, gl.viewportWidth / gl.viewportHeight, 1.0, 1000.0);
 
 		// new viewport and clear Display 
 		this.Screen.updateViewPortAndCanvasSize(gl);
@@ -203,54 +198,30 @@ class CGame
 		mat4.multiply(pMatrix,pMatrix,lookAtMatrix)
 		
 		groundDraw(this.Hero.Pos[0],this.Hero.Pos[2]);
-		//Draw Shadow Map		
-		SphereShaderGlowProgram = SphereShaderNormalGlowProgram;
-		SphereShaderProgram = SphereShaderNormalProgram;
+		gl.cullFace(gl.BACK);	
+
 		this.Trees.draw();
 		this.Stone.draw(false);	 
-		SphereShaderProgram = SphereWithShadowShaderProgram;	 
 		this.Enemies.draw();
 		this.Vehicules.draw();	
 		this.Hero.draw();
 		this.Guns.draw();
 
+		gl.cullFace(gl.FRONT);	
+			
+		mat4.identity(mvMatrix); 
+	
+		shaderVertexColorVector = [7.0/256.0,11.0/256.0,45.0/256.0,1.0]; 
+		mat4.translate(mvMatrix,mvMatrix, this.CamPos);	
+		mat4.scale(mvMatrix,mvMatrix,[9000.0,9000.0,9000.0]);	
+		Sphere.Draw(SphereShaderSkyProgram);
+			
+		gl.cullFace(gl.BACK);
 		
 		//Draw Info 2D
 		this.Info.draw();
 
-		//Draw Shadow Map	
-		if(this.initPhase<2)
-		{
-			SphereShaderProgram = SphereShadowMapShaderProgram
-			SphereShaderGlowProgram = SphereShadowMapShaderProgram;
-			shadowMapStart();
-				mat4.identity(mvMatrix);
-				gl.viewport(0, 0,shadowMapDepthTextureSize,shadowMapDepthTextureSize);
-				// new viewport and clear Display 
-				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-				//Perceptive projection
-				var lookAtMatrix = mat4.create();			
-				mat4.ortho(pMatrix, -1000.0, 1000.0, -1000.0, 1000.0, 0.0, 2000.0);	
-				mat4.lookAt(lookAtMatrix,[0,1000,0],[0,0,0],[1,0,0]);
-				mat4.multiply(pMatrix,pMatrix,lookAtMatrix);
-				mat4.copy(pShadowMatrix,pMatrix);
-				gl.cullFace(gl.FRONT);
-				this.Trees.draw();
-				this.Stone.draw(true);	 
-		
-			shadowMapStop();
-			gl.cullFace(gl.BACK);	
-
-			this.initPhase++;
-		}	
-		//Debug shadow map Texture
-		// gl.viewport(0, 0,256,256);
-		// mat4.identity(mvMatrix);
-		// mat4.ortho(pMatrix, -1.0, 1.0, -1.0, 1.0, 0.0, 1.0);	
-		// mat4.identity(mvMatrix);
-		// squareDraw(SquareShaderProgramTexDbg);
-
+	
 
 	}
 

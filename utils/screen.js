@@ -36,7 +36,7 @@ class CScreen
 			break; 
 		}	
 		
-      //  if ((this.windowWidth == width) && (this.windowHeight == height) && (this.orientation == orientation)) return;
+        if ((this.windowWidth == width) && (this.windowHeight == height) && (this.orientation == orientation)) return;
         this.windowWidth = width;
         this.windowHeight = height;
         this.orientation = orientation;

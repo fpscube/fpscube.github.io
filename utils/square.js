@@ -20,20 +20,11 @@ var SquareVertexShader = `
 	}
 `;
 
-var SquareTexDbgFragmentShader = `
-precision lowp float;
-uniform sampler2D uTexture;
-   
-uniform vec4 uVertexColor;   
 
-void main() {
-  gl_FragColor = texture2D(uTexture,vec2(gl_FragCoord.x/256.0,gl_FragCoord.y/256.0));
-}`;
 
 
 
 var SquareShaderProgram;
-var SquareShaderProgramTexDbg;
 
 function SquareInitShaders(vertexShaderStr,fragmentShaderStr) {
 
@@ -91,7 +82,6 @@ function squareInit()
 {
 
   SquareShaderProgram = SquareInitShaders(SquareVertexShader,SquareFragmentShader);
-  SquareShaderProgramTexDbg = SquareInitShaders(SquareVertexShader,SquareTexDbgFragmentShader);
 
   // Vertex Buffer
   squareVertexBuffer = gl.createBuffer();
@@ -117,7 +107,6 @@ function squareDraw(pShaderProgram)
         gCurrentShaderProgram = pShaderProgram;
     }
     
-    gl.uniform1i(SquareShaderProgramTexDbg.texture, 0)
 
     if(gCurrentGraphicalObject!=2) 
     {
