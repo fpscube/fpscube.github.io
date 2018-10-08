@@ -1,7 +1,33 @@
 
 var VehiculesInst;
 
+var VehiculesSphereGlowFragmentShader = `
+precision lowp float;
+uniform vec4 uVertexColor; 
+varying vec3 v_normal;
+varying vec4 a_position;      
 
+void main() {
+
+  float light =  (0.2 - abs(a_position.x))/0.2 * 50.0 ;
+ 
+  gl_FragColor = vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light*5.0,uVertexColor.a);
+}`;
+
+
+var VehiculesSphereGlowFragmentShader2 = `
+precision lowp float;
+uniform vec4 uVertexColor; 
+varying vec3 v_normal;
+varying vec4 a_position;      
+
+void main() {
+
+  float light =  (0.2 - abs(a_position.x))/0.2 * 10.0 ;
+  
+ 
+  gl_FragColor = vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,uVertexColor.a);
+}`;
 
 class CVehicules
 {
@@ -48,6 +74,10 @@ class CVehicules
         this.CollisionMatrixList = [];   
         this.EnterCollisionMatrix = mat4.create();
         VehiculesInst = this;
+
+        
+        this.ShaderGlowProgram = SphereInitShaders(SphereVertexShader,VehiculesSphereGlowFragmentShader);
+        this.ShaderGlowProgram2 = SphereInitShaders(SphereVertexShader,VehiculesSphereGlowFragmentShader2);
 
     }
     
@@ -279,10 +309,10 @@ class CVehicules
         for (var iWheel=0;iWheel<4;iWheel++)
         {
             var wheelInfo = wheelInfoTab[iWheel];
-            shaderVertexColorVector = [0.2,0.2,0.2,1.0]; 
             mvPushMatrix();
                 mat4.translate(mvMatrix,mvMatrix,[wheelInfo[0],0,wheelInfo[1]]);
-                lookAtN(wheelInfo[2],wheelInfo[3]); 
+                lookAtN(wheelInfo[2],wheelInfo[3]);
+                shaderVertexColorVector = [1.0,1.0,1.0,1.0];  
                 for (var i=0;i<360;i+=30)
                 {
                     mvPushMatrix();
@@ -293,28 +323,28 @@ class CVehicules
                         Sphere.Draw(SphereShaderProgram);   
                     mvPopMatrix();
                 }
-                shaderVertexColorVector = [1.0,1.0,1.0,1.0]; 
+                shaderVertexColorVector = [0.0,0.0,0.0,1.0]; 
                 mat4.scale(mvMatrix,mvMatrix,[1.0,1.5,1.5]);
                 this.storeCollisionMatrix(mvMatrix);
                 Sphere.Draw(SphereShaderProgram); 
             mvPopMatrix();
         }
 
+        shaderVertexColorVector = [0.01,0.01,0.01,1.0]; 
         //Structure
-        shaderVertexColorVector = [0.2,0.2,0.2,1.0]; 
 
         mvPushMatrix();
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(20), [0, 1, 0]);  
             mat4.scale(mvMatrix,mvMatrix,[1.0,0.5,8.5]);
             this.storeCollisionMatrix(mvMatrix);
-            Sphere.Draw(SphereShaderProgram);   
+            Sphere.Draw(this.ShaderGlowProgram);   
         mvPopMatrix();
 
         mvPushMatrix();
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(-20), [0, 1, 0]);  
             mat4.scale(mvMatrix,mvMatrix,[1.0,0.5,8.5]);
             this.storeCollisionMatrix(mvMatrix);
-            Sphere.Draw(SphereShaderProgram);   
+            Sphere.Draw(this.ShaderGlowProgram);   
         mvPopMatrix();
 
         mvPushMatrix();
@@ -322,7 +352,7 @@ class CVehicules
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [0, 1, 0]);  
             mat4.scale(mvMatrix,mvMatrix,[0.4,0.4,5.0]);
             this.storeCollisionMatrix(mvMatrix);
-            Sphere.Draw(SphereShaderProgram);   
+            Sphere.Draw(this.ShaderGlowProgram);   
         mvPopMatrix();
 
         mvPushMatrix();
@@ -330,7 +360,7 @@ class CVehicules
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(90), [0, 1, 0]);  
             mat4.scale(mvMatrix,mvMatrix,[0.4,0.4,5.0]);
             this.storeCollisionMatrix(mvMatrix);
-            Sphere.Draw(SphereShaderProgram);   
+            Sphere.Draw(this.ShaderGlowProgram);   
         mvPopMatrix();        
 
         mvPushMatrix();
@@ -338,7 +368,7 @@ class CVehicules
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(25), [1, 0, 0]); 
             mat4.scale(mvMatrix,mvMatrix,[0.3,0.3,2.9]); 
             this.storeCollisionMatrix(mvMatrix);
-            Sphere.Draw(SphereShaderProgram);   
+            Sphere.Draw(this.ShaderGlowProgram);   
         mvPopMatrix();
 
         //Guidon
@@ -357,7 +387,7 @@ class CVehicules
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(25), [1, 0, 0]); 
             mat4.scale(mvMatrix,mvMatrix,[1.9,1.4,3.5]);
             this.storeCollisionMatrix(mvMatrix);
-            Sphere.Draw(SphereShaderProgram);   
+            Sphere.Draw(this.ShaderGlowProgram2);   
         mvPopMatrix();
 
 
@@ -375,7 +405,7 @@ class CVehicules
             mat4.translate(mvMatrix,mvMatrix,[0,0.5,-2.825]); 
             mat4.scale(mvMatrix,mvMatrix,[2,0.5,1.5]); 
             this.storeCollisionMatrix(mvMatrix);
-            Sphere.Draw(SphereShaderProgram);   
+            Sphere.Draw(this.ShaderGlowProgram2);   
         mvPopMatrix();
 
         mvPushMatrix();
@@ -384,7 +414,7 @@ class CVehicules
             mat4.translate(mvMatrix,mvMatrix,[0,0,1.5]); 
             mat4.scale(mvMatrix,mvMatrix,[1.5,0.5,2]); 
             this.storeCollisionMatrix(mvMatrix);
-            Sphere.Draw(SphereShaderProgram);   
+            Sphere.Draw(this.ShaderGlowProgram2);   
         mvPopMatrix();
 
     }

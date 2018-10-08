@@ -86,7 +86,7 @@ class CInfo
 		squareDraw(SquareShaderProgram);	
 		
 		
-		ctx2d.fillStyle = 'black'; 	
+		ctx2d.fillStyle = 'white'; 	
 		if(this.GameState == "Win") 	ctx2d.fillText("You Win - " + this.Time,canvas2D.width/2,canvas2D.height/2 );
 		if(this.GameState == "Lose") 	ctx2d.fillText("You Lose ",canvas2D.width/2,canvas2D.height/2 );
 
