@@ -38,8 +38,8 @@ class CGame
 		this.Info = new CInfo();
 		this.Trees = new CTrees();
 		this.Enemies = new CEnemies(30);
-		this.Hero = new CHuman([-575,200,81],2,[1,0,-1]);
-		
+		this.Hero = new CHuman([-575,200,81],2,[1,0,-1],true);
+		if (this.MultiPlayer==undefined) this.MultiPlayer = new CMultiPlayer();
 
 		
 	}
@@ -96,7 +96,8 @@ class CGame
 					}
 
 					this.Vehicules.update();
-					this.Hero.UpdateHero(mediaIsKey("Fire"),this.CamDir,this.HeroLife<=0);	
+					this.Hero.UpdateHero(mediaIsKey("Fire"),this.CamDir,this.HeroLife<=0);
+					
 
 					//Update Cam Position function of CamDir and Hero Position			
 					var projDir = [];
@@ -132,12 +133,11 @@ class CGame
 					
 				}
 
-
-
 				// Update Enemies
-				this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,this.HeroFire);
-	
-				if (this.Enemies.HitTarget) this.HeroLife--;
+				if(this.MultiPlayer.NbPlayers==1)
+				{
+					this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,this.HeroFire);
+				}
 
 				if (this.HeroLife<=0 )
 				{
@@ -155,29 +155,39 @@ class CGame
 			case "Lose":
 				// Update Cam Position
 				// Rotate Around Hero
-				vec3.rotateY(this.CamDir,this.CamDir,[0,0,0],gElapsed/4)	
-				var projDir = [];
-				vec3.rotateY(projDir,this.CamDir,[0,0,0],0.125);
-				this.CamPos[0] = this.Hero.Pos[0] - projDir[0]*15;
-				this.CamPos[2] = this.Hero.Pos[2] - projDir[2]*15;
-				this.CamPos[1] = this.Hero.Pos[1] + 5.5 ;
+
+				//  vec3.subtract(this.CamDir,this.Hero.Pos,this.CamPos);
+			//	  vec3.normalize(this.CamDir,this.CamDir);
+
+				  
+				// vec3.rotateY(this.CamDir,this.CamDir,[0,0,0],gElapsed/4)	
 
 				// Update Enemies
-				this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,false);				
+				if(this.MultiPlayer.NbPlayers==1)
+				{
+					this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,false);				
+				}
 				
-				this.Hero.UpdateHero(false,this.CamDir,this.HeroLife<=0);
+				this.Hero.UpdateHeroDead();
 
 				if (this.LastFire && !mediaIsKey("Fire") && !this.EndAnim.running)
 				{
 					this.init();
-				}
-
+				}	
+				var projDir = [];
+				vec3.rotateY(projDir,this.CamDir,[0,0,0],0.125);
+				this.CamPos[0] = this.Hero.Pos[0] - projDir[0]*15;
+				this.CamPos[2] = this.Hero.Pos[2] - projDir[2]*15
+				this.CamPos[1] = this.Hero.Pos[1] + 5.5 ;
+				this.Vehicules.EngineOn = false;
 				break;
 		}
 
-		this.Info.update(this.Enemies.IsInTarget,this.Enemies.HitTarget,this.HeroLife,this.Enemies.NbALive,this.State,this.Hero.GunSelected);
 		this.Guns.update();
+		this.Info.update(this.Enemies.IsInTarget,this.Hero.IsTouched,this.HeroLife,this.Enemies.NbALive,this.State,this.Hero.GunSelected);
 		this.LastFire = mediaIsKey("Fire");
+
+		this.MultiPlayer.update(this.Hero,this.CamDir,mediaIsKey("Fire"),this.HeroLife>0);
 
 	}
 
@@ -202,8 +212,8 @@ class CGame
 
 		this.Trees.draw();
 		this.Stone.draw(false);	 
-		this.Enemies.draw();
-		this.Vehicules.draw();	
+		(this.MultiPlayer.NbPlayers==1) ? this.Enemies.draw(): this.MultiPlayer.draw();
+		this.Vehicules.draw();		
 		this.Hero.draw();
 		this.Guns.draw();
 

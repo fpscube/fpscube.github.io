@@ -18,7 +18,7 @@ class CEnemies
 
             if (!groundIsUnderWater(y))
             {
-                this.humans.push(new CHuman([x,1000,z],Math.random()*8,dir));
+                this.humans.push(new CHuman([x,1000,z],Math.random()*8,dir,false));
             }
     	}	
     
@@ -27,7 +27,6 @@ class CEnemies
        //     this.humans.push(new CHuman([-300,y,20],2));
 	
         this.NbALive=pNbEnemies;
-        this.HitTarget=false;
         this.IsInTarget=false;
         CEnemiesInst = this;
     }
@@ -36,7 +35,6 @@ class CEnemies
 
     update(pCamPos,pCamDir,pHeroPos)
     {
-        this.HitTarget=false;
         this.IsInTarget=false;
         this.NbALive=0;
         for(var i =0 ;i<this.humans.length;i++){
@@ -45,7 +43,6 @@ class CEnemies
             { 
                 this.NbALive++;
             }
-            this.HitTarget = this.HitTarget || this.humans[i].HitTarget;
             this.IsInTarget =  this.IsInTarget || this.humans[i].IsInTarget;
 		} 
     }
@@ -62,7 +59,7 @@ class CEnemies
     {
         var collision = pLastCollPt;
         for(var i =0 ;i<this.humans.length;i++){
-            collision = this.humans[i].GetCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
+            collision = this.humans[i].getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
         }
         return collision;
     }
@@ -141,6 +138,7 @@ constructor(pPos,pSpeed,pDir,pHero) {
     this.HSpeed=0;
     this.VSpeed=0;
     this.VAcc=-300.0;
+    this.Hero = pHero
 
     this.Dir=pDir;
     vec3.normalize(this.Dir,this.Dir);
@@ -153,10 +151,9 @@ constructor(pPos,pSpeed,pDir,pHero) {
     this.AngleRange=0
     this.State="Running";
     this.TargetHist=[];
-    this.HitTarget = false;
     this.IsTouched = false;
     this.AnimCounter=0;
-    this.Hero = pHero;
+    this.FireCount = 0;
 
     this.GunSelected = GunsInst.Uzi;
 
@@ -240,13 +237,46 @@ ChangeGun(){
     this.GunSelected = ((this.GunSelected == GunsInst.Uzi))?GunsInst.Bazooka:GunsInst.Uzi;
 }
 
-UpdateHero(pFire,pFireDir,pDead)
+UpdateHeroDead()
+{
+
+    this.IsTouched = false;
+    switch (this.State) {
+        case "StartFalling":
+            this.HumanPhy.update(); 
+            vec3.subtract(this.NormalDir,this.HumanPhy.Pos1,this.HumanPhy.Pos2);
+            vec3.normalize(this.NormalDir,this.NormalDir); 
+            vec3.cross(this.Dir,this.NormalDir,this.Dir); 
+            vec3.cross(this.Dir,this.Dir,this.NormalDir); 
+            vec3.normalize(this.Dir,this.Dir); 
+            if(this.HumanPhy.Ground1) this.State = "Falling";  
+        break
+        case "Falling":
+            if (!this.AnimSpeedFall.running){
+                this.State = "Disappear"; 
+                this.AnimDead.start(5000,0,1);
+            } 
+            this.AngleRange= this.AnimSpeedFall.getValue();
+            break;
+        case "Disappear":
+            if (!this.AnimDead.running) this.State = "Dead";
+            this.AngleRange= 1;
+            break;
+        case "Dead":
+        break;
+
+    }
+     
+}
+
+UpdateHero(pFire,pFireDir)
 {
 
     var elapsed = timeGetElapsedInS();
+    this.IsTouched = false;
 
     // Check for vehicules selection
-    if(this.State != "Vehicule")
+    if(this.State != "Vehicule" )
     {
         //Update hero position according position speed and collision
         this.computeNewPosition();
@@ -265,84 +295,74 @@ UpdateHero(pFire,pFireDir,pDead)
     {
         this.GunSelected.Selected = false;
     }
+    
+    
+    this.AngleRange = (this.HSpeed>0.1)?4:0;
+    vec3.copy(this.HeadDir,this.Dir);
 
 
-    if(pDead && this.State!= "FallingHero")
-    {
-        this.AnimSpeedFall.start(1000,this.AngleRange,1);
-        this.AnimBodyFall.start(1000,0,1);
-        this.State = "FallingHero";
-        this.HSpeed = 0;
-        this.VSpeed = 0;
-    }
-    else if (!pDead)
-    {
-        
-        this.AngleRange = (this.HSpeed>0.1)?4:0;
-        vec3.copy(this.HeadDir,this.Dir);
-
-
-        // Human State Machine
-        switch (this.State) {
-            case "Running":
-                if(pFire && this.GunSelected.WeaponsCount>0) 
-                {
-                    vec3.copy(this.HeadDir,pFireDir);
-                    this.State="Fire";
-                }   
-                break;
-            case "Fire": 
+    // Human State Machine
+    switch (this.State) {
+        case "Running":
+            if(pFire && this.GunSelected.WeaponsCount>0) 
+            {
                 vec3.copy(this.HeadDir,pFireDir);
-                this.GunSelected.fire(this.Pos,pFireDir);
-                this.AnimReload.start(150,0,2*3.14);      
-                this.State="ReadyToFire";        
-                break;
-            case "ReadyToFire":
-                vec3.copy(this.HeadDir,pFireDir); 
-                if(!pFire)
-                {
-                    this.AnimFireToRunning.start(800,0,1) 
-                    this.State = "FireToRunning"
-                }
-                else if (this.GunSelected==GunsInst.Uzi &&
-                         this.GunSelected.WeaponsCount>0 &&
-                        !this.AnimReload.running)
-                {
-                    this.State = "Fire"
-                }   
-                break;       
-            case "FireToRunning":
-                vec3.copy(this.HeadDir,pFireDir);
-                if(pFire  && this.GunSelected.WeaponsCount>0) this.State="Fire"; 
-                else if(!this.AnimFireToRunning.running) this.State="Running"; 
-                break;
-            
-        }
-
-        vec3.copy(this.GunDir,this.HeadDir);
-
-        //Bazooka to heavy
-        if(this.GunSelected == GunsInst.Bazooka)
-        {
-            this.Dir[0]=this.GunDir[0];
-            this.Dir[2]=this.GunDir[2];
-        }
-
-        //Orientation and BackWardsRunning
-        if (vec3.dot(this.Dir,this.GunDir) < -0.25 )
-        {
-            vec3.scale(this.Dir,this.Dir,-1);
-            this.AnimCounter  -= 8.0*elapsed;
-            if (this.AnimCounter > 10.0 * Math.PI)  this.AnimCounter = 10.0 * Math.PI - this.AnimCounter;
-        }        
-        else
-        {
-            this.AnimCounter  += 8.0*elapsed;
-            if (this.AnimCounter < -10.0 * Math.PI)  this.AnimCounter = -10.0 * Math.PI - this.AnimCounter;
-        }
-
-
+                this.State="Fire";
+            }   
+            break;
+        case "Fire": 
+            vec3.copy(this.HeadDir,pFireDir);
+            this.FireCount +=1;
+            this.GunSelected.fire(this.Pos,pFireDir);
+            this.AnimReload.start(150,0,2*3.14);      
+            this.State="ReadyToFire";        
+            break;
+        case "ReadyToFire":
+            vec3.copy(this.HeadDir,pFireDir); 
+            if(!pFire)
+            {
+                this.AnimFireToRunning.start(800,0,1) 
+                this.State = "FireToRunning"
+            }
+            else if (this.GunSelected==GunsInst.Uzi &&
+                        this.GunSelected.WeaponsCount>0 &&
+                    !this.AnimReload.running)
+            {
+                this.State = "Fire"
+            }   
+            break;       
+        case "FireToRunning":
+            vec3.copy(this.HeadDir,pFireDir);
+            if(pFire  && this.GunSelected.WeaponsCount>0) this.State="Fire"; 
+            else if(!this.AnimFireToRunning.running) this.State="Running"; 
+            break; 
+                        
     }
+
+    vec3.copy(this.GunDir,this.HeadDir);
+
+    //Bazooka to heavy
+    if(this.GunSelected == GunsInst.Bazooka)
+    {
+        this.Dir[0]=this.GunDir[0];
+        this.Dir[2]=this.GunDir[2];
+    }
+
+    //Orientation and BackWardsRunning
+    if (vec3.dot(this.Dir,this.GunDir) < -0.25 )
+    {
+        vec3.scale(this.Dir,this.Dir,-1);
+        this.AnimCounter  -= 8.0*elapsed;
+        if (this.AnimCounter > 10.0 * Math.PI)  this.AnimCounter = 10.0 * Math.PI - this.AnimCounter;
+    }        
+    else
+    {
+        this.AnimCounter  += 8.0*elapsed;
+        if (this.AnimCounter < -10.0 * Math.PI)  this.AnimCounter = -10.0 * Math.PI - this.AnimCounter;
+    }
+
+
+    
 }
 
 UpdateEnemie(pCamPos,pCamDir,pHeroPos)
@@ -434,7 +454,6 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos)
     // Update Sqr Dist
     this.sqrDist = vec3.squaredDistance(this.Pos,pHeroPos);
 
-    this.HitTarget=false;
     // Human State Machine
     //  =>test angle between target and human direction
     switch (this.State) {
@@ -442,18 +461,8 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos)
             if (dotProd> 0.5 && this.sqrDist < 10000) this.State = "Fire";
             vec3.copy(this.GunDir,this.Dir);
             break;
-        case "Fire":  
-            playSound(wavList[0]);     
-            //Collision detection
-            var targetDir =  vec3.create();	
-            var fireVector =  vec3.create();
-            var distVector  =  vec3.create();
-            var targetPos = [pHeroPos[0] ,pHeroPos[1]-3.5,pHeroPos[2]];
-            vec3.subtract(targetDir,this.Pos,targetPos);
-            var fireDist = vec3.dot(targetDir,this.GunDir);
-            var enemieDist = vec3.distance(this.Pos,targetPos);		
-            var dist = Math.sqrt(enemieDist**2 - fireDist**2);   
-            this.HitTarget = (dist < 1 || isNaN(dist));
+        case "Fire":   
+            this.GunSelected.fire(this.Pos,this.GunDir);
             //Start  Reload Animation
             this.AnimReload.start(500,0,2*3.14);
             this.State  = "Reload";
@@ -463,15 +472,13 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos)
             else if (!this.AnimReload.running) this.State = "Fire"; 
             break;
         case "StartFalling":
-
             this.HumanPhy.update(); 
             vec3.subtract(this.NormalDir,this.HumanPhy.Pos1,this.HumanPhy.Pos2);
             vec3.normalize(this.NormalDir,this.NormalDir); 
             vec3.cross(this.Dir,this.NormalDir,this.Dir); 
             vec3.cross(this.Dir,this.Dir,this.NormalDir); 
             vec3.normalize(this.Dir,this.Dir); 
-            if(this.HumanPhy.Ground1 && this.HumanPhy.Ground2) this.State = "Falling"; 
-
+            if(this.HumanPhy.Ground1) this.State = "Falling"; 
             break;
         case "Falling":
             if (!this.AnimSpeedFall.running){
@@ -490,26 +497,36 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos)
 
 };
 
-BulletCollision(pDir,pSpeed)
-{
 
-    if(!this.IsDead()) 
+
+BulletCollision(pDir,pSpeed,pPower)
+{
+    if (this.IsDead()) return;
+
+    if(this.Hero)
     {
+        this.IsTouched = true;
+        GameInst.HeroLife -= pPower
+    }
+    
+    if (GameInst.HeroLife <= 0  ||  !this.Hero)
+    {
+
         this.State = "StartFalling";
          
         this.HumanPhy = new CHumanPhysical();
         vec3.scale(this.HumanPhy.Speed,pDir,pSpeed*100);
-        this.HumanPhy.Pos1[0] = this.Pos[0] + this.NormalDir[0]*4.0;
-        this.HumanPhy.Pos1[1] = this.Pos[1] + this.NormalDir[1]*4.0;
-        this.HumanPhy.Pos1[2] = this.Pos[2] + this.NormalDir[2]*4.0;
-        this.HumanPhy.Pos2 = this.Pos;
+        this.HumanPhy.Pos1 = this.Pos;
+        this.HumanPhy.Pos2[0] = this.Pos[0] - this.NormalDir[0]*4.0;
+        this.HumanPhy.Pos2[1] = this.Pos[1] - this.NormalDir[1]*4.0;
+        this.HumanPhy.Pos2[2] = this.Pos[2] - this.NormalDir[2]*4.0;
 
 
     }
 
 }
 
-GetCollisionPoint(pRayPoint1,pRayPoint2,pLastCollPt,pDistSquaredOffset)
+getCollisionPoint(pRayPoint1,pRayPoint2,pLastCollPt,pDistSquaredOffset)
 {
     var collision = Sphere.GetCollisionPosUsingMatrixList(pRayPoint1,pRayPoint2,this.CollisionMatrixList,pLastCollPt,pDistSquaredOffset,this)    
     return (collision);
@@ -701,15 +718,6 @@ draw()
     
     lookAtN(this.Dir,this.NormalDir);
     
-    // Falling Annimation
-    if (this.State == "FallingHero" )
-    {
-        var bodyFallCoef = this.AnimBodyFall.getValue()**2;
-        mat4.translate(mvMatrix,mvMatrix, [0,-5,0]);
-        mat4.rotate(mvMatrix,mvMatrix,  degToRad(bodyFallCoef*90), [1, 0, 0]);
-        mat4.translate(mvMatrix,mvMatrix, [0,5,0]);
-    }
-
     
 
     mat4.rotate(mvMatrix,mvMatrix,  degToRad(this.AngleRange*1.0) , [1, 0, 0]);

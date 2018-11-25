@@ -31,8 +31,6 @@ class CHumanPhysical
         this.Ground2=false;
         this.Dist=4.0;
         this.Speed=[0,0,0];
-        this.GSpeed1=0;
-        this.GSpeed2=0;
     }
 
     update()
@@ -47,10 +45,14 @@ class CHumanPhysical
 
         if(!this.Ground1)
         {
-            // compute speed pos1
+            // gravity
+            this.Speed[1] = this.Speed[1] - 150*elapsed; 
+
+            // compute speed and gravity for pos1
             newPos1[0] = this.Pos1[0] + this.Speed[0]*elapsed; 
             newPos1[1] = this.Pos1[1] + this.Speed[1]*elapsed;
             newPos1[2] = this.Pos1[2] + this.Speed[2]*elapsed;
+            
 
             vec3.subtract(newDir,newPos1,this.Pos2);
             vec3.normalize(newDir,newDir);
@@ -59,29 +61,7 @@ class CHumanPhysical
             newPos2[1] = newPos1[1] - newDir[1]*this.Dist; 
             newPos2[2] = newPos1[2] - newDir[2]*this.Dist; 
             
-            // check collision
-            collision1 = collisionObjectAndGroundGetPoint(this.Pos1,newPos1,null,0);
-            collision2 = collisionObjectAndGroundGetPoint(this.Pos2,newPos2,null,0);
-            if (collision1 == null && collision2==null)
-            {
-                vec3.copy(this.Pos1,newPos1);
-                vec3.copy(this.Pos2,newPos2);
-            } 
-
-            // compute gravity pos1
-            this.GSpeed1 += - 150*elapsed;        
-            newPos1[0] = this.Pos1[0];
-            newPos1[1] = this.Pos1[1] + this.GSpeed1 * elapsed;
-            newPos1[2] = this.Pos1[2];
-
-            vec3.subtract(newDir,newPos1,this.Pos2);
-            vec3.normalize(newDir,newDir);
-            
-            newPos2[0] = newPos1[0] - newDir[0]*this.Dist; 
-            newPos2[1] = newPos1[1] - newDir[1]*this.Dist; 
-            newPos2[2] = newPos1[2] - newDir[2]*this.Dist; 
-        
-         
+       
             // check collision
             collision1 = collisionObjectAndGroundGetPoint(this.Pos1,newPos1,null,0);
             collision2 = collisionObjectAndGroundGetPoint(this.Pos2,newPos2,null,0);
@@ -99,40 +79,14 @@ class CHumanPhysical
             if(collision2!=null)
             {
                 collision2[1] +=1.0;
-                this.Ground1 = true;
+                this.Ground2 = true;
                 vec3.copy(this.Pos2,collision2);
             }   
         }    
         
         if(!this.Ground2)
         {
-        
-            // compute gravity pos2
-            this.GSpeed2 += - 150*elapsed;        
-            newPos2[0] = this.Pos2[0];
-            newPos2[1] = this.Pos2[1] + this.GSpeed1 * elapsed;
-            newPos2[2] = this.Pos2[2];
 
-            vec3.subtract(newDir,this.Pos1,newPos2);
-            vec3.normalize(newDir,newDir);
-            
-            newPos2[0] = this.Pos1[0] - newDir[0]*this.Dist;
-            newPos2[1] = this.Pos1[1] - newDir[1]*this.Dist;
-            newPos2[2] = this.Pos1[2] - newDir[2]*this.Dist;
-            
-            // check collision
-            collision2 = collisionObjectAndGroundGetPoint(this.Pos2,newPos2,null,0);
-            if (collision2==null)
-            {
-                vec3.copy(this.Pos2,newPos2);
-            } 
-            else
-            {
-                this.Ground2 = true;
-                collision2[1] +=1.0;
-                vec3.copy(this.Pos2,collision2);
-
-            }
         }      
         
 
