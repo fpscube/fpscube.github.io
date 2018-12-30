@@ -141,11 +141,11 @@ class CGunsUzi
         this.FireShaderProgram =  SphereInitShaders(SphereVertexShader,gunsFragmentShaderFire);
     }
 
-    fire(pPos,pDir)
+    fire(pPos,pDir,pHumanSrc)
     {
         playSound(wavList[0]);
-        GunsInst.BulletList.push(new CBullet([pPos[0]+pDir[2]*1.0 + pDir[0]*8.0  ,pPos[1]+2.5 + pDir[1]*8.0,pPos[2]-pDir[0]*1.0 + pDir[2]*8.0 ],pDir,0.3,1,2000,0.4));
-        GunsInst.BulletList.push(new CBullet([pPos[0]-pDir[2]*1.0  + pDir[0]*8.0  ,pPos[1]+2.5 + pDir[1]*8.0,pPos[2]+ pDir[0]*1.0 + pDir[2]*8.0],pDir,0.3,1,2000,0.4));
+        GunsInst.BulletList.push(new CBullet([pPos[0]+pDir[2]*1.0 + pDir[0]*8.0  ,pPos[1]+2.5 + pDir[1]*8.0,pPos[2]-pDir[0]*1.0 + pDir[2]*8.0 ],pDir,0.3,1,2000,0.4,pHumanSrc));
+        GunsInst.BulletList.push(new CBullet([pPos[0]-pDir[2]*1.0  + pDir[0]*8.0  ,pPos[1]+2.5 + pDir[1]*8.0,pPos[2]+ pDir[0]*1.0 + pDir[2]*8.0],pDir,0.3,1,2000,0.4,pHumanSrc));
         //   GunsInst.BulletList.push(new CBullet([pPos[0],pPos[1]+2.5,pPos[2]],pDir,1,10,0));
         this.WeaponsCount--;
      
@@ -197,10 +197,10 @@ class CGunsBazooka
     }
 
     
-    fire(pPos,pDir)
+    fire(pPos,pDir,pHumanSrc)
     {
         playSound(wavList[1]);
-        GunsInst.BulletList.push(new CBullet([pPos[0]+ pDir[0]*2.0  ,pPos[1]+1.0 + pDir[1]*2.0,pPos[2] + pDir[2]*2.0 ],pDir,0.6,70,300,3));
+        GunsInst.BulletList.push(new CBullet([pPos[0]+ pDir[0]*2.0  ,pPos[1]+1.0 + pDir[1]*2.0,pPos[2] + pDir[2]*2.0 ],pDir,0.6,70,300,3,pHumanSrc));
         this.WeaponsCount--;
     }
 
@@ -262,7 +262,7 @@ function  _gunsAllCollisionGetPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquare
 class CBullet
 {
 
-    constructor(pPos,pDir,pSize,pSizeExp,pSpeed,pLifeTime)
+    constructor(pPos,pDir,pSize,pSizeExp,pSpeed,pLifeTime,pHumanSrc)
     {
         this.Pos=[pPos[0],pPos[1],pPos[2]];
         this.Dir=[pDir[0],pDir[1],pDir[2]];
@@ -276,6 +276,7 @@ class CBullet
         this.ExplosionAnim = new CTimeAnim();
         this.StartTimeInS = timeGetCurrentInS();
         this.LifeTime = pLifeTime;
+        this.HumanSrc = pHumanSrc;
     }
 
 
@@ -335,7 +336,7 @@ class CBullet
             if (collision != null && collision[3]!=null) 
             {
                 var human = collision[3];
-                human.BulletCollision(this.Dir,1,2);
+                human.BulletCollision(this.Dir,1,2,this.HumanSrc);
             }
 
             if ((collision != null) || ((timeGetCurrentInS()-this.StartTimeInS) > this.LifeTime))  
@@ -364,7 +365,7 @@ class CBullet
                     var expDir=[];
                     vec3.subtract(expDir,humanList[i].Pos,this.Pos);
                     vec3.normalize(expDir,expDir);
-                    humanList[i].BulletCollision(expDir,2,2);
+                    humanList[i].BulletCollision(expDir,2,2,this.HumanSrc);
                 }
                 var humanSquaredDist = vec3.squaredDistance(GameInst.Hero.Pos,this.Pos);
                 var squaredScale =  this.Scale**2;
@@ -375,7 +376,7 @@ class CBullet
                     var expDir=[];
                     vec3.subtract(expDir,GameInst.Hero.Pos,this.Pos);
                     vec3.normalize(expDir,expDir);
-                    GameInst.Hero.BulletCollision(expDir,2,power);
+                    GameInst.Hero.BulletCollision(expDir,2,power,this.HumanSrc);
                 }
                 this.HasExplosed = true;
             }

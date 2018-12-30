@@ -39,6 +39,7 @@ class CVehicules
 
         this.Power = 0;
         this.EngineOn = false;
+        this.Free = true;
 
         this.Dir = [1,0,0]; 
         this.WheelDir = [1,0,0]; 
@@ -105,7 +106,7 @@ class CVehicules
         return collision;
     }
 
-
+  
 
     update()
     {

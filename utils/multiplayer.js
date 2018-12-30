@@ -9,26 +9,28 @@ class CMultiPlayer
 	constructor() {
 
         // Initialize Firebase
-        firebase=null
-        // firebase.initializeApp({
-        //     apiKey: "AIzaSyCxSOq__bGchn5bJflqTRK2yMytz-YQ-WY",
-        //     authDomain: "fpscube-d229f.firebaseapp.com",
-        //     databaseURL: "https://fpscube-d229f.firebaseio.com",
-        //     projectId: "fpscube-d229f",
-        //     storageBucket: "fpscube-d229f.appspot.com",
-        //     messagingSenderId: "858204774229"
-        // });
+       // firebase=null
+        firebase.initializeApp({
+            apiKey: "AIzaSyCxSOq__bGchn5bJflqTRK2yMytz-YQ-WY",
+            authDomain: "fpscube-d229f.firebaseapp.com",
+            databaseURL: "https://fpscube-d229f.firebaseio.com",
+            projectId: "fpscube-d229f",
+            storageBucket: "fpscube-d229f.appspot.com",
+            messagingSenderId: "858204774229"
+        });
 
 
         MultiPlayerInst = this;
         this.PlayersDataModel = null;
-        this.PlayerID = 0;
+        this.PlayerID = -1;
+        this.MaxNbPlayers = 12;
         this.NbPlayers = 1;
         this.Connected = false
         this.Heros = [];
+        this.IsInTarget=null; 
         for (var i =0 ;i<8;i++)
         {
-            this.Heros.push(new CHuman([0,0,0],2,[1,0,-1]));
+            this.Heros.push(new CHuman([0,0,0],2,[1,0,-1],"NoName"));
         }
         
         if(firebase!=null)
@@ -41,16 +43,42 @@ class CMultiPlayer
 
     getPlayerId(players)
     {
-        MultiPlayerInst.PlayerID = 0;
-        for (i=(players.length-1);i>=0;i--)
+        if(players==null) return 0 ;
+        for (i=0;i<this.MaxNbPlayers;i++)
         {
-            if(players[i]["time"] < (Date.now()-(10*1000)))
+            if(players[i]==undefined ||
+                players[i][0] ==undefined ||
+                players[i][0] < (Date.now()-(10*1000)))
             {
                 MultiPlayerInst.PlayerID = i;
+                return;
             }
         } 
     }
-
+    
+    getScoreTable(pHero)
+    {
+        var scoreTab=[];
+        for (var i=0;i<this.NbPlayers;i++){     
+            var kills=0;
+            for (var y=0;y<this.NbPlayers;y++){
+                var hero = (pHero.Id==y)?pHero:this.Heros[y];
+                var killBy = hero.KillBy;
+                if (killBy == null) continue;
+                var val = killBy[i];
+                if(val != null) kills += val;
+            }  
+            var hero = (pHero.Id==i)?pHero:this.Heros[i];
+            var deaths=0;
+            var killBy = hero.KillBy;
+            if (killBy != null) {
+            for (var k=0;k<killBy.length;k++){
+                deaths += killBy[k];
+            }}
+            scoreTab[i] = [hero.Name,kills,deaths];
+        }
+        return scoreTab;
+    }
 
 
     onBaseChange(data)
@@ -64,59 +92,58 @@ class CMultiPlayer
     }
 
 
-    update(hero,camDir,life)
+    update(hero,pCamPos,pCamDir)
     {
         if ( !this.Connected) return;
+        if ( MultiPlayerInst.PlayerID == -1)
+        {            
+            this.getPlayerId(this.PlayersDataModel)
+            return;
+        }
+        
+        hero.Id = this.PlayerID;
+        this.IsInTarget=null; 
 
+        // Update multiplayer hero with distant data
         for(var heroId=0;heroId<this.NbPlayers;heroId++)
         {
             if(heroId!=this.PlayerID)
             {
                 var distDB = this.PlayersDataModel[heroId];
                 var mHeros =  this.Heros[heroId];
-                mHeros.Pos[0] = distDB["x"];
-                mHeros.Pos[1] = distDB["y"];
-                mHeros.Pos[2] = distDB["z"];
-                mHeros.Dir[0] = distDB["dx"];
-                mHeros.Dir[1] = distDB["dy"];
-                mHeros.Dir[2] = distDB["dz"];
-                mHeros.HSpeed = distDB["hs"];
-                mHeros.gunSelected = distDB["hs"];
+                mHeros.UpdateHeroMultiPlayer(distDB,pCamPos,pCamDir,heroId) 
                 
-                mHeros.GunSelected = (distDB["gs"]==0)?GunsInst.Uzi:GunsInst.Bazooka;
-
-                var fire = (distDB["fc"] > mHeros.FireCount)
-                mHeros.UpdateHero(fire,[distDB["cx"],distDB["cy"],distDB["cz"]],distDB["Life"]);	
+                if(this.IsInTarget==null && mHeros.IsInTarget)
+                {
+                    this.IsInTarget = mHeros;
+                }
             }
         }
 
-        //update NB Players
-        this.NbPlayers =0;
+        // Update NB players
+        this.NbPlayers = 0;
         for (var id in this.PlayersDataModel)
         {
-            if(this.PlayersDataModel[id]["time"] > (Date.now()-(10*1000)))
+            if(this.PlayersDataModel[id] == undefined ||
+               this.PlayersDataModel[id][0] == undefined ||
+               this.PlayersDataModel[id][0] > (Date.now()-(10*1000)))
             {
                 this.NbPlayers  +=1;
             }
         } 
 
-        var gunSelected = hero.GunSelected ;
 
+        // Send Local Hero To distant database
         var dataUpdate = {};  
-        dataUpdate['/' + this.PlayerID] = {
-            time:Date.now(),
-            x: hero.Pos[0],y: hero.Pos[1],z: hero.Pos[2],
-            dx:hero.Dir[0],dy:hero.Dir[1],dz:hero.Dir[2],
-            cx:camDir[0],cy:camDir[1],cz:camDir[2],
-            hs:hero.HSpeed,
-            fc:hero.FireCount,
-            gs:gunSelected,
-            life:life
-        };
+        dataUpdate['/' + this.PlayerID  ] = hero.GetHeroMultiPlayerData()   
+        
               
         if(this.NbPlayers<2)
         {  
-            if(this.PlayersDataModel[this.PlayerID]["time"] < (Date.now()-(5*1000)))
+            if( this.PlayersDataModel == null ||
+                this.PlayersDataModel[this.PlayerID] == undefined ||
+                this.PlayersDataModel[this.PlayerID][0]  ||
+                this.PlayersDataModel[this.PlayerID][0] < (Date.now()-(5*1000)))
             {
                 var playerDataRef = firebase.database().ref();
                 playerDataRef.update(dataUpdate);
@@ -124,7 +151,7 @@ class CMultiPlayer
         }
         else 
         {
-             var playerDataRef = firebase.database().ref();
+            var playerDataRef = firebase.database().ref();
             playerDataRef.update(dataUpdate);
         }
     
@@ -132,6 +159,7 @@ class CMultiPlayer
 
     draw ()
     {
+        // Draw distant heros
         for(var heroId=0;heroId<this.NbPlayers;heroId++)
         {
             if(heroId!=this.PlayerID)
