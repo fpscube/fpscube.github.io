@@ -4,15 +4,28 @@ class CGame
 
 	constructor()
 	{
+		this.UserData = {};
+		this.UserData["playerName"]="NoName";
+		var hrefTab = window.location.href.split(/[?&]+([^=&]+)=([^&]*)/);
+		hrefTab.shift();
+		while (hrefTab.length>0)
+		{
+			var key=hrefTab.shift();
+			if(key!="")
+			{
+				var val=hrefTab.shift();
+				this.UserData[key]=val;
+			}
+		}
+	
 		this.init();
 	}
 
  	init() {
-
+	
 		// Data Init
 		timeInit();
 		mediaInit();
-		this.HeroLife = 10;
 		this.CamPos = [-370,13,100]; 
 		this.SpeedCoef=50;
 		this.CamDir = [0.88,-0.15,-0.43];
@@ -38,10 +51,20 @@ class CGame
 		this.Info = new CInfo();
 		this.Trees = new CTrees();
 		this.Enemies = new CEnemies(30);
-		this.Hero = new CHuman([-575,200,81],2,[1,0,-1],true);
+		this.Hero = new CHuman([-575,200,81],2,[1,0,-1],true,this.UserData["playerName"]);
 		if (this.MultiPlayer==undefined) this.MultiPlayer = new CMultiPlayer();
 
 		
+	}
+
+	reInitMulti() {
+		// Data Init
+		this.CamPos = [-370,13,100]; 
+		this.SpeedCoef=50;
+		this.CamDir = [0.88,-0.15,-0.43];
+		this.State = "Play"
+		this.LastFire = 0;
+		this.Hero.reInit();
 	}
 
 	update() {
@@ -72,34 +95,22 @@ class CGame
 				// Vehicule Exit
 				if (this.LastFire && !mediaIsKey("Fire") &&  this.Hero.State =="Vehicule")
 				{
-					vec3.copy(this.Hero.Pos,this.Vehicules.DriverOutPos);
-					this.Hero.State = "Running";
-					this.Hero.Dir[1]=0;
-					vec3.normalize(this.Hero.Dir,this.Hero.Dir);
-					this.Vehicules.Power = 0;
-					this.Vehicules.FrontPt.Speed = [0,0,0];
+					this.Vehicules.Free = true; 
+					this.Hero.ExitVehicule(this.Vehicules )
 				}
 
-				// Update Hero Direction and Hero Horz Speed
-				if(this.Hero.State !="Vehicule"){
-	
-					// if Running process hero dir function of camdir and media angle
-					if (mediaIsMvtAsked()){
-						vec3.rotateY(this.Hero.Dir,this.CamDir,[0,0,0],mediaGetMvAngle());
-						this.Hero.Dir[1]=0;
-						vec3.normalize(this.Hero.Dir,this.Hero.Dir);
-						this.Hero.HSpeed = 50;
-					}	
-					else
-					{
-						this.Hero.HSpeed = 0;
-					}
-
-					this.Vehicules.update();
-					this.Hero.UpdateHero(mediaIsKey("Fire"),this.CamDir,this.HeroLife<=0);
-					
-
-					//Update Cam Position function of CamDir and Hero Position			
+				this.Hero.UpdateHero(mediaIsKey("Fire"),this.CamDir,mediaIsMvtAsked(),mediaGetMvAngle(),this.Vehicules);
+				
+				//Update Cam Position function of CamDir and Vehicule Poisition
+				if(this.Hero.State =="Vehicule")
+				{
+					this.CamPos[0] = this.Vehicules.Pos[0] - this.CamDir[0]*40;
+					this.CamPos[2] = this.Vehicules.Pos[2] - this.CamDir[2]*40
+					this.CamPos[1] = this.Vehicules.Pos[1] + 10.5 ;
+				}
+				//Update Cam Position function of CamDir and Hero Position 
+				else
+				{							
 					var projDir = [];
 					vec3.rotateY(projDir,this.CamDir,[0,0,0],0.125);
 					this.CamPos[0] = this.Hero.Pos[0] - projDir[0]*15;
@@ -107,31 +118,8 @@ class CGame
 					this.CamPos[1] = this.Hero.Pos[1] + 5.5 ;
 					this.Vehicules.EngineOn = false;
 				}
-				else
-				{				
-					vec3.copy(this.Vehicules.WheelDir,this.CamDir);
-					if(mediaIsMvtAsked())
-					{
-						this.Vehicules.Power = (Math.abs(mediaGetMvAngle())<Math.PI/4)?60:-100;
-					}
-					else
-					{
-						this.Vehicules.Power = 0;
-					}						
-					this.Vehicules.update();
-					vec3.copy(this.Hero.Pos,this.Vehicules.DriverPos);
-					vec3.copy(this.Hero.Dir,this.Vehicules.Dir);
-					vec3.normalize(this.Hero.Dir,this.Hero.Dir);
-					this.Hero.HSpeed = 0;
-					this.Hero.UpdateHero(false,this.CamDir,this.HeroLife<=0);
-					
-					this.CamPos[0] = this.Vehicules.Pos[0] - this.CamDir[0]*40;
-					this.CamPos[2] = this.Vehicules.Pos[2] - this.CamDir[2]*40
-					this.CamPos[1] = this.Vehicules.Pos[1] + 10.5 ;
-					this.Vehicules.EngineOn = true;
 
-					
-				}
+
 
 				// Update Enemies
 				if(this.MultiPlayer.NbPlayers==1)
@@ -139,7 +127,8 @@ class CGame
 					this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,this.HeroFire);
 				}
 
-				if (this.HeroLife<=0 )
+
+				if (this.Hero.Life<=0 )
 				{
 					this.State="Lose";
 					this.EndAnim.start(2000,0,1);
@@ -153,14 +142,8 @@ class CGame
 				break;
 			case "Win":
 			case "Lose":
-				// Update Cam Position
-				// Rotate Around Hero
-
-				//  vec3.subtract(this.CamDir,this.Hero.Pos,this.CamPos);
-			//	  vec3.normalize(this.CamDir,this.CamDir);
-
-				  
-				// vec3.rotateY(this.CamDir,this.CamDir,[0,0,0],gElapsed/4)	
+				
+				vec3.rotateY(this.CamDir,this.CamDir,[0,0,0],gElapsed/4);	
 
 				// Update Enemies
 				if(this.MultiPlayer.NbPlayers==1)
@@ -172,7 +155,7 @@ class CGame
 
 				if (this.LastFire && !mediaIsKey("Fire") && !this.EndAnim.running)
 				{
-					this.init();
+					(this.MultiPlayer.NbPlayers==1) ? this.init() : this.reInitMulti();
 				}	
 				var projDir = [];
 				vec3.rotateY(projDir,this.CamDir,[0,0,0],0.125);
@@ -184,10 +167,14 @@ class CGame
 		}
 
 		this.Guns.update();
-		this.Info.update(this.Enemies.IsInTarget,this.Hero.IsTouched,this.HeroLife,this.Enemies.NbALive,this.State,this.Hero.GunSelected);
 		this.LastFire = mediaIsKey("Fire");
+	
+		this.MultiPlayer.update(this.Hero,this.CamPos,this.CamDir);
 
-		this.MultiPlayer.update(this.Hero,this.CamDir,mediaIsKey("Fire"),this.HeroLife>0);
+		this.Info.update(this.Hero,this.MultiPlayer,this.Enemies,this.State);
+			
+		// Update Vehicule if not used by any human
+		if(this.Vehicules.Free)	{this.Vehicules.update();}
 
 	}
 
