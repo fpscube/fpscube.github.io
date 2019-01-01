@@ -69,6 +69,9 @@ class CInfo
 			if(pMultiPlayer.NbPlayers>1)
 			{
 				this.ScoreTab = pMultiPlayer.getScoreTable(pHero);
+				this.ScoreTab.sort(function(a, b) {
+					return  b[1]*1000 - a[1]*1000 + a[2] - b[2]  ;
+				});
 			}
 
 		}
@@ -101,15 +104,48 @@ class CInfo
 		"PlayerID:" +  MultiPlayerInst.PlayerID 
 		,10,15);
 
+
+
+
+
+		//this.ScoreTab=[["coucou",0,1],["dany",2,1],["Steph",0,1],["U nom très lonf",11,15]];
+		
+
 		if (this.ScoreTab!=null)
 		{
+			var fontSize=20;
+			var xPosName = canvas2D.width*1/5;
+			var xPosKills = canvas2D.width*3/5;
+			var xPosDeaths = canvas2D.width*4/5;
+			var yPos = fontSize*5;
+	
+			ctx2d.fillStyle = 'black';
+			ctx2d.globalAlpha = 0.8;
+			ctx2d.fillRect(fontSize,yPos - fontSize,canvas2D.width-2*fontSize ,(this.ScoreTab.length+1)*fontSize*1.5);
+			ctx2d.globalAlpha = 1.0;
+			ctx2d.fillStyle = 'white';
+			
+			ctx2d.font = fontSize + "px Arial";
+	
+			
+			ctx2d.fillText("PLAYERS",xPosName,yPos);
+			ctx2d.fillText("KILLS",xPosKills,yPos);
+			ctx2d.fillText("DEATHS",xPosDeaths,yPos);
+
 			for (var i=0;i<this.ScoreTab.length;i++)
 			{
-				ctx2d.fillText(this.ScoreTab[i][0] + " " + this.ScoreTab[i][1] + " " + this.ScoreTab[i][2],30,35+10*i);
+				yPos = yPos + fontSize*0.5;
+				ctx2d.globalAlpha = 0.5;
+				ctx2d.fillRect(fontSize,yPos, canvas2D.width-2*fontSize,fontSize*0.1); 
+				ctx2d.globalAlpha = 1.0;
+				yPos = yPos + fontSize;
+				ctx2d.fillText(this.ScoreTab[i][0],xPosName,yPos);
+				ctx2d.fillText(this.ScoreTab[i][1],xPosKills,yPos);
+				ctx2d.fillText(this.ScoreTab[i][2],xPosDeaths,yPos);
 			}	
 			
 		}
-
+		
 		// Cross Display
 		shaderVertexColorVector  = this.CrossColor;
 		mat4.ortho(pMatrix, 0.0, gl.viewportWidth , 0.0, gl.viewportHeight, -1.0, 1.0);			

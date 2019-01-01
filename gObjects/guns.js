@@ -1,3 +1,5 @@
+
+
 var gunsBulletFragmentShader= `
 precision lowp float;
 
@@ -64,24 +66,21 @@ class CGuns
         }
     }
 
-    checkCollision(pCurrentGun,pPos1,pPos2)
+    checkCollision(pHero,pCurrentGunId,pPos1,pPos2)
     {
         if( Sphere.GetCollisionPos(pPos1,pPos2,this.BazookaCollisionMatrix,null,0) != null)
         {
-            pCurrentGun.Selected = false;
-            this.Bazooka.Selected = true;
-            this.Bazooka.WeaponsCount = 50;
-            return this.Bazooka;
+            pHero.Bazooka.WeaponsCount=50;
+            return pHero.Bazooka;
         }
-        else if(Sphere.GetCollisionPos(pPos1,pPos2,this.UziCollisionMatrix,null,0) != null)
+        else if( Sphere.GetCollisionPos(pPos1,pPos2,this.UziCollisionMatrix,null,0) != null)
         {
-            pCurrentGun.Selected = false;
-            this.Uzi.Selected = true;
-            this.Uzi.WeaponsCount = 100  ;
-            return this.Uzi;
+            pHero.Uzi.WeaponsCount=100;
+            return pHero.Uzi;
         }
-        return pCurrentGun;
+        return pCurrentGunId;
     }
+
 
     draw()
     {
@@ -94,38 +93,32 @@ class CGuns
         }
 
         //Bazooka
-        if (this.Bazooka.WeaponsCount < 50)
-        {
-            mvPushMatrix();
-            mat4.translate(mvMatrix,mvMatrix,this.BazookaPos); 
-            mat4.rotate(mvMatrix,mvMatrix, timeGetAnimRad(), [0 , 1, 0]);    
-            mvPushMatrix();
-                mat4.scale(mvMatrix,mvMatrix,[4.0,6.0,10.0]);
-                mat4.copy(this.BazookaCollisionMatrix,mvMatrix) ;
-            mvPopMatrix();       
-            mat4.scale(mvMatrix,mvMatrix,[3.0,3.0,3.0]);
-            this.Bazooka.draw(false);
-            mvPopMatrix(); 
-        }
+        mvPushMatrix();
+        mat4.translate(mvMatrix,mvMatrix,this.BazookaPos); 
+        mat4.rotate(mvMatrix,mvMatrix, timeGetAnimRad(), [0 , 1, 0]);    
+        mvPushMatrix();
+            mat4.scale(mvMatrix,mvMatrix,[4.0,6.0,10.0]);
+            mat4.copy(this.BazookaCollisionMatrix,mvMatrix) ;
+        mvPopMatrix();       
+        mat4.scale(mvMatrix,mvMatrix,[3.0,3.0,3.0]);
+        this.Bazooka.draw(false);
+        mvPopMatrix(); 
 
-        if (this.Uzi.WeaponsCount < 100)
-        {
-            //Uzi
-            mvPushMatrix();
-            mat4.translate(mvMatrix,mvMatrix,this.UziPos);   
-            mat4.rotate(mvMatrix,mvMatrix, timeGetAnimRad(), [0 , 1, 0]);   
-            mat4.rotate(mvMatrix,mvMatrix, degToRad(-90), [ 1, 0, 0]);  
-            mvPushMatrix();
-                mat4.scale(mvMatrix,mvMatrix,[4.0,4.0,4.0]);
-                mat4.copy(this.UziCollisionMatrix,mvMatrix) ;
-            mvPopMatrix();         
-            mat4.scale(mvMatrix,mvMatrix,[3.0,3.0,3.0]);
-            mat4.translate(mvMatrix,mvMatrix,[-1,0,0]);
-            this.Uzi.draw();
-            mat4.translate(mvMatrix,mvMatrix,[2,0,0]); 
-            this.Uzi.draw();
-            mvPopMatrix(); 
-        }
+        //Uzi
+        mvPushMatrix();
+        mat4.translate(mvMatrix,mvMatrix,this.UziPos);   
+        mat4.rotate(mvMatrix,mvMatrix, timeGetAnimRad(), [0 , 1, 0]);   
+        mat4.rotate(mvMatrix,mvMatrix, degToRad(-90), [ 1, 0, 0]);  
+        mvPushMatrix();
+            mat4.scale(mvMatrix,mvMatrix,[4.0,4.0,4.0]);
+            mat4.copy(this.UziCollisionMatrix,mvMatrix) ;
+        mvPopMatrix();         
+        mat4.scale(mvMatrix,mvMatrix,[3.0,3.0,3.0]);
+        mat4.translate(mvMatrix,mvMatrix,[-1,0,0]);
+        this.Uzi.draw();
+        mat4.translate(mvMatrix,mvMatrix,[2,0,0]); 
+        this.Uzi.draw();
+        mvPopMatrix(); 
         
     }
 }
