@@ -62,6 +62,7 @@ class CMultiPlayer
         for (var i=0;i<this.NbPlayers;i++){     
             var kills=0;
             for (var y=0;y<this.NbPlayers;y++){
+                if(i==y) continue; // not count auto kill
                 var hero = (pHero.Id==y)?pHero:this.Heros[y];
                 var killBy = hero.KillBy;
                 if (killBy == null) continue;

@@ -362,8 +362,6 @@ UpdateHeroMultiPlayer(distDB,pCamPos,pCamDir,pId)
     }
     this.Id = pId;
 
-    console.log(firecount + ":" + this.FireCount);
-
     if (firecount > this.FireCount)
     {
         this.GunSelected.fire(this.Pos,this.GunDir,this);
@@ -374,8 +372,7 @@ UpdateHeroMultiPlayer(distDB,pCamPos,pCamDir,pId)
     
     if(prevState =="Vehicule" && prevState!=this.State)   
     { 
-        GameInst.Vehicules.Free = true;
-        GameInst.Vehicules.NormalDir = [0,1,0];
+        this.ExitVehicule(GameInst.Vehicules);
     }
 
     if(this.State =="Vehicule")   
@@ -404,25 +401,7 @@ UpdateHero(pFire,pFireDir,pMvAsk,pMvMediaAngle,pVehicules)
     var elapsed = timeGetElapsedInS();
     this.IsTouched = false;
 
-    // Check for gun or vehicules selection
-    if(this.State != "Vehicule" )
-    {
-        //Update hero position according position speed and collision
-        this.computeNewPosition();
 
-        // Check for a new gun selection
-        this.GunSelected = GunsInst.checkCollision(this,this.GunSelected,this.Pos,this.NewPos);
-        
-        // Check for a vehicule selection
-        if(pVehicules.Free &&  pVehicules.checkCollision(this.Pos,this.NewPos))
-        {
-            pVehicules.Free = false;
-            this.State = "Vehicule";
-        }
-
-        //Collision Check is finished apply new pos to current
-        vec3.copy(this.Pos,this.NewPos);
-    }
 
     // Update Hero Direction and Hero Horz Speed
     if(this.State !="Vehicule"){
@@ -513,16 +492,11 @@ UpdateHero(pFire,pFireDir,pMvAsk,pMvMediaAngle,pVehicules)
 
     vec3.copy(this.GunDir,this.HeadDir);
 
-    //Bazooka to heavy
-    if(this.GunSelected == this.Bazooka)
-    {
-        this.Dir[0]=this.GunDir[0];
-        this.Dir[2]=this.GunDir[2];
-    }
 
     //Orientation and BackWardsRunning
     if (vec3.dot(this.Dir,this.GunDir) < -0.25 )
     {
+        if(this.HSpeed >0) this.HSpeed=-this.HSpeed;
         vec3.scale(this.Dir,this.Dir,-1);
         this.AnimCounter  -= 8.0*elapsed;
         if (this.AnimCounter > 10.0 * Math.PI)  this.AnimCounter = 10.0 * Math.PI - this.AnimCounter;
@@ -533,7 +507,32 @@ UpdateHero(pFire,pFireDir,pMvAsk,pMvMediaAngle,pVehicules)
         if (this.AnimCounter < -10.0 * Math.PI)  this.AnimCounter = -10.0 * Math.PI - this.AnimCounter;
     }
 
+    //Bazooka to heavy
+    if(this.GunSelected == this.Bazooka)
+    {
+        this.Dir[0]=this.GunDir[0];
+        this.Dir[2]=this.GunDir[2];
+    }
+    
+    // Move and Check for gun or vehicules selection 
+    if(this.State != "Vehicule" )
+    {
+        //Update hero position according position speed and collision
+        this.computeNewPosition();
 
+        // Check for a new gun selection
+        this.GunSelected = GunsInst.checkCollision(this,this.GunSelected,this.Pos,this.NewPos);
+        
+        // Check for a vehicule selection
+        if(pVehicules.Free &&  pVehicules.checkCollision(this.Pos,this.NewPos))
+        {
+            pVehicules.Free = false;
+            this.State = "Vehicule";
+        }
+
+        //Collision Check is finished apply new pos to current
+        vec3.copy(this.Pos,this.NewPos);
+    }
     
 }
 
@@ -545,6 +544,7 @@ ExitVehicule(pVehicule)
     this.State = "Running";
     this.Dir[1]=0;
     vec3.normalize(this.Dir,this.Dir);
+    pVehicule.Free = true;
     pVehicule.Power = 0;
     pVehicule.FrontPt.Speed = [0,0,0];
 }
@@ -710,6 +710,7 @@ BulletCollision(pDir,pSpeed,pPower,pHumanSrc)
     if (this.Life <= 0  ||  !this.Hero)
     {
 
+        if(this.State =="Vehicule")   this.ExitVehicule(GameInst.Vehicules); 
         this.State = "StartFalling";
          
         this.HumanPhy = new CHumanPhysical();
