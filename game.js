@@ -133,7 +133,7 @@ class CGame
 					this.State="Lose";
 					this.EndAnim.start(2000,0,1);
 				}	
-				else if (this.Enemies.NbALive==0) 
+				else if (this.Enemies.NbALive==0 && this.MultiPlayer.NbPlayers==1) 
 				{
 					this.State="Win";
 					this.EndAnim.start(2000,0,1);

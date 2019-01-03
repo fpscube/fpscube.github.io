@@ -76,7 +76,7 @@ class CMultiPlayer
             for (var k=0;k<killBy.length;k++){
                 deaths += killBy[k];
             }}
-            scoreTab[i] = [hero.Name,kills,deaths];
+            scoreTab[i] = [hero.Name,kills,deaths,pHero.Id==i];
         }
         return scoreTab;
     }

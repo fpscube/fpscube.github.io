@@ -16,6 +16,7 @@ class CInfo
 		this.Time = "0:0";
 		this.WeaponsCount = 0;
 		this.ScoreTab = null;
+
 	}
 
 
@@ -64,17 +65,15 @@ class CInfo
 
 		
 		}
-		else
-		{
-			if(pMultiPlayer.NbPlayers>1)
-			{
-				this.ScoreTab = pMultiPlayer.getScoreTable(pHero);
-				this.ScoreTab.sort(function(a, b) {
-					return  b[1]*1000 - a[1]*1000 + a[2] - b[2]  ;
-				});
-			}
 
+		if(pMultiPlayer.NbPlayers>1 && (this.GameState == "Lose" || mediaIsKey("Tab")))
+		{
+			this.ScoreTab = pMultiPlayer.getScoreTable(pHero);
+			this.ScoreTab.sort(function(a, b) {
+				return  b[1]*1000 - a[1]*1000 + a[2] - b[2]  ;
+			});
 		}
+
 
 		this.WeaponsCount  = pHero.GunSelected.WeaponsCount;
 		if (pHero.GunSelected == GunsInst.No) this.WeaponsCount = 0;
@@ -94,21 +93,22 @@ class CInfo
 		ctx2d.fillStyle = 'white';
 		ctx2d.globalAlpha = 1.0;
 		ctx2d.font = "14px Arial";
-		ctx2d.fillText(
-		"Life : " + this.LifeQt*10 	+ "%  -  " +
-		"Enemies : " +  this.NbEnemies  + "  -  " +
-		"Weapons : " +  this.WeaponsCount  + "  -  " +
-		"Time : " +  this.Time +  " - "  +
-		"Resolution : " + canvas3D.width + "x" + canvas3D.height  +  " - "  +
-		"NbPlayer:" +  MultiPlayerInst.NbPlayers   +  " - "  +
-		"PlayerID:" +  MultiPlayerInst.PlayerID 
-		,10,15);
+
+		var legendText =  "Life : " + this.LifeQt*10 	+ "%  -  ";
+		legendText += "Enemies : " +  this.NbEnemies  + "  -  ";
+		legendText += "Weapons : " +  this.WeaponsCount  + "  -  ";
+		legendText += "Time : " +  this.Time +  " - ";
+		legendText += "Resolution : " + canvas3D.width + "x" + canvas3D.height  +  " - ";
+
+		if (MultiPlayerInst.NbPlayers>1) legendText += " TAB for Score -";
+
+		ctx2d.fillText(legendText,10,15);
 
 
 
 
 
-		//this.ScoreTab=[["coucou",0,1],["dany",2,1],["Steph",0,1],["U nom très lonf",11,15]];
+		//this.ScoreTab=[["coucou",0,1,false],["dany",2,1,true],["Steph",0,1,false],["U nom très lonf",11,15,false]];
 		
 
 		if (this.ScoreTab!=null)
@@ -136,12 +136,15 @@ class CInfo
 			{
 				yPos = yPos + fontSize*0.5;
 				ctx2d.globalAlpha = 0.5;
+				
 				ctx2d.fillRect(fontSize,yPos, canvas2D.width-2*fontSize,fontSize*0.1); 
+				ctx2d.fillStyle = (this.ScoreTab[i][3])?'red':'white'; 
 				ctx2d.globalAlpha = 1.0;
 				yPos = yPos + fontSize;
 				ctx2d.fillText(this.ScoreTab[i][0],xPosName,yPos);
 				ctx2d.fillText(this.ScoreTab[i][1],xPosKills,yPos);
 				ctx2d.fillText(this.ScoreTab[i][2],xPosDeaths,yPos);
+				ctx2d.fillStyle = 'white';
 			}	
 			
 		}
