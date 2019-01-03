@@ -567,6 +567,7 @@ CameraRayCollisionDetection(pCamPos,pCamDir)
 UpdateEnemie(pCamPos,pCamDir,pHeroPos)
 {
 
+    this.IsInTarget = false;
     if (this.State=="Dead") return;
 
     var elapsed = timeGetElapsedInS();

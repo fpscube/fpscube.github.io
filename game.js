@@ -171,7 +171,7 @@ class CGame
 	
 		this.MultiPlayer.update(this.Hero,this.CamPos,this.CamDir);
 
-		this.Info.update(this.Hero,this.MultiPlayer,this.Enemies,this.State);
+		this.Info.update();
 			
 		// Update Vehicule if not used by any human
 		if(this.Vehicules.Free)	{this.Vehicules.update();}

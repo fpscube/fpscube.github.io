@@ -21,37 +21,35 @@ class CInfo
 
 
 
-	update(pHero,pMultiPlayer,pEnemies,pGameState)
+	update()
 	{	
 		
-		var humanInTarget = (pMultiPlayer.NbPlayers==1)?pEnemies.IsInTarget:pMultiPlayer.IsInTarget;
+		var humanInTarget = (CMultiPlayerInst.NbPlayers==1)?CEnemiesInst.IsInTarget:CMultiPlayerInst.IsInTarget;
 
 		// if (!this.AnimTextRefresh.running) 
 		// {
 		// 	this.NbFps = Math.round(1/timeGetElapsedInMs() * 1000,0);
 		// 	this.AnimTextRefresh.start(1000,0,1);
 		// }
-		if (pGameState=="Play")
+		this.EnName = "";
+		this.EnLife = "";
+		this.CrossColor = [0.0,0.0,0.0,0.0];
+		if (GameInst.State=="Play")
 		{
 			if(humanInTarget!=null)	{
 				this.CrossColor =  [1.0,0.0,0.0,1.0];
 				this.EnName = humanInTarget.Name;
+				if(CMultiPlayerInst.NbPlayers>1) this.EnLife = humanInTarget.Life*10 + "%";
 			}
 			else{
 				this.CrossColor = [1.0,1.0,1.0,1.0];
-				this.EnName = "";
 			}
-			if (pHero.IsTouched) this.AnimInjury.start(200,0.7,0.0);
+			if (GameInst.Hero.IsTouched) this.AnimInjury.start(200,0.7,0.0);
 		}
-		else
-		{
-			this.CrossColor = [0.0,0.0,0.0,0.0];
-			this.EnName = "";
-		}
-		this.LifeQt = pHero.Life;
+		this.LifeQt = GameInst.Hero.Life;
 		this.InjuryAlpha = this.AnimInjury.getValue();
-		this.NbEnemies = pEnemies.NbALive;
-		this.GameState = pGameState;
+		this.NbEnemies = CEnemiesInst.NbALive;
+		this.GameState = GameInst.State;
 		
 		if(this.GameState != "Win" &&  this.GameState != "Lose") 
 		{
@@ -66,17 +64,17 @@ class CInfo
 		
 		}
 
-		if(pMultiPlayer.NbPlayers>1 && (this.GameState == "Lose" || mediaIsKey("Tab")))
+		if(CMultiPlayerInst.NbPlayers>1 && (this.GameState == "Lose" || mediaIsKey("Tab")))
 		{
-			this.ScoreTab = pMultiPlayer.getScoreTable(pHero);
+			this.ScoreTab = CMultiPlayerInst.getScoreTable(GameInst.Hero);
 			this.ScoreTab.sort(function(a, b) {
 				return  b[1]*1000 - a[1]*1000 + a[2] - b[2]  ;
 			});
 		}
 
 
-		this.WeaponsCount  = pHero.GunSelected.WeaponsCount;
-		if (pHero.GunSelected == GunsInst.No) this.WeaponsCount = 0;
+		this.WeaponsCount  = GameInst.Hero.GunSelected.WeaponsCount;
+		if (GameInst.Hero.GunSelected == GunsInst.No) this.WeaponsCount = 0;
 		
 	}
 
@@ -100,13 +98,9 @@ class CInfo
 		legendText += "Time : " +  this.Time +  " - ";
 		legendText += "Resolution : " + canvas3D.width + "x" + canvas3D.height  +  " - ";
 
-		if (MultiPlayerInst.NbPlayers>1) legendText += " TAB for Score -";
+		if (CMultiPlayerInst.NbPlayers>1) legendText += " TAB for Score -";
 
 		ctx2d.fillText(legendText,10,15);
-
-
-
-
 
 		//this.ScoreTab=[["coucou",0,1,false],["dany",2,1,true],["Steph",0,1,false],["U nom très lonf",11,15,false]];
 		
@@ -159,7 +153,9 @@ class CInfo
 		
 		// Enemy name Display
 		ctx2d.font = "14px Arial";
-		ctx2d.fillText(this.EnName	,gl.viewportWidth/2.0+10.0,gl.viewportHeight/2.0);
+		ctx2d.fillText(this.EnName,canvas2D.width/2.0 + 14,canvas2D.height/2.0);
+		ctx2d.fillText(this.EnLife,canvas2D.width/2.0 + 14,canvas2D.height/2.0 + 20,);
+	
 	
 		
 		

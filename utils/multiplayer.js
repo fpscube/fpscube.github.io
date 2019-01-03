@@ -1,5 +1,5 @@
 
-var MultiPlayerInst;
+var CMultiPlayerInst;
 
 var firebase
 
@@ -20,7 +20,7 @@ class CMultiPlayer
         });
 
 
-        MultiPlayerInst = this;
+        CMultiPlayerInst = this;
         this.PlayersDataModel = null;
         this.PlayerID = -1;
         this.MaxNbPlayers = 12;
@@ -50,7 +50,7 @@ class CMultiPlayer
                 players[i][0] ==undefined ||
                 players[i][0] < (Date.now()-(10*1000)))
             {
-                MultiPlayerInst.PlayerID = i;
+                CMultiPlayerInst.PlayerID = i;
                 return;
             }
         } 
@@ -84,11 +84,11 @@ class CMultiPlayer
 
     onBaseChange(data)
     {
-        MultiPlayerInst.PlayersDataModel = data.val();
-        if(!MultiPlayerInst.Connected)
+        CMultiPlayerInst.PlayersDataModel = data.val();
+        if(!CMultiPlayerInst.Connected)
         {
-            MultiPlayerInst.getPlayerId(MultiPlayerInst.PlayersDataModel)
-            MultiPlayerInst.Connected = true;
+            CMultiPlayerInst.getPlayerId(CMultiPlayerInst.PlayersDataModel);
+            CMultiPlayerInst.Connected = true;
         }
     }
 
@@ -96,7 +96,7 @@ class CMultiPlayer
     update(hero,pCamPos,pCamDir)
     {
         if ( !this.Connected) return;
-        if ( MultiPlayerInst.PlayerID == -1)
+        if ( CMultiPlayerInst.PlayerID == -1)
         {            
             this.getPlayerId(this.PlayersDataModel)
             return;
@@ -156,6 +156,15 @@ class CMultiPlayer
             playerDataRef.update(dataUpdate);
         }
     
+    }
+
+    getCollisionPoint(pRayPoint1,pRayPoint2,pLastCollPt,pDistSquaredOffset)
+    {
+        var collision = pLastCollPt;
+        for(var i =0 ;i<this.Heros.length;i++){
+            collision = this.Heros[i].getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
+        }
+        return collision;
     }
 
     draw ()
