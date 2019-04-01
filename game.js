@@ -51,8 +51,8 @@ class CGame
 		this.Info = new CInfo();
 		this.Trees = new CTrees();
 		this.Enemies = new CEnemies(30);
-		this.Hero = new CHuman([-575,200,81],2,[1,0,-1],true,this.UserData["playerName"]);
-		if (this.MultiPlayer==undefined) this.MultiPlayer = new CMultiPlayer();
+		this.Hero = new CHuman([-575,200,81],2,[1,0,-1],true,this.UserData["playerName"].substring(0, 10));
+		if (this.MultiPlayer==undefined) this.MultiPlayer = new CMultiPlayer(this.Hero);
 
 		
 	}
@@ -169,7 +169,7 @@ class CGame
 		this.Guns.update();
 		this.LastFire = mediaIsKey("Fire");
 	
-		this.MultiPlayer.update(this.Hero,this.CamPos,this.CamDir);
+		this.MultiPlayer.update(this.CamPos,this.CamDir);
 
 		this.Info.update();
 			

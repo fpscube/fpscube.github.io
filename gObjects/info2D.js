@@ -66,10 +66,10 @@ class CInfo
 
 		if(CMultiPlayerInst.NbPlayers>1 && (this.GameState == "Lose" || mediaIsKey("Tab")))
 		{
-			this.ScoreTab = CMultiPlayerInst.getScoreTable(GameInst.Hero);
+			/*this.ScoreTab = CMultiPlayerInst.getScoreTable(GameInst.Hero);
 			this.ScoreTab.sort(function(a, b) {
 				return  b[1]*1000 - a[1]*1000 + a[2] - b[2]  ;
-			});
+			});*/
 		}
 
 

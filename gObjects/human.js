@@ -161,11 +161,7 @@ constructor(pPos,pSpeed,pDir,pHero,pName) {
     this.Bazooka = new CGunsBazooka();
     this.GunSelected = this.Uzi;
 
-    this.KillBy=[];
-    if(pHero==true)
-    {
-        for(var i=0;i<16;i++){ this.KillBy[i]=0;}
-    }
+    this.KillBy=0;
     this.IsTouched = false;
 
     this.AnimDir = new CTimeAnim();
@@ -184,6 +180,7 @@ constructor(pPos,pSpeed,pDir,pHero,pName) {
 
     
     this.HumanPhy = new CHumanPhysical();
+    this.BinDataSize = 144;
  
     this.GlowShaderProgram = SphereInitShaders(SphereVertexShader,HumanGlowFragmentShader);
     this.GlowDownShaderProgram = SphereInitShaders(SphereVertexShader,HumanGlowDownFragmentShader);
@@ -306,61 +303,152 @@ UpdateHeroDead()
      
 }
 
-GetHeroMultiPlayerData()
+
+
+
+
+GetMultiPlayerData()
 {    
-    var killBy = this.KillBy.slice();
+    function _formatBinVec(vec,pos,binArray)
+    {
+        binArray.set(vec,pos);
+        return pos+3;
+    }
 
-    var data = 
-    [Date.now(),
-    this.Pos,
-    this.Dir,
-    this.NormalDir,
-    this.HeadDir,
-    this.GunDir,
-    this.AnimCounter ,
-    this.AngleRange ,
-    this.HSpeed,
-    this.VSpeed,
-    this.FireCount,
-    (this.GunSelected==this.Uzi)?0:1,
-    this.Life,
-    this.State,
-    this.Name,
-    this.Uzi.WeaponsCount,
-    this.Bazooka.WeaponsCount,
-    killBy,
-    GameInst.Vehicules.Pos,
-    GameInst.Vehicules.Dir,
-    GameInst.Vehicules.WheelDir,
-    GameInst.Vehicules.NormalDir,
-    GameInst.Vehicules.Distance ];
+    function _formatState(state)
+    {
+        var stateHash={};
+        stateHash["Running"]=1;
+        stateHash["Fire"]=2;
+        stateHash["ReadyToFire"]=3;
+        stateHash["FireToRunning"]=4;
+        stateHash["Vehicule"]=5;
+        return stateHash[state];
+    }
 
-    return data;
+
+    var myArray = new ArrayBuffer(256);
+    var uint8Array = new Uint8Array(myArray);  
+    var int32Array = new Int32Array(myArray);   
+    var float32Array = new Float32Array(myArray); 
+
+    // Int8 mod
+    var i=0;
+
+    uint8Array[i] = 0; i++;
+    uint8Array[i] = this.Id; i++;
+    uint8Array[i] = this.Life; i++;
+    uint8Array[i] = _formatState(this.State);i++;
+
+    uint8Array[i] = (this.GunSelected==this.Uzi)?0:1; i++;
+    uint8Array[i] = this.Uzi.WeaponsCount; i++;
+    uint8Array[i] = this.Bazooka.WeaponsCount; i++;  
+    uint8Array[i] = this.KillBy;i++
+
+    // Int32 mod
+    i=i/4;
+
+    int32Array[i] = Date.now(); i++;
+    int32Array[i] = this.FireCount; i++;
+
+    float32Array[i] = this.AnimCounter; i++;
+    float32Array[i] = this.AngleRange; i++;
+    float32Array[i] = this.HSpeed; i++;
+    float32Array[i] = this.VSpeed; i++;
+
+    i=_formatBinVec(this.Pos,i,float32Array);
+    i=_formatBinVec(this.Dir,i,float32Array);
+    i=_formatBinVec(this.NormalDir,i,float32Array);
+    i=_formatBinVec(this.HeadDir,i,float32Array);
+    i=_formatBinVec(this.GunDir,i,float32Array); 
+
+    
+    i=_formatBinVec(VehiculesInst.Pos,i,float32Array);
+    i=_formatBinVec(VehiculesInst.Dir,i,float32Array);
+    i=_formatBinVec(VehiculesInst.WheelDir,i,float32Array);
+    i=_formatBinVec(VehiculesInst.NormalDir,i,float32Array);
+    float32Array[i] = VehiculesInst.Distance ; i++;
+
+    if(this.BinDataSize != i*4)
+    {
+        alert("Frame Size Error");
+    }
+
+    return int32Array.subarray(0,i);
 }
 
-UpdateHeroMultiPlayer(distDB,pCamPos,pCamDir,pId)
+
+
+
+UpdateMultiPlayer(distArray,pCamPos,pCamDir,playerId)
 {
-    var prevState =   this.State;
-    this.Pos = distDB[1];
-    this.Dir = distDB[2];
-    this.NormalDir = distDB[3];
-    this.HeadDir = distDB[4];
-    this.GunDir = distDB[5];
-    this.AnimCounter = distDB[6];
-    this.AngleRange = distDB[7];
-    this.HSpeed = distDB[8];
-    this.VSpeed = distDB[9];
-    var firecount = distDB[10];
-    this.GunSelected= (distDB[11]==0)?this.Uzi:this.Bazooka;
-    this.Life = distDB[12];
-    this.State = distDB[13];
-    this.Name = distDB[14];
-    this.Uzi.WeaponsCount = distDB[15];
-    this.Bazooka.WeaponsCount = distDB[16];
-    if(distDB[17]!=null) {
-        this.KillBy = distDB[17].slice();
+
+    if(distArray==null) return;
+    
+
+    if(distArray.length<(i*this.BinDataSize)) return;
+
+    function _unformatBinVec(vec,pos,binArray)
+    {
+        vec[0] = binArray[pos]; 
+        vec[1] = binArray[pos+1]; 
+        vec[2] = binArray[pos+2];
+        return pos+3;
     }
-    this.Id = pId;
+    function _unformatState(val)
+    {
+        var stateTab=[];
+        stateTab[0]="";
+        stateTab[1]="Running";
+        stateTab[2]="Fire";
+        stateTab[3]="ReadyToFire";
+        stateTab[4]="FireToRunning";
+        stateTab[5]="Vehicule";
+        return stateTab[val];
+    }  
+    var prevState =   this.State;
+
+    var uint8Array = new Uint8Array(distArray); 
+    var int32Array = new Int32Array(distArray);   
+    var float32Array = new Float32Array(distArray); 
+
+    // Int8 mod
+    var i=playerId*this.BinDataSize+1;
+
+    this.Id = uint8Array[i]; i++;
+    this.Life = uint8Array[i]; i++;
+    this.State = _unformatState(uint8Array[i]); i++;
+    this.GunSelected = (uint8Array[i]==0)?this.Uzi:this.Bazooka; i++;
+    this.Uzi.WeaponsCount = uint8Array[i]; i++;
+    this.Bazooka.WeaponsCount = uint8Array[i]; i++;
+    this.KillBy = uint8Array[i]; i++;
+
+    // Int32 mod
+    i=i/4;
+
+    var dateNow = int32Array[i];i++;
+    var firecount  = int32Array[i]; i++;
+
+    this.AnimCounter = float32Array[i]; i++;
+    this.AngleRange = float32Array[i]; i++;
+    this.HSpeed = float32Array[i]; i++;
+    this.VSpeed = float32Array[i]; i++;
+
+    i=_unformatBinVec(this.Pos,i,float32Array);
+    i=_unformatBinVec(this.Dir,i,float32Array);
+    i=_unformatBinVec(this.NormalDir,i,float32Array);
+    i=_unformatBinVec(this.HeadDir,i,float32Array);
+    i=_unformatBinVec(this.GunDir,i,float32Array);
+
+    if(this.State =="Vehicule")   
+    { 
+        GameInst.Vehicules.Free = false;
+        i=_unformatBinVec(GameInst.Vehicules.Pos,i,float32Array);
+        i=_unformatBinVec(GameInst.Vehicules.Dir,i,float32Array);
+        i=_unformatBinVec(GameInst.Vehicules.WheelDir,i,float32Array);
+        i=_unformatBinVec(GameInst.Vehicules.NormalDir,i,float32Array);
+        GameInst.Vehicules.Distance = float32Array[i]; i++;
+    }
 
     if (firecount > this.FireCount)
     {
@@ -374,22 +462,6 @@ UpdateHeroMultiPlayer(distDB,pCamPos,pCamDir,pId)
     { 
         this.ExitVehicule(GameInst.Vehicules);
     }
-
-    if(this.State =="Vehicule")   
-    { 
-        //save current Pos
-        var savedPos = [];
-        vec3.copy(savedPos,this.Pos);
-
-        GameInst.Vehicules.Free = false;
-        vec3.copy(GameInst.Vehicules.Pos,distDB[18]);
-        vec3.copy(GameInst.Vehicules.Dir,distDB[19]);  
-        vec3.copy(GameInst.Vehicules.WheelDir,distDB[20]); 
-        vec3.copy(GameInst.Vehicules.NormalDir,distDB[21]); 
-
-        GameInst.Vehicules.Distance = distDB[22];
-        
-    } 
 
 
     this.CameraRayCollisionDetection(pCamPos,pCamDir)
@@ -705,7 +777,7 @@ BulletCollision(pDir,pSpeed,pPower,pHumanSrc)
  
     if(this.Life <= 0 && prevLife>0 && pHumanSrc.Id>=0)
     {
-        this.KillBy[pHumanSrc.Id] +=1;
+        this.KillBy=pHumanSrc.Id; 
     }    
 
     if (this.Life <= 0  ||  !this.Hero)
