@@ -27,7 +27,8 @@ class CMultiPlayer
    
 
       //  this.url = 'http://127.0.0.1:8080';
-        this.url = 'http://fpscube.hopto.org/8080';
+       // this.url = 'http://192.168.1.12:8080';
+        this.url = 'http://fpscube.hopto.org:8080';
         this.xhttp = new XMLHttpRequest(); 
         this.xhttp.onreadystatechange =  this.onChange;
         this.xhttp.responseType = 'arraybuffer';
