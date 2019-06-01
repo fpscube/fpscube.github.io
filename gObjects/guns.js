@@ -26,11 +26,17 @@ gl_FragColor = vec4(1.0,1.0,1.0,1.0-dist);
 
 var GunsInst;
 
+var gBulletShaderProgram=-1
+
 class CGuns
 {
     constructor()
     {
-        this.BulletShaderProgram =  SphereInitShaders(SphereVertexShader,gunsBulletFragmentShader); 
+        if(gBulletShaderProgram==-1)
+        {
+            gBulletShaderProgram =  SphereInitShaders(SphereVertexShader,gunsBulletFragmentShader); 
+        }
+        this.BulletShaderProgram = gBulletShaderProgram;
    
         GunsInst = this;
         
@@ -123,15 +129,19 @@ class CGuns
     }
 }
 
-
+var gFireShaderProgram = -1;
 
 class CGunsUzi
 {
     constructor()
     {
         this.Selected = false;
-        this.WeaponsCount = 90;       
-        this.FireShaderProgram =  SphereInitShaders(SphereVertexShader,gunsFragmentShaderFire);
+        this.WeaponsCount = 90;  
+        if(gFireShaderProgram==-1)
+        {
+            gFireShaderProgram =  SphereInitShaders(SphereVertexShader,gunsFragmentShaderFire);
+        }     
+        this.FireShaderProgram = gFireShaderProgram;
     }
 
     fire(pPos,pDir,pHumanSrc)
@@ -179,6 +189,8 @@ class CGunsUzi
     }
 
 }
+
+
 
 class CGunsBazooka
 {

@@ -128,7 +128,9 @@ void main() {
   gl_FragColor = vec4(light*1.5,light,light ,uVertexColor.a);
 }`;
 
-
+var gGlowShaderProgram = -1;
+var gGlowDownShaderProgram = -1;
+var gGlowSphereShaderProgram = -1;
 
 
 class CHuman
@@ -161,7 +163,7 @@ constructor(pPos,pSpeed,pDir,pHero,pName) {
     this.Bazooka = new CGunsBazooka();
     this.GunSelected = this.Uzi;
 
-    this.KillBy=0;
+    this.KillBy=[0,0,0,0,0,0,0,0];
     this.IsTouched = false;
 
     this.AnimDir = new CTimeAnim();
@@ -180,12 +182,20 @@ constructor(pPos,pSpeed,pDir,pHero,pName) {
 
     
     this.HumanPhy = new CHumanPhysical();
-    this.BinDataSize = 144;
+    this.BinDataSize = 160;
  
-    this.GlowShaderProgram = SphereInitShaders(SphereVertexShader,HumanGlowFragmentShader);
-    this.GlowDownShaderProgram = SphereInitShaders(SphereVertexShader,HumanGlowDownFragmentShader);
-    this.GlowSphereShaderProgram = SphereInitShaders(SphereVertexShader,HumanGlowSphereFragmentShader);
+    if(gGlowShaderProgram==-1)
+    {
+        gGlowShaderProgram = SphereInitShaders(SphereVertexShader,HumanGlowFragmentShader);
+        gGlowDownShaderProgram = SphereInitShaders(SphereVertexShader,HumanGlowDownFragmentShader);
+        gGlowSphereShaderProgram = SphereInitShaders(SphereVertexShader,HumanGlowSphereFragmentShader);
+    }
+    
+    this.GlowShaderProgram = gGlowShaderProgram;
+    this.GlowDownShaderProgram = gGlowDownShaderProgram;
+    this.GlowSphereShaderProgram = gGlowSphereShaderProgram;
 
+   
 }
 
 reInit()
@@ -194,6 +204,7 @@ reInit()
     this.VSpeed=0;
     this.VAcc=-300.0;
     this.Life = 10;
+
 
     this.Dir=[1,0,-1];
     vec3.normalize(this.Dir,this.Dir);
@@ -235,8 +246,16 @@ computeNewPosition()
     //Store current Pos In New Pos
     vec3.copy(this.NewPos,this.Pos);
 
-    //Get New Vertical Speed (gravity)     
-    this.VSpeed += this.VAcc*elapsed;
+    //Get New Vertical Speed (gravity)    
+    //VSpeed is higher when last position is on ground (Vspeed=0) in order to follow high slope
+    if(this.VSpeed==0) 
+    {
+        this.VSpeed += this.VAcc*elapsed*10.0;
+    }
+    else
+    {
+        this.VSpeed += this.VAcc*elapsed;
+    }
 
     //Get New Position
     this.NewPos[0] = this.Pos[0] + this.HSpeed*elapsed*this.Dir[0];
@@ -304,9 +323,6 @@ UpdateHeroDead()
 }
 
 
-
-
-
 GetMultiPlayerData()
 {    
     function _formatBinVec(vec,pos,binArray)
@@ -335,20 +351,41 @@ GetMultiPlayerData()
     // Int8 mod
     var i=0;
 
-    uint8Array[i] = 0; i++;
-    uint8Array[i] = this.Id; i++;
+    uint8Array[i] = 0; i++; //null char = start data  
+    uint8Array[i] = 0; i++; //spare  
     uint8Array[i] = this.Life; i++;
     uint8Array[i] = _formatState(this.State);i++;
 
     uint8Array[i] = (this.GunSelected==this.Uzi)?0:1; i++;
     uint8Array[i] = this.Uzi.WeaponsCount; i++;
     uint8Array[i] = this.Bazooka.WeaponsCount; i++;  
-    uint8Array[i] = this.KillBy;i++
+    uint8Array[i] = 0; i++; //spare  
+
+    uint8Array[i] = this.KillBy[0];i++
+    uint8Array[i] = this.KillBy[1];i++
+    uint8Array[i] = this.KillBy[2];i++
+    uint8Array[i] = this.KillBy[3];i++
+
+    uint8Array[i] = this.KillBy[4];i++
+    uint8Array[i] = this.KillBy[5];i++
+    uint8Array[i] = this.KillBy[6];i++
+    uint8Array[i] = this.KillBy[7];i++
+
+    
+    uint8Array[i] = this.Name.charCodeAt(0);i++
+    uint8Array[i] = this.Name.charCodeAt(1);i++
+    uint8Array[i] = this.Name.charCodeAt(2);i++
+    uint8Array[i] = this.Name.charCodeAt(3);i++
+    
+    uint8Array[i] = this.Name.charCodeAt(4);i++
+    uint8Array[i] = this.Name.charCodeAt(5);i++
+    uint8Array[i] = this.Name.charCodeAt(6);i++
+    uint8Array[i] = this.Name.charCodeAt(7);i++
 
     // Int32 mod
     i=i/4;
 
-    int32Array[i] = Date.now(); i++;
+    int32Array[i] = timeGetCurrentInMs(); i++;
     int32Array[i] = this.FireCount; i++;
 
     float32Array[i] = this.AnimCounter; i++;
@@ -373,20 +410,26 @@ GetMultiPlayerData()
     {
         alert("Frame Size Error");
     }
+    
+    // Add Size
+    uint8Array[1] = i*4 -2;
 
     return int32Array.subarray(0,i);
 }
 
 
 
-
-UpdateMultiPlayer(distArray,pCamPos,pCamDir,playerId)
+UpdateMultiPlayer(pCamPos,pCamDir)
 {
 
-    if(distArray==null) return;
-    
+    this.CameraRayCollisionDetection(pCamPos,pCamDir)
+}
 
-    if(distArray.length<(i*this.BinDataSize)) return;
+
+UpdateMultiPlayerData(pDistArray,pHeroId)
+{
+
+    this.MultiLastRefreshTime = timeGetCurrentInMs();
 
     function _unformatBinVec(vec,pos,binArray)
     {
@@ -408,27 +451,55 @@ UpdateMultiPlayer(distArray,pCamPos,pCamDir,playerId)
     }  
     var prevState =   this.State;
 
-    var uint8Array = new Uint8Array(distArray); 
-    var int32Array = new Int32Array(distArray);   
-    var float32Array = new Float32Array(distArray); 
+    var uint8Array = new Uint8Array(pDistArray); 
+    var int32Array = new Int32Array(pDistArray);    
+    var float32Array = new Float32Array(pDistArray); 
+
+    this.Id = pHeroId;
 
     // Int8 mod
-    var i=playerId*this.BinDataSize+1;
+    var i = pHeroId*this.BinDataSize + 4 //(4 = my hero id);
 
-    this.Id = uint8Array[i]; i++;
+    i++; //null char = start data
+    i++; //spare          
     this.Life = uint8Array[i]; i++;
     this.State = _unformatState(uint8Array[i]); i++;
+
+
     this.GunSelected = (uint8Array[i]==0)?this.Uzi:this.Bazooka; i++;
     this.Uzi.WeaponsCount = uint8Array[i]; i++;
     this.Bazooka.WeaponsCount = uint8Array[i]; i++;
-    this.KillBy = uint8Array[i]; i++;
+    i++; //spare          
+
+    this.KillBy[0] = uint8Array[i]; i++;
+    this.KillBy[1] = uint8Array[i]; i++;
+    this.KillBy[2] = uint8Array[i]; i++;
+    this.KillBy[3] = uint8Array[i]; i++;
+
+    
+    this.KillBy[4] = uint8Array[i]; i++;
+    this.KillBy[5] = uint8Array[i]; i++;
+    this.KillBy[6] = uint8Array[i]; i++;
+    this.KillBy[7] = uint8Array[i]; i++;
+
+
+    if(uint8Array[i]!=0) this.Name = String.fromCharCode(uint8Array[i]); i++;
+    if(uint8Array[i]!=0) this.Name += String.fromCharCode(uint8Array[i]); i++;
+    if(uint8Array[i]!=0) this.Name += String.fromCharCode(uint8Array[i]); i++;
+    if(uint8Array[i]!=0) this.Name += String.fromCharCode(uint8Array[i]); i++;
+
+    
+    if(uint8Array[i]!=0) this.Name += String.fromCharCode(uint8Array[i]); i++;
+    if(uint8Array[i]!=0) this.Name += String.fromCharCode(uint8Array[i]); i++;
+    if(uint8Array[i]!=0) this.Name += String.fromCharCode(uint8Array[i]); i++;
+    if(uint8Array[i]!=0) this.Name += String.fromCharCode(uint8Array[i]); i++;
+    
 
     // Int32 mod
     i=i/4;
 
-    var dateNow = int32Array[i];i++;
+    var rxTime = int32Array[i];i++;
     var firecount  = int32Array[i]; i++;
-
     this.AnimCounter = float32Array[i]; i++;
     this.AngleRange = float32Array[i]; i++;
     this.HSpeed = float32Array[i]; i++;
@@ -463,16 +534,15 @@ UpdateMultiPlayer(distArray,pCamPos,pCamDir,playerId)
         this.ExitVehicule(GameInst.Vehicules);
     }
 
+  
 
-    this.CameraRayCollisionDetection(pCamPos,pCamDir)
 }
 
-UpdateHero(pFire,pFireDir,pMvAsk,pMvMediaAngle,pVehicules)
+UpdateHero(pFire,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnectionTimeInMs)
 {
 
     var elapsed = timeGetElapsedInS();
     this.IsTouched = false;
-
 
 
     // Update Hero Direction and Hero Horz Speed
@@ -777,7 +847,7 @@ BulletCollision(pDir,pSpeed,pPower,pHumanSrc)
  
     if(this.Life <= 0 && prevLife>0 && pHumanSrc.Id>=0)
     {
-        this.KillBy=pHumanSrc.Id; 
+        this.KillBy[pHumanSrc.Id]++; 
     }    
 
     if (this.Life <= 0  ||  !this.Hero)

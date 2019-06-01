@@ -158,6 +158,8 @@ function groundInitShaders(vertexShaderStr,fragmentShaderStr) {
 	return outShaderProgram;
 }
 
+var gGroundShaderNormalProgram=-1;
+
 class CGroundSector
 {
   constructor(pPosX,pPosZ,pSize,pRes)
@@ -167,7 +169,12 @@ class CGroundSector
    var groundNormals=[];
    var groundIndices=[];
 
-   groundShaderNormalProgram = initShaders(groundVertexShader,groundFragmentShader);
+   if(gGroundShaderNormalProgram == -1)
+   {
+    gGroundShaderNormalProgram = initShaders(groundVertexShader,groundFragmentShader);
+   }
+   
+   groundShaderNormalProgram = gGroundShaderNormalProgram;
    groundShaderProgram = groundShaderNormalProgram;
   
     for (var ix=0;ix<=pRes;ix+=1)

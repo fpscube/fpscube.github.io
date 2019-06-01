@@ -12,26 +12,44 @@
      
 
 #define MY_PORT				8080
-#define MY_ADDR				"192.168.1.12"
-#define K_MAX_NB_PLAYER		32
-#define K_MAX_SIZE_TCP_IP_FRAME		65536
-#define K_MAX_SIZE_PLAYER_DATA		256
-#define K_RX_BUFFER_SIZE			100*K_MAX_SIZE_TCP_IP_FRAME
+// #define MY_ADDR				"192.168.1.12"
+#define MY_ADDR				"127.0.0.1"
+#define K_MAX_SIZE_TCP_IP_FRAME		4096
+#define K_MAX_READ_SIZE				4096 
 #define K_MAX_SIZE_HTTP_HEADER		2048
 #define K_MAX_SIZE_HTTP_REPONSE		4096
-#define K_TX_HEADER_SIZE			(sizeof(header)-1 + 7)
 
-static char header[] = 	"HTTP/1.1 200 OK\nConnection: Keep-Alive\nContent-Type: text/html; charset=utf-8\nKeep-Alive: timeout=5, max=1000\nAccess-Control-Allow-Origin: *\nContent-Length:";
-static char rxBuffer[K_MAX_SIZE_TCP_IP_FRAME];
+#define K_HEADER_SIZE		164
+#define K_MAX_NB_PLAYER		8
+#define K_DATA_SIZE			160
+
+static char gHeader[] = 	"HTTP/1.1 200 OK\nConnection: Keep-Alive\nContent-Type: text/html; charset=utf-8\nKeep-Alive: timeout=5, max=1000\nAccess-Control-Allow-Origin: *\nContent-Length:       ";
+
+typedef enum
+{
+	RX_MODE_HTTP_HEADER,
+	RX_MODE_DATA,
+	RX_MODE_COMPLETE,
+}T_readMode;
+
+ 
+typedef struct 
+{
+	char header[K_HEADER_SIZE];
+	int dstId;
+	char data[K_DATA_SIZE*K_MAX_NB_PLAYER];
+} T_txData;
+
 
 typedef struct 
 {
-	char buffer[K_MAX_SIZE_TCP_IP_FRAME];
-	int  size;
-} T_clientTxBuffer;
+	T_readMode 	rxMode;
+	char 		rxBuffer[K_MAX_SIZE_TCP_IP_FRAME];
+	int			rxSize;
+} T_clientData;
 
-T_clientTxBuffer gClientTxBuffer[K_MAX_NB_PLAYER];
-
+T_clientData gClientData[K_MAX_NB_PLAYER];
+T_txData	gTxBuffer;
 
 
 
@@ -42,12 +60,17 @@ int main(int Count, char *Strings[])
 	int socketfd,activity;
 	struct sockaddr_in self;
 
+	if(sizeof(gHeader) != K_HEADER_SIZE)
+	{
+		printf("Error Sizeof(gHeader):%d not equal K_HEADER_SIZE:%d",sizeof(gHeader),K_HEADER_SIZE);
+		return 0;
+	}
+
 	//init client tx buffer
 	for (int i=0;i<K_MAX_NB_PLAYER;i++)
 	{		
-		memcpy (gClientTxBuffer[i].buffer,header,sizeof(header));
-		// initial si
-		gClientTxBuffer[i].size = K_TX_HEADER_SIZE;
+		memcpy (gTxBuffer.header,gHeader,sizeof(gHeader));
+		gClientData[i].rxMode = RX_MODE_COMPLETE;
 	}
 
     //set of socket descriptors  
@@ -106,8 +129,7 @@ int main(int Count, char *Strings[])
             int sd = client_fd[i];   
                  
             //if valid socket descriptor then add to read list  
-            if(sd > 0)   
-                FD_SET( sd , &readfds);   
+            if(sd > 0) FD_SET( sd , &readfds);   
                  
             //highest file descriptor number, need it for the select function  
             if(sd > max_sd)   
@@ -117,7 +139,7 @@ int main(int Count, char *Strings[])
         activity = select( max_sd + 1, &readfds , NULL , NULL , NULL);   
 		if ((activity < 0) && (errno!=EINTR))   
         {   
-            printf("select error");   
+            printf("select error\n");   
         }     
 
 		if (FD_ISSET(socketfd, &readfds))   
@@ -125,12 +147,9 @@ int main(int Count, char *Strings[])
 			int new_client_fd;  
 			printf("New connection");  
 			new_client_fd = accept(socketfd, (struct sockaddr*)&client_addr, &addrlen);
-
-			//inform user of socket number - used in send and receive commands  
-            printf(" socket fd is %d  ip is : %s  port : %d \n" , new_client_fd , inet_ntoa(client_addr.sin_addr) , ntohs(client_addr.sin_port));  
-
+			int i;	
            //add new socket to array of sockets  
-            for (int i = 0; i < K_MAX_NB_PLAYER; i++)   
+            for (i = 0; i < K_MAX_NB_PLAYER; i++)   
             {   
                 //if position is empty  
                 if( client_fd[i] == 0 )   
@@ -138,92 +157,110 @@ int main(int Count, char *Strings[])
                     client_fd[i] = new_client_fd;                           
                     break;   
                 }   
-            }  
+            } 
+			//inform user of socket number - used in send and receive commands  
+            printf(" id %d  socket fd is %d  ip is : %s  port : %d \n" ,i, new_client_fd , inet_ntoa(client_addr.sin_addr) , ntohs(client_addr.sin_port));  
+
 		}
 		else
 		{
 			//else its some IO operation on some other socket 
 			for (int i = 0; i < K_MAX_NB_PLAYER; i++)   
-			{   
-				int size = 0;
-				int sd = client_fd[i];   
+			{  
+				T_clientData *clientDataRx = &gClientData[i]; 
+				int sd = client_fd[i]; 
+				char buffer[K_MAX_READ_SIZE] ;
 					
 				if (FD_ISSET( sd , &readfds))   
 				{   
 					struct sockaddr_in address;
 					socklen_t  addrlen;
+					char *rxData;
+					int size = 0;
 
 					//Check if it was for closing , and also read the  
 					//incoming message   
 					getpeername(sd , (struct sockaddr*)&address ,(socklen_t*)&addrlen); 
 
-					//read current socket into the first circular buffer
-					size = read( sd , &rxBuffer, K_MAX_SIZE_TCP_IP_FRAME);
+					//read current socket 
+					size = read( sd , &buffer, K_MAX_READ_SIZE);
 					
-					//search null char to detect start of data
-					char *rxData =	strchr(rxBuffer,0);
-					
-					//ignore null charater
-					rxData+=1;
+					//printf("START DEFORMAT size %d\n",size);
+					//deformat rx data into  client rx buffer 
+					for (int rxi=0;rxi<size;rxi++)
+					{
+						unsigned char rxByte = buffer[rxi];
+						
+							//printf("counter  %d\n",rxi);
 
-					//compute data size
-					size = size - (int)(rxData-rxBuffer);
-
-					if ( rxData!=NULL && size>0 && size<K_MAX_SIZE_PLAYER_DATA)   
-					{ 
-					
-
-						// Copy rx data into players buffer if connected
-						for (int y = 0; y < K_MAX_NB_PLAYER; y++)   
+						if (clientDataRx->rxMode == RX_MODE_COMPLETE)
 						{
-							// Client not conn
-							if(client_fd[y]==0) continue;
-							if((gClientTxBuffer[y].size + size + 2) > K_MAX_SIZE_HTTP_REPONSE) 
+							//printf("P\n",rxByte, rxByte);
+							if(rxByte=='P')	clientDataRx->rxMode =   RX_MODE_HTTP_HEADER;
+							
+						}
+						else if (clientDataRx->rxMode == RX_MODE_HTTP_HEADER)
+						{
+							
+							//printf("HEADER byte %c %d\n",rxByte, rxByte);
+							if(rxByte==0)
 							{
-								printf ("Client soket %d buffer overflow\n",y);
-								continue;
+								//printf("pos null %d\n",rxi);
+								clientDataRx->rxMode = RX_MODE_DATA;
+								clientDataRx->rxBuffer[0] = 0;
+								clientDataRx->rxSize=1;
+							}		
+						}
+						else /*RX_MODE_DATA*/
+						{
+							//printf("DATA* byte %c %d\n",rxByte, rxByte);
+							clientDataRx->rxBuffer[clientDataRx->rxSize] = rxByte;
+							clientDataRx->rxSize++;
+							if(clientDataRx->rxSize >= K_DATA_SIZE) 
+							{
+								clientDataRx->rxMode = RX_MODE_COMPLETE;
 							}
 							
-							printf ("UpdateClient:%d  msgfromClient:%d size :%d\n ",y,i,size);
-							printf ("Data: %s\n ",rxData);
-							
-							//write player id
-							gClientTxBuffer[y].buffer[gClientTxBuffer[y].size] = i;
-							//write data Size
-							gClientTxBuffer[y].buffer[gClientTxBuffer[y].size+1] = size;
-							//write data
-							memcpy (gClientTxBuffer[y].buffer + gClientTxBuffer[y].size + 2,rxData,size) ;
-							gClientTxBuffer[y].size += size + 2;
-						}
-						
+						}						
 
-						// Add Size of message in http header
-						char lengthString[8];
-						sprintf (lengthString,"%5d\n\n", gClientTxBuffer[i].size - K_TX_HEADER_SIZE);
-						memcpy(gClientTxBuffer[i].buffer + sizeof(header) -1,lengthString,7);
-						
-
-						//printf("response %s\n",gClientTxBuffer[i].buffer);
-						// Send Tx Buffer
-						send(sd, (const char *)&gClientTxBuffer[i].buffer,gClientTxBuffer[i].size, 0);
-
-						// Clear tx buffer for current player after sending
-						gClientTxBuffer[i].size = K_TX_HEADER_SIZE;
-
-						// Print Client Info
-						printf("- send http OK response ip %s , port %d \n", inet_ntoa(address.sin_addr) , ntohs(address.sin_port));
-					}   
-						
-					//Echo back the message that came in  
-					else 
-					{   
-						printf("Host disconnected , ip %s , port %d \n" ,  
+					}
+			    
+					//printf("clientDataRx->rxMode %d\n",clientDataRx->rxMode );
+					// Disconnect if receive size <=0
+					if (size<=0)   
+					{ 
+						printf("Hosts disconnected , ip %s , port %d \n" ,  
 						inet_ntoa(address.sin_addr) , ntohs(address.sin_port));   
 							
 						//Close the socket and mark as 0 in list for reuse  
-						close( sd );   
-						client_fd[i] = 0;   	
-					}   
+						close(sd);  						
+						client_fd[i] = 0;  
+						gClientData[i].rxMode = RX_MODE_COMPLETE;
+					}
+					// If rx is complete for current client store for other client and send response for current client
+					else if(clientDataRx->rxMode == RX_MODE_COMPLETE)
+					{
+						//write rx data to txBuffer 
+						memcpy(gTxBuffer.data + (i*K_DATA_SIZE),clientDataRx->rxBuffer,K_DATA_SIZE);	
+
+						// Add Size of message in http header
+						char lengthString[8];
+						sprintf (lengthString,"%5d\n\n", K_DATA_SIZE * K_MAX_NB_PLAYER + 4);
+						memcpy(gTxBuffer.header + K_HEADER_SIZE - 7,lengthString,7);					
+
+						//printf("response:\n%s\n",gTxBuffer.header);
+						// Send Tx Buffer
+						gTxBuffer.dstId = i;
+						//printf("gTxBuffer.dstId  %d\n",gTxBuffer.dstId );
+
+						send(sd, (const char *)&(gTxBuffer.header[0]),sizeof(T_txData), 0);
+
+	
+
+						// Print Client Info
+						//printf("- send http OK response ip %s , port %d \n", inet_ntoa(address.sin_addr) , ntohs(address.sin_port));
+					}				
+						
 				}   
 			}   
 		
