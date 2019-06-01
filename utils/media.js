@@ -154,7 +154,7 @@ function mediaSetTouchMove(evt){
         var id = touches[i].identifier;
         var startPos = gMediaTouchStartPos[id];
         var touchDir =[touches[i].clientX-startPos[0],touches[i].clientY-startPos[1]];
-        if (startPos[0]>(screen.width/2))
+        if (startPos[0]<(screen.width/2))
         {
             gMediaTouchMvInProgress=1;
             gMediaTouchMvAngle = Math.atan2(-touchDir[0],-touchDir[1]);
@@ -177,7 +177,7 @@ function mediaSetTouchEnd(evt){
     for (var i=0; i<touches.length; i++) {
         var id = touches[i].identifier;
         var startPos = gMediaTouchStartPos[id];
-        if (startPos[0]>(screen.width/2))
+        if (startPos[0]<(screen.width/2))
         { 
             gMediaTouchMvInProgress=0;
         }
