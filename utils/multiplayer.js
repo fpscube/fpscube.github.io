@@ -13,12 +13,10 @@ class CMultiPlayer
 
         CMultiPlayerInst = this;
         this.PlayersDataModel = null;
-        this.NbPlayers = 8;
+        this.NbPlayers = 1;
         this.IsInTarget=null;
         this.RxBinData=null;
         this.Heros = [];
-
-        this.DiscoveryTimeInMs = timeGetCurrentInMs() + 500 + 1000*Math.random(); // discovery time is random in order to limit collision
 
         this.TxBinData=pHero.GetMultiPlayerData();
 
@@ -28,8 +26,8 @@ class CMultiPlayer
         }
    
 
-      //  this.url = 'http://192.168.1.12:8080';
-        this.url = 'http://127.0.0.1:8080';
+      //  this.url = 'http://127.0.0.1:8080';
+        this.url = 'http://fpscube.hopto.org/8080';
         this.xhttp = new XMLHttpRequest(); 
         this.xhttp.onreadystatechange =  this.onChange;
         this.xhttp.responseType = 'arraybuffer';
@@ -63,7 +61,8 @@ class CMultiPlayer
     {
         this.IsInTarget=null; 
         this.TxBinData=GameInst.Hero.GetMultiPlayerData();
-        
+        if(GameInst.Hero.Id >=0 ) this.NbPlayers=8;
+
         if(CMultiPlayerInst.RxBinData!=null)
         {
             

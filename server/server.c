@@ -12,8 +12,8 @@
      
 
 #define MY_PORT				8080
-// #define MY_ADDR				"192.168.1.12"
-#define MY_ADDR				"127.0.0.1"
+ #define MY_ADDR				"192.168.1.12"
+//#define MY_ADDR				"127.0.0.1"
 #define K_MAX_SIZE_TCP_IP_FRAME		4096
 #define K_MAX_READ_SIZE				4096 
 #define K_MAX_SIZE_HTTP_HEADER		2048
