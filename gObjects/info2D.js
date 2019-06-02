@@ -16,6 +16,7 @@ class CInfo
 		this.Time = "0:0";
 		this.WeaponsCount = 0;
 		this.ScoreTab = null;
+		this.EventTab = null;
 
 	}
 
@@ -72,6 +73,7 @@ class CInfo
 			});
 		}
 
+		this.EventTab = CMultiPlayerInst.getEventTable();
 
 		this.WeaponsCount  = GameInst.Hero.GunSelected.WeaponsCount;
 		if (GameInst.Hero.GunSelected == GunsInst.No) this.WeaponsCount = 0;
@@ -101,10 +103,24 @@ class CInfo
 		if (CMultiPlayerInst.NbPlayers>1) legendText += " TAB for Score -";
 
 		ctx2d.fillText(legendText,10,15);
-
-		//this.ScoreTab=[["coucou",0,1,false],["dany",2,1,true],["Steph",0,1,false],["U nom très lonf",11,15,false]];
 		
+		if (this.EventTab!=null)
+		{
+			var fontSize=15;
+			var xPos = fontSize*2;
+			var yPos = fontSize*4;
+	
+			ctx2d.globalAlpha = 1.0;
+			ctx2d.fillStyle = 'white';			
+			ctx2d.font = fontSize + "px Arial";			
 
+			for (var i=0;i<this.EventTab.length;i++)
+			{				
+				ctx2d.fillText(this.EventTab[i],xPos,yPos);
+				yPos = yPos + fontSize; 
+			}	
+			
+		}
 		if (this.ScoreTab!=null)
 		{
 			var fontSize=20;

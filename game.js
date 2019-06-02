@@ -51,13 +51,19 @@ class CGame
 		this.Info = new CInfo();
 		this.Trees = new CTrees();
 		this.Enemies = new CEnemies(30);
-		this.Hero = new CHuman([-575,200,81],2,[1,0,-1],true,this.UserData["playerName"].substring(0, 10));
+		var  x = Math.sin(Math.random()*2*Math.PI) * 900;
+		var  z = Math.sin(Math.random()*2*Math.PI) * 900;
+		var intPos = [x,600,z];
+		this.Hero = new CHuman(intPos,2,[1,0,-1],true,this.UserData["playerName"].substring(0, 10));
 		if (this.MultiPlayer==undefined) this.MultiPlayer = new CMultiPlayer(this.Hero);
 
 		
 	}
 
 	reInitMulti() {
+		var  x = Math.sin(Math.random()*2*Math.PI) * 400 + Math.random()*200;
+		var  z = Math.sin(Math.random()*2*Math.PI) * 400 + Math.random()*200;
+		this.Hero.Pos = [x,600,z];
 		// Data Init
 		this.CamPos = [-370,13,100]; 
 		this.SpeedCoef=50;

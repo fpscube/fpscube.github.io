@@ -164,6 +164,7 @@ constructor(pPos,pSpeed,pDir,pHero,pName) {
     this.GunSelected = this.Uzi;
 
     this.KillBy=[0,0,0,0,0,0,0,0];
+    this.KillByEventTime=[null,null,null,null,null,null,null,null];
     this.IsTouched = false;
 
     this.AnimDir = new CTimeAnim();
@@ -177,6 +178,13 @@ constructor(pPos,pSpeed,pDir,pHero,pName) {
     this.CollisionMatrixList = [];
     this.TargetHist=[];
     this.AnimCounter=0;
+
+
+    this.MultiCounter = 0;
+    this.MultiRefreshTime = null;
+    this.MultiConnexionTime = null;
+    this.MultiDisConnexionTime = null;
+
 
     this.sqrDist = vec3.squaredDistance(this.Pos,pPos);
 
@@ -352,7 +360,8 @@ GetMultiPlayerData()
     var i=0;
 
     uint8Array[i] = 0; i++; //null char = start data  
-    uint8Array[i] = 0; i++; //spare  
+    this.MultiCounter = (this.MultiCounter + 1)%256;
+    uint8Array[i] = this.MultiCounter; i++;
     uint8Array[i] = this.Life; i++;
     uint8Array[i] = _formatState(this.State);i++;
 
@@ -411,8 +420,7 @@ GetMultiPlayerData()
         alert("Frame Size Error");
     }
     
-    // Add Size
-    uint8Array[1] = i*4 -2;
+
 
     return int32Array.subarray(0,i);
 }
@@ -421,6 +429,7 @@ GetMultiPlayerData()
 
 UpdateMultiPlayer(pCamPos,pCamDir)
 {
+
 
     this.CameraRayCollisionDetection(pCamPos,pCamDir)
 }
@@ -461,7 +470,14 @@ UpdateMultiPlayerData(pDistArray,pHeroId)
     var i = pHeroId*this.BinDataSize + 4 //(4 = my hero id);
 
     i++; //null char = start data
-    i++; //spare          
+    
+    if(this.MultiCounter != uint8Array[i])
+    {
+        this.MultiRefreshTime = timeGetCurrentInMs();
+        this.MultiCounter = uint8Array[i];
+    };
+
+    i++;          
     this.Life = uint8Array[i]; i++;
     this.State = _unformatState(uint8Array[i]); i++;
 
@@ -471,16 +487,13 @@ UpdateMultiPlayerData(pDistArray,pHeroId)
     this.Bazooka.WeaponsCount = uint8Array[i]; i++;
     i++; //spare          
 
-    this.KillBy[0] = uint8Array[i]; i++;
-    this.KillBy[1] = uint8Array[i]; i++;
-    this.KillBy[2] = uint8Array[i]; i++;
-    this.KillBy[3] = uint8Array[i]; i++;
+    for (var heroId = 0;heroId<8;heroId++)
+    {
+        if(uint8Array[i] > this.KillBy[heroId])  this.KillByEventTime[heroId] = timeGetCurrentInMs();
+        this.KillBy[heroId] = uint8Array[i];
+        i++;
+    }
 
-    
-    this.KillBy[4] = uint8Array[i]; i++;
-    this.KillBy[5] = uint8Array[i]; i++;
-    this.KillBy[6] = uint8Array[i]; i++;
-    this.KillBy[7] = uint8Array[i]; i++;
 
 
     if(uint8Array[i]!=0) this.Name = String.fromCharCode(uint8Array[i]); i++;
@@ -534,7 +547,21 @@ UpdateMultiPlayerData(pDistArray,pHeroId)
         this.ExitVehicule(GameInst.Vehicules);
     }
 
-  
+    if(this.MultiRefreshTime != null)
+    {
+        if(this.MultiConnexionTime == null)
+        {
+            this.MultiDisConnexionTime = null; 
+            this.MultiConnexionTime = this.MultiRefreshTime; 
+        }
+        else if((timeGetCurrentInMs() -  this.MultiRefreshTime) > 4000)
+        {
+            this.MultiRefreshTime = null;
+            this.MultiConnexionTime = null;
+            this.MultiDisConnexionTime = timeGetCurrentInMs();       
+        }
+    }
+
 
 }
 
@@ -848,6 +875,7 @@ BulletCollision(pDir,pSpeed,pPower,pHumanSrc)
     if(this.Life <= 0 && prevLife>0 && pHumanSrc.Id>=0)
     {
         this.KillBy[pHumanSrc.Id]++; 
+        this.KillByEventTime[pHumanSrc.Id] = timeGetCurrentInMs();
     }    
 
     if (this.Life <= 0  ||  !this.Hero)

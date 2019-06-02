@@ -27,8 +27,8 @@ class CMultiPlayer
    
 
       //  this.url = 'http://127.0.0.1:8080';
-       // this.url = 'http://192.168.1.12:8080';
-        this.url = 'http://fpscube.hopto.org:8080';
+    this.url = 'http://192.168.1.12:8080';
+    //   this.url = 'http://fpscube.hopto.org:8080';
         this.xhttp = new XMLHttpRequest(); 
         this.xhttp.onreadystatechange =  this.onChange;
         this.xhttp.responseType = 'arraybuffer';
@@ -72,6 +72,7 @@ class CMultiPlayer
 
             for(var heroId=0;heroId<8;heroId++)
             {
+               if(GameInst.Hero.Id == heroId) continue;
                 this.Heros[heroId].UpdateMultiPlayerData(this.RxBinData,heroId);  
             }                        
             CMultiPlayerInst.RxBinData = null;
@@ -80,8 +81,17 @@ class CMultiPlayer
         
         for(var heroId=0;heroId<8;heroId++)
         {
+            
+            if(this.Heros[heroId].MultiConnexionTime==null) continue;
             this.Heros[heroId].UpdateMultiPlayer(GameInst.CamPos,GameInst.CamDir);    
+            if(this.IsInTarget==null && this.Heros[heroId].IsInTarget)
+            {
+                this.IsInTarget = this.Heros[heroId];
+            }
+
         }
+
+
 
     }
 
@@ -94,10 +104,57 @@ class CMultiPlayer
         return collision;
     }
 
+    getEventTable()
+    {
+        var timeMs = timeGetCurrentInMs();
+        var eventTab=[];
+        for (var i=0;i<this.NbPlayers;i++){  
+            var distHero = this.Heros[i];              
+            if(i ==GameInst.Hero.Id )  continue; 
+            if(distHero.MultiConnexionTime!=null && (timeMs-distHero.MultiConnexionTime)<10000)
+            {
+                eventTab.push(distHero.Name + " - has joined the game");
+            }
+            if(distHero.MultiDisConnexionTime!=null && (timeMs-distHero.MultiDisConnexionTime)<10000)
+            {
+                eventTab.push(distHero.Name + " - has quit the game");
+            }
+        }
+
+        for (var i=0;i<this.NbPlayers;i++){  
+      
+            var deadHero = this.Heros[i];    
+            if(i ==GameInst.Hero.Id )  deadHero = GameInst.Hero; 
+
+            for (var y=0;y<this.NbPlayers;y++){  
+                var killTime = deadHero.KillByEventTime[y] ;
+                var killNb = deadHero.KillBy[y] ;
+                if(killTime == null) continue;
+                if((timeMs-killTime)<5000)
+                {
+                    var winHero = this.Heros[y];
+                    if(y == GameInst.Hero.Id ) winHero = GameInst.Hero;
+                    if(y==i)
+                    {                        
+                        eventTab.push(deadHero.Name + " kill himself  (" + killNb + " time(s))");
+                    }
+                    else
+                    {
+                        eventTab.push(deadHero.Name + " was killed by " + winHero.Name + " (" + killNb + " time(s))");
+                    }
+                }
+            }
+        }
+
+        return eventTab;
+    }
+
+
     getScoreTable(pHero)
     {
         var scoreTab=[];
-        for (var i=0;i<this.NbPlayers;i++){     
+        for (var i=0;i<this.NbPlayers;i++){                
+            if((i !=GameInst.Hero.Id) && this.Heros[i].MultiConnexionTime==null)  continue; 
             var kills=0;
             for (var y=0;y<this.NbPlayers;y++){
                 if(i==y) continue; // not count auto kill
@@ -114,7 +171,7 @@ class CMultiPlayer
             for (var k=0;k<killBy.length;k++){
                 deaths += killBy[k];
             }}
-            scoreTab[i] = [hero.Name,kills,deaths,pHero.Id==i];
+            scoreTab.push([hero.Name,kills,deaths,pHero.Id==i]);
         }
         return scoreTab;
     }
@@ -126,6 +183,7 @@ class CMultiPlayer
         {
 
             if(heroId == GameInst.Hero.Id) continue;
+            if(this.Heros[heroId].MultiConnexionTime==null) continue;
             this.Heros[heroId].draw();	                       
         }
     }
