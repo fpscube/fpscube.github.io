@@ -295,8 +295,8 @@ class CSphere
 
         if(delta<=0) return pLastCollPt;           
                 
-        var t1 = (-b - Math.sqrt(delta))/2*a
-        var t2 = (-b + Math.sqrt(delta))/2*a
+        var t1 = (-b - Math.sqrt(delta))/2*a;
+        var t2 = (-b + Math.sqrt(delta))/2*a;
         if ( t1 < 0 && t2 < 0) return pLastCollPt;  
         
         

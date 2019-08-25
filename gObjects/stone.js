@@ -65,8 +65,8 @@ class CStone
 
     
         mvPushMatrix();
-            mat4.translate(mvMatrix,mvMatrix,[150.0,30.0,-500.0])
-            mat4.rotate(mvMatrix,mvMatrix,  degToRad(-5), [0, 0,1]);;  
+            mat4.translate(mvMatrix,mvMatrix,[150.0,30.0,-500.0]);
+            mat4.rotate(mvMatrix,mvMatrix,  degToRad(-5), [0, 0,1]);
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(84), [1, 0, 0]);   
             mat4.scale(mvMatrix,mvMatrix,[50.0,200.0,10.0]); 
             Sphere.Draw(SphereShaderProgram); 
@@ -88,7 +88,7 @@ class CStone
     
         for (var i=70;i<(360);i+=45)
         {
-            var c = (i%17) / 17.0 +0.5
+            var c = (i%17)/17.0+0.5;
             
             shaderVertexColorVector = [c,c,0.2,1.0]; 
             mvPushMatrix();   
@@ -107,7 +107,7 @@ class CStone
         mat4.translate(mvMatrix,mvMatrix,[-300.0,20.0,-450.0]);       
         for (var i=70;i<(360);i+=45)
         {
-            var c = (i%17) / 17.0 +0.5
+            var c = (i%17)/17.0+0.5;
             
             shaderVertexColorVector = [0.1,c*0.8,c*1.2,1.0]; 
             mvPushMatrix();   

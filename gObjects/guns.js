@@ -26,7 +26,7 @@ gl_FragColor = vec4(1.0,1.0,1.0,1.0-dist);
 
 var GunsInst;
 
-var gBulletShaderProgram=-1
+var gBulletShaderProgram=-1;
 
 class CGuns
 {
@@ -306,7 +306,7 @@ class CBullet
  
             newPos[0] = this.Pos[0] + this.Speed[0]*elapsed;
             newPos[1] = this.Pos[1] + this.Speed[1]*elapsed;
-            newPos[2] = this.Pos[2] + this.Speed[2]*elapsed
+            newPos[2] = this.Pos[2] + this.Speed[2]*elapsed;
             collision = _gunsAllCollisionGetPoint(this.Pos,newPos,null,0);
 
             if(this.scale > 1.0)
@@ -383,7 +383,7 @@ class CBullet
                 var squaredScale =  this.Scale**2;
                 if (humanSquaredDist < squaredScale)
                 {           
-                    var coef = humanSquaredDist/squaredScale 
+                    var coef = humanSquaredDist/squaredScale;
                     var power = Math.floor((1-coef)*10);
                     var expDir=[];
                     vec3.subtract(expDir,GameInst.Hero.Pos,this.Pos);

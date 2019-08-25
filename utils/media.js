@@ -23,15 +23,14 @@ function mediaInit()
 
 function fullScreenRequest()
 {
-   var container = document.getElementById('game');
- if(container.webkitRequestFullScreen) {container.webkitRequestFullScreen();}
- if(container.mozRequestFullScreen)	   {container.mozRequestFullScreen();}
+	var container = document.getElementById('game');
+	if(container.webkitRequestFullScreen) container.webkitRequestFullScreen();
+	if(container.mozRequestFullScreen)	container.mozRequestFullScreen();
 }
 
 function mediaMouseMove(evt) {
-
-        speedCoef = 2.5
-        gMediaCamMvVec[0] += speedCoef*evt.movementX/screen.width;
+	speedCoef = 2.5;
+	gMediaCamMvVec[0] += speedCoef*evt.movementX/screen.width;
 	gMediaCamMvVec[1] += speedCoef*evt.movementY/screen.height;
 }
 

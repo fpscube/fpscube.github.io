@@ -29,7 +29,7 @@ class CGame
 		this.CamPos = [-370,13,100]; 
 		this.SpeedCoef=50;
 		this.CamDir = [0.88,-0.15,-0.43];
-		this.State = "Play"
+		this.State = "Play";
 		this.EndAnim = new CTimeAnim();
 		this.LastFire = 0;
 
@@ -68,7 +68,7 @@ class CGame
 		this.CamPos = [-370,13,100]; 
 		this.SpeedCoef=50;
 		this.CamDir = [0.88,-0.15,-0.43];
-		this.State = "Play"
+		this.State = "Play";
 		this.LastFire = 0;
 		this.Hero.reInit();
 	}
@@ -111,7 +111,7 @@ class CGame
 				if(this.Hero.State =="Vehicule")
 				{
 					this.CamPos[0] = this.Vehicules.Pos[0] - this.CamDir[0]*40;
-					this.CamPos[2] = this.Vehicules.Pos[2] - this.CamDir[2]*40
+					this.CamPos[2] = this.Vehicules.Pos[2] - this.CamDir[2]*40;
 					this.CamPos[1] = this.Vehicules.Pos[1] + 10.5 ;
 				}
 				//Update Cam Position function of CamDir and Hero Position 
@@ -120,7 +120,7 @@ class CGame
 					var projDir = [];
 					vec3.rotateY(projDir,this.CamDir,[0,0,0],0.125);
 					this.CamPos[0] = this.Hero.Pos[0] - projDir[0]*15;
-					this.CamPos[2] = this.Hero.Pos[2] - projDir[2]*15
+					this.CamPos[2] = this.Hero.Pos[2] - projDir[2]*15;
 					this.CamPos[1] = this.Hero.Pos[1] + 5.5 ;
 					this.Vehicules.EngineOn = false;
 				}
@@ -166,7 +166,7 @@ class CGame
 				var projDir = [];
 				vec3.rotateY(projDir,this.CamDir,[0,0,0],0.125);
 				this.CamPos[0] = this.Hero.Pos[0] - projDir[0]*15;
-				this.CamPos[2] = this.Hero.Pos[2] - projDir[2]*15
+				this.CamPos[2] = this.Hero.Pos[2] - projDir[2]*15;
 				this.CamPos[1] = this.Hero.Pos[1] + 5.5 ;
 				this.Vehicules.EngineOn = false;
 				break;
@@ -198,7 +198,7 @@ class CGame
 		var lookAtMatrix = mat4.create();
 		var viewPos = [this.CamPos[0] + this.CamDir[0],this.CamPos[1] + this.CamDir[1],this.CamPos[2] + this.CamDir[2]];
 		mat4.lookAt(lookAtMatrix,this.CamPos,viewPos,[0,1,0]);
-		mat4.multiply(pMatrix,pMatrix,lookAtMatrix)
+		mat4.multiply(pMatrix,pMatrix,lookAtMatrix);
 		
 		groundDraw(this.Hero.Pos[0],this.Hero.Pos[2]);
 		gl.cullFace(gl.BACK);	

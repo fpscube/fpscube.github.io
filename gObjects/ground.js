@@ -140,7 +140,7 @@ function groundInitShaders(vertexShaderStr,fragmentShaderStr) {
 	if (!gl.getProgramParameter(outShaderProgram, gl.LINK_STATUS)) {
 		alert("Could not initialise shaders");
 	}
-	gl.uniform1i(outShaderProgram.texture, 0)
+	gl.uniform1i(outShaderProgram.texture, 0);
 
 	outShaderProgram.vertexPositionAttribute = gl.getAttribLocation(outShaderProgram, "aVertexPosition");
 	gl.enableVertexAttribArray(outShaderProgram.vertexPositionAttribute);
@@ -242,7 +242,7 @@ class CGroundSector
 
     shaderWaterY = -2008.5;
     shaderVertexColorVector = [0.8,0.8,0.4,1.0];
-    mat4.identity(mvMatrix)    
+    mat4.identity(mvMatrix)    ;
     
     if(gCurrentShaderProgram != groundShaderProgram) 
     {

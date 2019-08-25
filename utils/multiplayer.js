@@ -25,10 +25,7 @@ class CMultiPlayer
            this.Heros.push(new CHuman([0,0,0],2,[1,0,-1],true,"Player " + i));
         }
    
-
-      //  this.url = 'http://127.0.0.1:8080';
-    this.url = 'http://192.168.1.12:8080';
-    //   this.url = 'http://fpscube.hopto.org:8080';
+        this.url = "http:/" + "/" + location.host + ":8080";
         this.xhttp = new XMLHttpRequest(); 
         this.xhttp.onreadystatechange =  this.onChange;
         this.xhttp.responseType = 'arraybuffer';

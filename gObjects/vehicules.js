@@ -221,7 +221,7 @@ class CVehicules
 
         // Compute new
         vec3.add(this.NormalDir,this.FrontNormalDir,this.BackNormalDir);
-        vec3.normalize(this.NormalDir,this.NormalDir)
+        vec3.normalize(this.NormalDir,this.NormalDir);
         
         //Check Collision between front and back        
         var collision = null;
@@ -320,7 +320,7 @@ class CVehicules
                         mat4.rotate(mvMatrix,mvMatrix,  degToRad(i)+this.Distance/2, [1, 0, 0]); 
                         mat4.rotate(mvMatrix,mvMatrix,  degToRad(wheelInfo[4]), [0, 0, 1]); 
                         mat4.translate(mvMatrix,mvMatrix,[0.0,0.0,2.0]);    
-                        mat4.scale(mvMatrix,mvMatrix,[0.9,1.6,0.8]); 2
+                        mat4.scale(mvMatrix,mvMatrix,[0.9,1.6,0.8]);
                         Sphere.Draw(SphereShaderProgram);   
                     mvPopMatrix();
                 }

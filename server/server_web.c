@@ -9,69 +9,68 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/time.h> //FD_SET, FD_ISSET, FD_ZERO macros  
-     
 
-#define MY_PORT				8080
+#define K_MAX_NB_PLAYER 32     
+
+#define MY_PORT				80
  #define MY_ADDR				"192.168.1.20"
 //#define MY_ADDR				"127.0.0.1"
 #define K_MAX_SIZE_TCP_IP_FRAME		4096
 #define K_MAX_READ_SIZE				4096 
 #define K_MAX_SIZE_HTTP_HEADER		2048
 #define K_MAX_SIZE_HTTP_REPONSE		4096
+#define K_MAX_NB_USER				32
 
-#define K_HEADER_SIZE		164
-#define K_MAX_NB_PLAYER		8
-#define K_DATA_SIZE			160
+#define K_HEADER_SIZE		191
+#define K_MAX_FILE_SIZE			1024*1024*500
 
-static char gHeader[] = 	"HTTP/1.1 200 OK\nConnection: Keep-Alive\nContent-Type: text/html; charset=utf-8\nKeep-Alive: timeout=5, max=1000\nAccess-Control-Allow-Origin: *\nContent-Length:       ";
-
-typedef enum
-{
-	RX_MODE_HTTP_HEADER,
-	RX_MODE_DATA,
-	RX_MODE_COMPLETE,
-}T_readMode;
+static char gHeader[] = 	"HTTP/1.1 200 OK\nConnection: Keep-Alive\nContent-Encoding: gzip\nContent-Type: text/html; charset=utf-8\nKeep-Alive: timeout=5, max=1000\nAccess-Control-Allow-Origin: *\nContent-Length:           ";
 
  
 typedef struct 
 {
 	char header[K_HEADER_SIZE];
-	int dstId;
-	char data[K_DATA_SIZE*K_MAX_NB_PLAYER];
+	char data[K_MAX_FILE_SIZE];
 } T_txData;
 
-
-typedef struct 
-{
-	T_readMode 	rxMode;
-	char 		rxBuffer[K_MAX_SIZE_TCP_IP_FRAME];
-	int			rxSize;
-} T_clientData;
-
-T_clientData gClientData[K_MAX_NB_PLAYER];
 T_txData	gTxBuffer;
-
-
-
 static int 	client_fd[K_MAX_NB_PLAYER];
+
 
 int main(int Count, char *Strings[])
 {   
-	int socketfd,activity;
+	int socketfd,activity;	
+	long fileSize =  0;
+	int txSize =  0;
 	struct sockaddr_in self;
+	FILE *fp;
+
 
 	if(sizeof(gHeader) != K_HEADER_SIZE)
 	{
 		printf("Error Sizeof(gHeader):%d not equal K_HEADER_SIZE:%d",sizeof(gHeader),K_HEADER_SIZE);
 		return 0;
 	}
-
+	
 	//init client tx buffer
-	for (int i=0;i<K_MAX_NB_PLAYER;i++)
-	{		
-		memcpy (gTxBuffer.header,gHeader,sizeof(gHeader));
-		gClientData[i].rxMode = RX_MODE_COMPLETE;
+	memcpy (gTxBuffer.header,gHeader,sizeof(gHeader));
+
+	fp = fopen("index.html.gz", "r");
+	if (fp != NULL) {
+		fileSize = (size_t) fread(&gTxBuffer.data[0] , sizeof(char), K_MAX_FILE_SIZE, fp);
+		fclose(fp);
+		txSize = K_HEADER_SIZE + fileSize;
 	}
+	else
+	{
+		  printf("Error while opening the file index.html \n");
+		  return 0;
+	}
+
+	// Add Size of message in http header
+	char lengthString[8];
+	sprintf (lengthString,"%9d\n\n", fileSize);
+	memcpy(gTxBuffer.header + K_HEADER_SIZE - 11,lengthString,11);	
 
     //set of socket descriptors  
     fd_set readfds;   
@@ -116,6 +115,7 @@ int main(int Count, char *Strings[])
 		int max_sd;
 		struct sockaddr_in client_addr;
 		int addrlen=sizeof(client_addr);
+		char buffer[K_MAX_READ_SIZE] ;
  
         FD_ZERO(&readfds); 
 
@@ -164,15 +164,12 @@ int main(int Count, char *Strings[])
 		}
 		else
 		{
-			//else its some IO operation on some other socket 
 			for (int i = 0; i < K_MAX_NB_PLAYER; i++)   
 			{  
-				T_clientData *clientDataRx = &gClientData[i]; 
 				int sd = client_fd[i]; 
-				char buffer[K_MAX_READ_SIZE] ;
 					
 				if (FD_ISSET( sd , &readfds))   
-				{   
+				{ 					
 					struct sockaddr_in address;
 					socklen_t  addrlen;
 					char *rxData;
@@ -184,88 +181,13 @@ int main(int Count, char *Strings[])
 
 					//read current socket 
 					size = read( sd , &buffer, K_MAX_READ_SIZE);
-					
-					printf ("\n%s\n",buffer);
-					
-					//printf("START DEFORMAT size %d\n",size);
-					//deformat rx data into  client rx buffer 
-					for (int rxi=0;rxi<size;rxi++)
-					{
-						unsigned char rxByte = buffer[rxi];
-						
-							//printf("counter  %d\n",rxi);
-
-						if (clientDataRx->rxMode == RX_MODE_COMPLETE)
-						{
-							//printf("P\n",rxByte, rxByte);
-							if(rxByte=='P')	clientDataRx->rxMode =   RX_MODE_HTTP_HEADER;
-							
-						}
-						else if (clientDataRx->rxMode == RX_MODE_HTTP_HEADER)
-						{
-							
-							//printf("HEADER byte %c %d\n",rxByte, rxByte);
-							if(rxByte==0)
-							{
-								//printf("pos null %d\n",rxi);
-								clientDataRx->rxMode = RX_MODE_DATA;
-								clientDataRx->rxBuffer[0] = 0;
-								clientDataRx->rxSize=1;
-							}		
-						}
-						else /*RX_MODE_DATA*/
-						{
-							//printf("DATA* byte %c %d\n",rxByte, rxByte);
-							clientDataRx->rxBuffer[clientDataRx->rxSize] = rxByte;
-							clientDataRx->rxSize++;
-							if(clientDataRx->rxSize >= K_DATA_SIZE) 
-							{
-								clientDataRx->rxMode = RX_MODE_COMPLETE;
-							}
-							
-						}						
-
-					}
-			    
-					//printf("clientDataRx->rxMode %d\n",clientDataRx->rxMode );
-					// Disconnect if receive size <=0
-					if (size<=0)   
-					{ 
-						printf("Hosts disconnected , ip %s , port %d \n" ,  
-						inet_ntoa(address.sin_addr) , ntohs(address.sin_port));   
-							
-						//Close the socket and mark as 0 in list for reuse  
-						close(sd);  						
-						client_fd[i] = 0;  
-						gClientData[i].rxMode = RX_MODE_COMPLETE;
-					}
-					// If rx is complete for current client store for other client and send response for current client
-					else if(clientDataRx->rxMode == RX_MODE_COMPLETE)
-					{
-						//write rx data to txBuffer 
-						memcpy(gTxBuffer.data + (i*K_DATA_SIZE),clientDataRx->rxBuffer,K_DATA_SIZE);	
-
-						// Add Size of message in http header
-						char lengthString[8];
-						sprintf (lengthString,"%5d\n\n", K_DATA_SIZE * K_MAX_NB_PLAYER + 4);
-						memcpy(gTxBuffer.header + K_HEADER_SIZE - 7,lengthString,7);					
-
-						//printf("response:\n%s\n",gTxBuffer.header);
-						// Send Tx Buffer
-						gTxBuffer.dstId = i;
-						//printf("gTxBuffer.dstId  %d\n",gTxBuffer.dstId );
-
-						send(sd, (const char *)&(gTxBuffer.header[0]),sizeof(T_txData), 0);
-
+					printf("buffer :\n%s\n",&gTxBuffer.header[0] );
+					send(sd, (const char *)&(gTxBuffer.header[0]),txSize, 0);
 	
-
-						// Print Client Info
-						//printf("- send http OK response ip %s , port %d \n", inet_ntoa(address.sin_addr) , ntohs(address.sin_port));
-					}				
-						
+					close(sd);  						
+					client_fd[i] = 0;  			
 				}   
-			}   
-		
+			}   		
 		}
 
 	}

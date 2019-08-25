@@ -67,13 +67,11 @@ for (var confListI=0;confListI<configList.length;confListI++ )
 
 
 
-
-
 function playSound(wav) {
-  var buf = new Float32Array(wav.length)
-  for (var i = 0; i < wav.length; i++) buf[i] = wav[i]
-  var buffer = ctxAud.createBuffer(1, buf.length, ctxAud.sampleRate)
-  buffer.copyToChannel(buf, 0)
+  var buf = new Float32Array(wav.length);
+  for (var i = 0; i < wav.length; i++) buf[i] = wav[i];
+  var buffer = ctxAud.createBuffer(1, buf.length, ctxAud.sampleRate);
+  buffer.copyToChannel(buf, 0);
   var source = ctxAud.createBufferSource();
   source.buffer = buffer;
   source.connect(ctxAud.destination);

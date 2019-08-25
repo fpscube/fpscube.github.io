@@ -12,7 +12,7 @@ class CEnemies
 
             var  x = Math.sin(5*(i/pNbEnemies*2*Math.PI)) *300;
             var  z = Math.sin(4*(i/pNbEnemies*2*Math.PI)) *300;
-            var  y = groundGetY(x,z) 
+            var  y = groundGetY(x,z);
 
             var dir = [-x,0.0,z];
 
@@ -38,7 +38,7 @@ class CEnemies
         this.IsInTarget=null;
         this.NbALive=0;
         for(var i =0 ;i<this.humans.length;i++){
-            this.humans[i].UpdateEnemie(pCamPos,pCamDir,pHeroPos)
+            this.humans[i].UpdateEnemie(pCamPos,pCamDir,pHeroPos);
             if(!(this.humans[i].IsDead()))
             { 
                 this.NbALive++;
@@ -143,7 +143,7 @@ constructor(pPos,pSpeed,pDir,pHero,pName) {
     this.HSpeed=0;
     this.VSpeed=0;
     this.VAcc=-300.0;
-    this.Hero = pHero
+    this.Hero = pHero;
     this.Life = 10;
     this.Name = pName;
     this.Id = -1;
@@ -156,7 +156,7 @@ constructor(pPos,pSpeed,pDir,pHero,pName) {
 
     this.Speed=pSpeed;
     this.Acc=1;
-    this.AngleRange=0
+    this.AngleRange=0;
     this.State="Running";
     this.FireCount = 0;
     this.Uzi = new CGunsUzi();
@@ -222,7 +222,7 @@ reInit()
 
     this.Speed=0;
     this.Acc=1;
-    this.AngleRange=0
+    this.AngleRange=0;
     this.State="Running";
     this.Uzi = new CGunsUzi();
     this.Bazooka = new CGunsBazooka();
@@ -311,7 +311,7 @@ UpdateHeroDead()
             vec3.cross(this.Dir,this.Dir,this.NormalDir); 
             vec3.normalize(this.Dir,this.Dir); 
             if(this.HumanPhy.Ground1) this.State = "Falling";  
-        break
+			break;
         case "Falling":
             if (!this.AnimSpeedFall.running){
                 this.State = "Disappear"; 
@@ -324,7 +324,7 @@ UpdateHeroDead()
             this.AngleRange= 1;
             break;
         case "Dead":
-        break;
+			break;
 
     }
      
@@ -370,32 +370,32 @@ GetMultiPlayerData()
     uint8Array[i] = this.Bazooka.WeaponsCount; i++;  
     uint8Array[i] = 0; i++; //spare  
 
-    uint8Array[i] = this.KillBy[0];i++
-    uint8Array[i] = this.KillBy[1];i++
-    uint8Array[i] = this.KillBy[2];i++
-    uint8Array[i] = this.KillBy[3];i++
+    uint8Array[i] = this.KillBy[0];i++;
+    uint8Array[i] = this.KillBy[1];i++;
+    uint8Array[i] = this.KillBy[2];i++;
+    uint8Array[i] = this.KillBy[3];i++;
 
-    uint8Array[i] = this.KillBy[4];i++
-    uint8Array[i] = this.KillBy[5];i++
-    uint8Array[i] = this.KillBy[6];i++
-    uint8Array[i] = this.KillBy[7];i++
+    uint8Array[i] = this.KillBy[4];i++;
+    uint8Array[i] = this.KillBy[5];i++;
+    uint8Array[i] = this.KillBy[6];i++;
+    uint8Array[i] = this.KillBy[7];i++;
 
     
-    uint8Array[i] = this.Name.charCodeAt(0);i++
-    uint8Array[i] = this.Name.charCodeAt(1);i++
-    uint8Array[i] = this.Name.charCodeAt(2);i++
-    uint8Array[i] = this.Name.charCodeAt(3);i++
+    uint8Array[i] = this.Name.charCodeAt(0);i++;
+    uint8Array[i] = this.Name.charCodeAt(1);i++;
+    uint8Array[i] = this.Name.charCodeAt(2);i++;
+    uint8Array[i] = this.Name.charCodeAt(3);i++;
     
-    uint8Array[i] = this.Name.charCodeAt(4);i++
-    uint8Array[i] = this.Name.charCodeAt(5);i++
-    uint8Array[i] = this.Name.charCodeAt(6);i++
-    uint8Array[i] = this.Name.charCodeAt(7);i++
+    uint8Array[i] = this.Name.charCodeAt(4);i++;
+    uint8Array[i] = this.Name.charCodeAt(5);i++;
+    uint8Array[i] = this.Name.charCodeAt(6);i++;
+    uint8Array[i] = this.Name.charCodeAt(7);i++;
 
     // Int32 mod
     i=i/4;
 
-    int32Array[i] = timeGetCurrentInMs(); i++;
-    int32Array[i] = this.FireCount; i++;
+    int32Array[i] = timeGetCurrentInMs(); i++;;
+    int32Array[i] = this.FireCount; i++;;
 
     float32Array[i] = this.AnimCounter; i++;
     float32Array[i] = this.AngleRange; i++;
@@ -467,7 +467,7 @@ UpdateMultiPlayerData(pDistArray,pHeroId)
     this.Id = pHeroId;
 
     // Int8 mod
-    var i = pHeroId*this.BinDataSize + 4 //(4 = my hero id);
+    var i = pHeroId*this.BinDataSize + 4; //(4 = my hero id);
 
     i++; //null char = start data
     
@@ -641,14 +641,14 @@ UpdateHero(pFire,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnectionTimeInMs
             vec3.copy(this.HeadDir,pFireDir); 
             if(!pFire)
             {
-                this.AnimFireToRunning.start(800,0,1) 
-                this.State = "FireToRunning"
+                this.AnimFireToRunning.start(800,0,1);
+                this.State = "FireToRunning";
             }
             else if (this.GunSelected==this.Uzi &&
                         this.GunSelected.WeaponsCount>0 &&
                     !this.AnimReload.running)
             {
-                this.State = "Fire"
+                this.State = "Fire";
             }   
             break;       
         case "FireToRunning":
@@ -742,7 +742,7 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos)
     var elapsed = timeGetElapsedInS();
     
 
-    this.CameraRayCollisionDetection(pCamPos,pCamDir)
+    this.CameraRayCollisionDetection(pCamPos,pCamDir);
 
     
     if (this.State!="Disappear"  &&  this.State!="StartFalling"  &&  this.State!="Falling" )
@@ -869,7 +869,7 @@ BulletCollision(pDir,pSpeed,pPower,pHumanSrc)
     if(this.Hero)
     {
         this.IsTouched = true;
-        this.Life -= pPower
+        this.Life -= pPower;
     }
  
     if(this.Life <= 0 && prevLife>0 && pHumanSrc.Id>=0)
@@ -898,7 +898,7 @@ BulletCollision(pDir,pSpeed,pPower,pHumanSrc)
 
 getCollisionPoint(pRayPoint1,pRayPoint2,pLastCollPt,pDistSquaredOffset)
 {
-    var collision = Sphere.GetCollisionPosUsingMatrixList(pRayPoint1,pRayPoint2,this.CollisionMatrixList,pLastCollPt,pDistSquaredOffset,this)    
+    var collision = Sphere.GetCollisionPosUsingMatrixList(pRayPoint1,pRayPoint2,this.CollisionMatrixList,pLastCollPt,pDistSquaredOffset,this)   ; 
     return (collision);
 }
 
