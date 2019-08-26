@@ -94,12 +94,17 @@ function getPlayerName() {
 
 
 function webGLStart(playerName) {
-
-	document.body.innerHTML= '';
+	var body = document.body;
+	body.innerHTML= '';
+	body.setAttribute("onmousedown", "mediaSetMouseDownFct(event)");
+	body.setAttribute("onmouseup", "mediaSetMouseUpFct(event)");
+	body.setAttribute("onkeydown", "mediaSetKeyDownFct(event)");
+	body.setAttribute("onkeyup", "mediaSetKeyUpFct(event)");
+	body.setAttribute("onwheel", "mediaWheelFct(event)");
 	var div = document.createElement("div");
 	div.setAttribute("class", "container");
 	div.setAttribute("id", "game");
-	document.body.appendChild(div);
+	body.appendChild(div);
 	var canvas3D = document.createElement("canvas");
 	canvas3D.setAttribute("id", "canvas3D");
 	canvas3D.setAttribute("style", "border: none;");
