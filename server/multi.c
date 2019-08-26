@@ -145,7 +145,7 @@ int main(int Count, char *Strings[])
 		if (FD_ISSET(socketfd, &readfds))   
 		{ 
 			int new_client_fd;  
-			printf("New connection");  
+			//printf("New connection");  
 			new_client_fd = accept(socketfd, (struct sockaddr*)&client_addr, &addrlen);
 			int i;	
            //add new socket to array of sockets  
@@ -159,7 +159,7 @@ int main(int Count, char *Strings[])
                 }   
             } 
 			//inform user of socket number - used in send and receive commands  
-            printf(" id %d  socket fd is %d  ip is : %s  port : %d \n" ,i, new_client_fd , inet_ntoa(client_addr.sin_addr) , ntohs(client_addr.sin_port));  
+            //printf(" id %d  socket fd is %d  ip is : %s  port : %d \n" ,i, new_client_fd , inet_ntoa(client_addr.sin_addr) , ntohs(client_addr.sin_port));  
 
 		}
 		else
@@ -185,7 +185,7 @@ int main(int Count, char *Strings[])
 					//read current socket 
 					size = read( sd , &buffer, K_MAX_READ_SIZE);
 					
-					printf ("\n%s\n",buffer);
+					//printf ("\n%s\n",buffer);
 					
 					//printf("START DEFORMAT size %d\n",size);
 					//deformat rx data into  client rx buffer 
@@ -231,7 +231,7 @@ int main(int Count, char *Strings[])
 					// Disconnect if receive size <=0
 					if (size<=0)   
 					{ 
-						printf("Hosts disconnected , ip %s , port %d \n" ,  
+						//printf("Hosts disconnected , ip %s , port %d \n" ,  
 						inet_ntoa(address.sin_addr) , ntohs(address.sin_port));   
 							
 						//Close the socket and mark as 0 in list for reuse  

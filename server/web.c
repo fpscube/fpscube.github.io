@@ -145,7 +145,7 @@ int main(int Count, char *Strings[])
 		if (FD_ISSET(socketfd, &readfds))   
 		{ 
 			int new_client_fd;  
-			printf("New connection");  
+			//printf("New connection");  
 			new_client_fd = accept(socketfd, (struct sockaddr*)&client_addr, &addrlen);
 			int i;	
            //add new socket to array of sockets  
@@ -159,7 +159,7 @@ int main(int Count, char *Strings[])
                 }   
             } 
 			//inform user of socket number - used in send and receive commands  
-            printf(" id %d  socket fd is %d  ip is : %s  port : %d \n" ,i, new_client_fd , inet_ntoa(client_addr.sin_addr) , ntohs(client_addr.sin_port));  
+            //printf(" id %d  socket fd is %d  ip is : %s  port : %d \n" ,i, new_client_fd , inet_ntoa(client_addr.sin_addr) , ntohs(client_addr.sin_port));  
 
 		}
 		else
@@ -181,7 +181,7 @@ int main(int Count, char *Strings[])
 
 					//read current socket 
 					size = read( sd , &buffer, K_MAX_READ_SIZE);
-					printf("buffer :\n%s\n",&gTxBuffer.header[0] );
+					//printf("buffer :\n%s\n",&gTxBuffer.header[0] );
 					send(sd, (const char *)&(gTxBuffer.header[0]),txSize, 0);
 	
 					close(sd);  						
