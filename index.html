@@ -1,52 +1,94 @@
-<!DOCTYPE html>
-<html>
+ <html>
 <head>
+<title>Game</title>
 <meta name="norton-safeweb-site-verification" content="w53kyb-wc1ktdjcwircy45agizvavtwfyb4zi4c65jdeqmhe-pgh-2odr5bpj2muixcsc-vlxi6od9l5zokevkvevt88sll5tmlvjzj7gp9ufqtq537qoqlvghmgpxgy" />
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<script type="text/javascript" src="game.js"></script>
+<script type="text/javascript" src="utils/glMatrix.js"></script>
+<script type="text/javascript" src="utils/webgl-utils.js"></script>
+<script type="text/javascript" src="utils/webgl.js"></script>
+<script type="text/javascript" src="utils/sphere.js"></script>
+<script type="text/javascript" src="utils/square.js"></script>
+<script type="text/javascript" src="utils/sound.js"></script>
+<script type="text/javascript" src="utils/time.js"></script>
+<script type="text/javascript" src="utils/media.js"></script>
+<script type="text/javascript" src="utils/screen.js"></script>
+<script type="text/javascript" src="utils/collision.js"></script>
+<script type="text/javascript" src="utils/multiplayer.js"></script>
+<script type="text/javascript" src="gObjects/ground.js"></script>
+<script type="text/javascript" src="gObjects/info2D.js"></script>
+<script type="text/javascript" src="gObjects/human.js"></script>
+<script type="text/javascript" src="gObjects/stone.js"></script>
+<script type="text/javascript" src="gObjects/tree.js"></script>
+<script type="text/javascript" src="gObjects/guns.js"></script>
+<script type="text/javascript" src="gObjects/vehicules.js"></script>
+<script type="text/javascript"></script>
+</script>
+</head>
 <style>
-body {
-  font-family: 'Lato', sans-serif;
-  margin: 0;
-  background:  #0a0a0b;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  background-size: cover;
-  color: #0a0a0b;
-  overflow: hidden;
+
+body{
+
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-right: 0px;
+    margin-left: 0px;
+    overflow: hidden;
+    background: rgb(0, 0, 0);
+    overscroll-behavior: none;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+
+#canvas3D {
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-right: 0px;
+    margin-left: 0px;
+}
+#canvas2D {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-right: 0px;
+    margin-left: 0px;
 }
 
 .inputFields {
   margin: 15px 0;
-  font-size: 16px;
+  font-size: 5vw;
   padding: 10px;
-  width: 250px;
-  border: 1px solid rgba(10, 180, 180, 1);
-  border-top: none;
-  border-left: none;
-  border-right: none;
-  background: rgba(20, 20, 20, .2);
+  width: 100%;
+  background: rgba(20, 20, 20, 50);
   color: white;
-  outline: none;
 }
-.button{
-          
-    font-size: 16px;
-    color: white;
-    border-radius: 4px;
-    border: 1px solid rgba(20, 20, 20, 1);
-    padding: 10px;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-    background: rgb(10, 10, 10); /* this is a light blue */
-}
+
+
 
 </style>
-
-
-
-<form action="game.html"> 
-            <input type="text"  class="inputFields"  name="playerName"  placeholder="Type your name">
-            <p></p>
-            <input type="submit"  class="button" value="PLAY NOW" >
-
-    </div>
-</form>
+<body onload="getPlayerName();" 
+onmousedown="mediaSetMouseDownFct(event)"
+onmouseup="mediaSetMouseUpFct(event)"
+onkeydown="mediaSetKeyDownFct(event)"
+onkeyup="mediaSetKeyUpFct(event)"
+onwheel="mediaWheelFct(event)" >
+</body>
 </html>

@@ -1,5 +1,5 @@
 
-htmlString = File.read("game.html")
+htmlString = File.read("index.html")
 
 newHtmlString = ""
 
@@ -23,5 +23,5 @@ end
  newHtmlString.gsub!(/\/\*.*?\*\//, "" );
  newHtmlString.gsub!(/[ \t]+/, " " );
 
-puts newHtmlString
-
+File.write('server/index.html', newHtmlString);
+system("gzip server/index.html")

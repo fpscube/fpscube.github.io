@@ -2,22 +2,11 @@
 class CGame
 {
 
-	constructor()
+	constructor(playerName)
 	{
+		if(playerName == "") playerName="NoName";
 		this.UserData = {};
-		this.UserData["playerName"]="NoName";
-		var hrefTab = window.location.href.split(/[?&]+([^=&]+)=([^&]*)/);
-		hrefTab.shift();
-		while (hrefTab.length>0)
-		{
-			var key=hrefTab.shift();
-			if(key!="")
-			{
-				var val=hrefTab.shift();
-				this.UserData[key]=val;
-			}
-		}
-	
+		this.UserData["playerName"]=playerName;
 		this.init();
 	}
 

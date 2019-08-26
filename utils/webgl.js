@@ -79,7 +79,42 @@ function tick() {
 	requestAnimFrame(tick);
 }
 
-function webGLStart() {
+function getPlayerName() {
+
+	var input = document.createElement("input");
+	input.setAttribute("type", "text");
+	input.setAttribute("placeholder", "Type your name");
+	input.setAttribute("class", "inputFields");
+	input.addEventListener('change', (event) => {
+	  webGLStart(event.srcElement.value);
+	});	
+	document.body.appendChild(input);
+
+}
+
+
+function webGLStart(playerName) {
+
+	document.body.innerHTML= '';
+	var div = document.createElement("div");
+	div.setAttribute("class", "container");
+	div.setAttribute("id", "game");
+	document.body.appendChild(div);
+	var canvas3D = document.createElement("canvas");
+	canvas3D.setAttribute("id", "canvas3D");
+	canvas3D.setAttribute("style", "border: none;");
+	canvas3D.setAttribute("width", "1024");
+	canvas3D.setAttribute("height", "600");
+	div.appendChild(canvas3D);
+	var canvas2D = document.createElement("canvas");
+	canvas2D.setAttribute("id", "canvas2D");
+	canvas2D.setAttribute("style", "border: none;");
+	canvas2D.setAttribute("width", "1024");
+	canvas2D.setAttribute("ontouchstart", "mediaSetTouchStart(event)");
+	canvas2D.setAttribute("ontouchmove", "mediaSetTouchMove(event)");
+	canvas2D.setAttribute("ontouchend", "mediaSetTouchEnd(event)");
+	div.appendChild(canvas2D);
+
 	window.AudioContext = window.AudioContext || window.webkitAudioContext;
 	
 	var canvas3D = document.getElementById("canvas3D");
@@ -97,7 +132,7 @@ function webGLStart() {
 
 	ctx2d = canvas2D.getContext("2d");
 
-	GameInst = new CGame();
+	GameInst = new CGame(playerName);
 
 	tick();
 }
