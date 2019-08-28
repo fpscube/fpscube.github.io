@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <signal.h>
 #include <sys/socket.h>
 #include <resolv.h>
 #include <arpa/inet.h>
@@ -45,6 +46,7 @@ int main(int Count, char *Strings[])
 	struct sockaddr_in self;
 	FILE *fp;
 
+	sigaction(SIGPIPE, &(struct sigaction){SIG_IGN}, NULL);
 
 	if(sizeof(gHeader) != K_HEADER_SIZE)
 	{
