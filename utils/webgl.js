@@ -86,7 +86,7 @@ function getPlayerName() {
 	input.setAttribute("placeholder", "Type your name");
 	input.setAttribute("class", "inputFields");
 	input.addEventListener('change', (event) => {
-	  webGLStart(event.srcElement.value);
+	  webGLStart(event.currentTarget.value);
 	});	
 	document.body.appendChild(input);
 
