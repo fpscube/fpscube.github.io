@@ -580,7 +580,7 @@ UpdateHero(pFire,pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnecti
     this.IsTouched = false;
     
     var humanInTarget = CEnemiesInst.IsInTarget;
-    this.TargetPos=null
+    this.TargetPos=null;
     if(humanInTarget!=null) this.TargetPos = humanInTarget.CamRayCollisionPos;
 
     // Update Hero Direction and Hero Horz Speed
@@ -1178,7 +1178,7 @@ draw()
     //head
     mvPushMatrix(); 
         mat4.translate(mvMatrix,mvMatrix, [0,4.2,0]);
-        if(this.TargetPos!=null) this.HeadDir = getCurDirByPos(this.TargetPos)
+        if(this.TargetPos!=null) this.HeadDir = getCurDirByPos(this.TargetPos);
         lookAt(this.HeadDir);
 
         shaderVertexColorVector = [0.0,0.0,0.0,1.0]; 
@@ -1233,12 +1233,12 @@ draw()
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(-10), [0, 0, 1]);
             mat4.scale(mvMatrix,mvMatrix,[0.12,0.04,0.05]);         
             Sphere.Draw(SphereShaderProgram);  
-            this._drawTargetVector()
+            this._drawTargetVector();
   
             shaderVertexColorVector = [0.0,0.0,0.0,1.0];  
             mat4.scale(mvMatrix,mvMatrix,[0.02,1.0,1.2]);         
             Sphere.Draw(SphereShaderProgram); 
-            this._drawTargetVector()   
+            this._drawTargetVector();   
     	mvPopMatrix();
 
         shaderVertexColorVector = [100.0,100.0,150.0,1.0];

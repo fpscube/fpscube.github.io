@@ -156,7 +156,7 @@ class CGunsUzi
         else
         {
             bulletDir = [pTargetPos[0]-currentPos[0],pTargetPos[1]-currentPos[1],pTargetPos[2]-currentPos[2]];
-            vec3.normalize(bulletDir,bulletDir)
+            vec3.normalize(bulletDir,bulletDir);
         }
 
         playSound(wavList[0]);
@@ -187,7 +187,7 @@ class CGunsUzi
             mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
             mvPushMatrix();	
             mat4.scale(mvMatrix,mvMatrix,[1.0,0.0,0.25]);
-            this.fire(pTargetPos,pTargetDir,pHumanSrc)
+            this.fire(pTargetPos,pTargetDir,pHumanSrc);
             Sphere.Draw(this.FireShaderProgram);
             mvPopMatrix();
             mvPushMatrix();	
@@ -225,7 +225,7 @@ class CGunsBazooka
         else
         {
             bulletDir = [pTargetPos[0]-currentPos[0],pTargetPos[1]-currentPos[1],pTargetPos[2]-currentPos[2]];
-            vec3.normalize(bulletDir,bulletDir)
+            vec3.normalize(bulletDir,bulletDir);
         }
 
         playSound(wavList[1]);
@@ -269,7 +269,7 @@ class CGunsBazooka
         
         if(pFire)
         {
-            this.fire(pTargetPos,pTargetDir,pHumanSrc)
+            this.fire(pTargetPos,pTargetDir,pHumanSrc);
         }
     
     

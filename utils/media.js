@@ -5,10 +5,10 @@ var gMediaCamMvVec;
 var gMediaTouchMvInProgress;
 var gMediaWheelEvt;
 var gMediaWheelLastEvt;
-var gMediaTouchMode=false
-var gMediaDoubleTapTimer=0
-var gMediaDoubleTapX=0
-var gMediaDoubleTapY=0
+var gMediaTouchMode=false;
+var gMediaDoubleTapTimer=0;
+var gMediaDoubleTapX=0;
+var gMediaDoubleTapY=0;
 
 function mediaInit()
 {
@@ -18,7 +18,7 @@ function mediaInit()
     gMediaTouchMvInProgress=0;
     gMediaWheelEvt=0;
     gMediaWheelLastEvt=0;  
-    gMediaDoubleTapTimer=0
+    gMediaDoubleTapTimer=0;
 }
 
 // ######### evt Handler ##############// 
@@ -32,7 +32,7 @@ function fullScreenRequest()
 }
 
 function mediaMouseMove(evt) {
-    gMediaTouchMode=false
+    gMediaTouchMode = false;
 	speedCoef = 2.5;
 	gMediaCamMvVec[0] += speedCoef*evt.movementX/screen.width;
 	gMediaCamMvVec[1] += speedCoef*evt.movementY/screen.height;
@@ -142,7 +142,7 @@ function mediaSetTouchStart(evt){
     var touches = evt.changedTouches;
     currentTime = timeGetCurrentInMs();
 
-    //   double tap detection
+    // Convert Double tap to fire
     if (((currentTime-gMediaDoubleTapTimer)<500) &&  
         (touches.length==1)   &&
         (Math.abs(gMediaDoubleTapX - touches[0].pageX)<200) &&
@@ -169,7 +169,7 @@ function mediaSetTouchStart(evt){
 
 
 function mediaSetTouchMove(evt){
-    gMediaTouchMode=true
+    gMediaTouchMode=true;
     fullScreenRequest();		
     var touches = evt.changedTouches;
     for (var i=0; i<touches.length; i++) {
