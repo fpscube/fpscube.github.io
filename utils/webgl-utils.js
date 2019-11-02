@@ -35,6 +35,14 @@ function collisionPushMatrix(pCollisionList,pMvMatrix)
 }
 
 
+function getCurDirByPos(pPos)
+{
+  var translationVector = vec3.create();
+  mat4.getTranslation(translationVector,mvMatrix);
+  return ([pPos[0]-translationVector[0],pPos[1]-translationVector[1],pPos[2]-translationVector[2]]);
+}
+
+
 function lookAt(pVec3Dir)
 {
     var lookAtMatrix = mat4.create();

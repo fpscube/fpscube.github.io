@@ -17,6 +17,7 @@ class CInfo
 		this.WeaponsCount = 0;
 		this.ScoreTab = null;
 		this.EventTab = null;
+		this.TargetPos = null;
 
 	}
 
@@ -40,6 +41,7 @@ class CInfo
 			if(humanInTarget!=null)	{
 				this.CrossColor =  [1.0,0.0,0.0,1.0];
 				this.EnName = humanInTarget.Name;
+				this.TargetPos = humanInTarget.TargetPos;
 				if(CMultiPlayerInst.NbPlayers>1) this.EnLife = humanInTarget.Life*10 + "%";
 			}
 			else{
@@ -170,7 +172,7 @@ class CInfo
 		// Enemy name Display
 		ctx2d.font = "14px Arial";
 		ctx2d.fillText(this.EnName,canvas2D.width/2.0 + 14,canvas2D.height/2.0);
-		ctx2d.fillText(this.EnLife,canvas2D.width/2.0 + 14,canvas2D.height/2.0 + 20,);
+		ctx2d.fillText(this.EnLife,canvas2D.width/2.0 + 14,canvas2D.height/2.0 + 20);
 	
 	
 		
@@ -189,7 +191,25 @@ class CInfo
 			mat4.identity(mvMatrix);
 			squareDraw(SquareShaderProgram);
 		}
-			
+
+		// Back Button		
+		if (this.InjuryAlpha>0)
+		{
+			shaderVertexColorVector = [0.0,1.0,0.0,0.5];
+			mat4.ortho(pMatrix, -1.0, 2.0, -1.0, 1.0, 0.0, 1.0);	
+			mat4.identity(mvMatrix);
+			squareDraw(SquareShaderProgram);
+		}
+					
+		// Move Buton		
+		if (this.InjuryAlpha>0)
+		{
+			shaderVertexColorVector = [0.0,0.0,1.0,0.5];
+			mat4.ortho(pMatrix, -2.0, 1.0, -1.0, 1.0, 0.0, 1.0);	
+			mat4.identity(mvMatrix);
+			squareDraw(SquareShaderProgram);
+		}
+
 	}
 
 }

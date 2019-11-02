@@ -88,7 +88,7 @@ class CGuns
     }
 
 
-    draw()
+    draw(pFire,pDir)
     {
 
         mat4.identity(mvMatrix);
@@ -136,7 +136,7 @@ class CGunsUzi
     constructor()
     {
         this.Selected = false;
-        this.WeaponsCount = 90;  
+        this.WeaponsCount = 900;  
         if(gFireShaderProgram==-1)
         {
             gFireShaderProgram =  SphereInitShaders(SphereVertexShader,gunsFragmentShaderFire);
@@ -144,19 +144,28 @@ class CGunsUzi
         this.FireShaderProgram = gFireShaderProgram;
     }
 
-    fire(pPos,pDir,pHumanSrc)
+    fire(pTargetPos,pTargetDir,pHumanSrc)
     {
+        var bulletDir ;
+        var currentPos = vec3.create();
+        mat4.getTranslation(currentPos,mvMatrix);
+        if(pTargetPos==null)
+        {
+            bulletDir = pTargetDir;
+        }
+        else
+        {
+            bulletDir = [pTargetPos[0]-currentPos[0],pTargetPos[1]-currentPos[1],pTargetPos[2]-currentPos[2]];
+            vec3.normalize(bulletDir,bulletDir)
+        }
+
         playSound(wavList[0]);
-        GunsInst.BulletList.push(new CBullet([pPos[0]+pDir[2]*1.0 + pDir[0]*8.0  ,pPos[1]+2.5 + pDir[1]*8.0,pPos[2]-pDir[0]*1.0 + pDir[2]*8.0 ],pDir,0.3,1,2000,0.4,pHumanSrc));
-        GunsInst.BulletList.push(new CBullet([pPos[0]-pDir[2]*1.0  + pDir[0]*8.0  ,pPos[1]+2.5 + pDir[1]*8.0,pPos[2]+ pDir[0]*1.0 + pDir[2]*8.0],pDir,0.3,1,2000,0.4,pHumanSrc));
-        //   GunsInst.BulletList.push(new CBullet([pPos[0],pPos[1]+2.5,pPos[2]],pDir,1,10,0));
-        this.WeaponsCount--;
-     
+        GunsInst.BulletList.push(new CBullet(currentPos,bulletDir,0.3,1,2000,0.4,pHumanSrc));
+        this.WeaponsCount--;     
     }
 
-    draw(pFire,pHero)
+    draw(pFire,pTargetPos,pTargetDir,pHumanSrc)
     {
-
         //Gun    
         shaderVertexColorVector = [0.9,0.9,1.0,1.0];
         mvPushMatrix();
@@ -178,10 +187,12 @@ class CGunsUzi
             mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
             mvPushMatrix();	
             mat4.scale(mvMatrix,mvMatrix,[1.0,0.0,0.25]);
+            this.fire(pTargetPos,pTargetDir,pHumanSrc)
             Sphere.Draw(this.FireShaderProgram);
             mvPopMatrix();
             mvPushMatrix();	
             mat4.scale(mvMatrix,mvMatrix,[0.25,0.0,1.0]);
+            this.fire(pTargetPos,pTargetDir,pHumanSrc);
             Sphere.Draw(this.FireShaderProgram);
             mvPopMatrix();
             mvPopMatrix();
@@ -202,14 +213,27 @@ class CGunsBazooka
     }
 
     
-    fire(pPos,pDir,pHumanSrc)
+    fire(pTargetPos,pTargetDir,pHumanSrc)
     {
+        var bulletDir;
+        var currentPos = vec3.create();
+        mat4.getTranslation(currentPos,mvMatrix);
+        if(pTargetPos==null)
+        {
+            bulletDir = pTargetDir;
+        }
+        else
+        {
+            bulletDir = [pTargetPos[0]-currentPos[0],pTargetPos[1]-currentPos[1],pTargetPos[2]-currentPos[2]];
+            vec3.normalize(bulletDir,bulletDir)
+        }
+
         playSound(wavList[1]);
-        GunsInst.BulletList.push(new CBullet([pPos[0]+ pDir[0]*2.0  ,pPos[1]+1.0 + pDir[1]*2.0,pPos[2] + pDir[2]*2.0 ],pDir,0.6,70,300,3,pHumanSrc));
-        this.WeaponsCount--;
+        GunsInst.BulletList.push(new CBullet(currentPos,bulletDir,0.6,70,300,3,pHumanSrc));
+        this.WeaponsCount--;     
     }
 
-    draw(pHero)
+    draw(pFire,pTargetPos,pTargetDir,pHumanSrc)
     {
         var toogle=0;
 
@@ -228,22 +252,24 @@ class CGunsBazooka
                 Sphere.Draw(SphereShaderProgram);   
             mvPopMatrix(); 
         }
-
-        if(pHero)
-        {            
-            mvPushMatrix();
-            mat4.translate(mvMatrix,mvMatrix,[0.0,0.2,0.7]); 
-                mat4.scale(mvMatrix,mvMatrix,[0.2,1.0,0.2]);
-                Sphere.Draw(SphereShaderProgram);   
-            mvPopMatrix(); 
+           
+        mvPushMatrix();
+        mat4.translate(mvMatrix,mvMatrix,[0.0,0.2,0.7]); 
+            mat4.scale(mvMatrix,mvMatrix,[0.2,1.0,0.2]);
+            Sphere.Draw(SphereShaderProgram);   
+        mvPopMatrix(); 
+    
         
-            
-            mvPushMatrix();   
-            mat4.translate(mvMatrix,mvMatrix,[1.2,0.6,0.7]); 
-                mat4.rotate(mvMatrix,mvMatrix,  degToRad(20), [0, 0, 1]);
-                mat4.scale(mvMatrix,mvMatrix,[1.5,0.2,0.2]);
-                Sphere.Draw(SphereShaderProgram);   
-            mvPopMatrix(); 
+        mvPushMatrix();   
+        mat4.translate(mvMatrix,mvMatrix,[1.2,0.6,0.7]); 
+            mat4.rotate(mvMatrix,mvMatrix,  degToRad(20), [0, 0, 1]);
+            mat4.scale(mvMatrix,mvMatrix,[1.5,0.2,0.2]);
+            Sphere.Draw(SphereShaderProgram);   
+        mvPopMatrix(); 
+        
+        if(pFire)
+        {
+            this.fire(pTargetPos,pTargetDir,pHumanSrc)
         }
     
     

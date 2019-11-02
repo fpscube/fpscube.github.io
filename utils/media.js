@@ -3,9 +3,12 @@ var gMediaKeyPressed;
 var gMediaTouchStartPos;
 var gMediaCamMvVec;
 var gMediaTouchMvInProgress;
-var gMediaFireTouch;
 var gMediaWheelEvt;
 var gMediaWheelLastEvt;
+var gMediaTouchMode=false
+var gMediaDoubleTapTimer=0
+var gMediaDoubleTapX=0
+var gMediaDoubleTapY=0
 
 function mediaInit()
 {
@@ -13,9 +16,9 @@ function mediaInit()
     gMediaTouchStartPos={};
     gMediaCamMvVec=[0,0];
     gMediaTouchMvInProgress=0;
-    gMediaFireTouch=0;
     gMediaWheelEvt=0;
     gMediaWheelLastEvt=0;  
+    gMediaDoubleTapTimer=0
 }
 
 // ######### evt Handler ##############// 
@@ -29,6 +32,7 @@ function fullScreenRequest()
 }
 
 function mediaMouseMove(evt) {
+    gMediaTouchMode=false
 	speedCoef = 2.5;
 	gMediaCamMvVec[0] += speedCoef*evt.movementX/screen.width;
 	gMediaCamMvVec[1] += speedCoef*evt.movementY/screen.height;
@@ -71,7 +75,7 @@ function mediaIsKey(name)
 
 function mediaSetMouseUpFct(evt){
 	if (evt.button==0) 
-	gMediaKeyPressed["Fire"]=gMediaFireTouch;
+	gMediaKeyPressed["Fire"]=0;
 }
 
 function mediaSetMouseDownFct(evt){	
@@ -131,22 +135,41 @@ function mediaGetMvAngle()
     return angle;
 }
 
+
+
 function mediaSetTouchStart(evt){
-    fullScreenRequest();	
+    gMediaTouchMode=true;
     var touches = evt.changedTouches;
+    currentTime = timeGetCurrentInMs();
+
+    //   double tap detection
+    if (((currentTime-gMediaDoubleTapTimer)<500) &&  
+        (touches.length==1)   &&
+        (Math.abs(gMediaDoubleTapX - touches[0].pageX)<200) &&
+        (Math.abs(gMediaDoubleTapY - touches[0].pageY)<200))
+    {
+        
+        gMediaKeyPressed["Fire"]=1;
+    }
+
+    if(touches.length==1)
+    {
+        gMediaDoubleTapTimer = currentTime;
+        gMediaDoubleTapX =touches[0].pageX;
+        gMediaDoubleTapY =touches[0].pageY;
+    }
+
+
+    fullScreenRequest();	
     for (var i=0; i<touches.length; i++) {
       var id = touches[i].identifier;
       gMediaTouchStartPos[id] = [ touches[i].pageX,touches[i].pageY];
-      if (touches[i].pageY<(screen.height*0.20))
-      {
-        gMediaFireTouch = !gMediaFireTouch;
-        gMediaKeyPressed["Fire"]=gMediaFireTouch;
-      }
     }
 }
 
 
 function mediaSetTouchMove(evt){
+    gMediaTouchMode=true
     fullScreenRequest();		
     var touches = evt.changedTouches;
     for (var i=0; i<touches.length; i++) {
@@ -171,6 +194,10 @@ function mediaSetTouchMove(evt){
     evt.stopPropagation();
 }
 
+
+
+
+
 function mediaSetTouchEnd(evt){	
     var touches = evt.changedTouches;
     for (var i=0; i<touches.length; i++) {
@@ -185,6 +212,9 @@ function mediaSetTouchEnd(evt){
             gMediaTouchCamMvVec=[0,0];
         }
     }
+    
+    gMediaKeyPressed["Fire"]=0
 }
 
+function mediaIsTouchModeActivated(){ return  gMediaTouchMode};
 

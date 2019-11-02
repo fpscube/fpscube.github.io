@@ -34,10 +34,14 @@ class CMultiPlayer
 
     sendPostRequest()
     {
-        CMultiPlayerInst.xhttp.open("POST", CMultiPlayerInst.url, true);
+        try{
+        CMultiPlayerInst.xhttp.open("POST", CMultiPlayerInst.url, true);       
         CMultiPlayerInst.xhttp.setRequestHeader('Accept', '');
         CMultiPlayerInst.xhttp.setRequestHeader('Accept-Language', '');    
-        CMultiPlayerInst.xhttp.send(CMultiPlayerInst.TxBinData);
+        CMultiPlayerInst.xhttp.send(CMultiPlayerInst.TxBinData); }
+        catch(error) {
+        }
+    
     }
 
     onChange()

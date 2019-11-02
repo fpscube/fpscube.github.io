@@ -93,8 +93,8 @@ class CGame
 					this.Vehicules.Free = true; 
 					this.Hero.ExitVehicule(this.Vehicules )
 				}
-
-				this.Hero.UpdateHero(mediaIsKey("Fire"),this.CamDir,mediaIsMvtAsked(),mediaGetMvAngle(),this.Vehicules);
+				var autoFire = mediaIsTouchModeActivated();
+				this.Hero.UpdateHero(mediaIsKey("Fire"),autoFire,this.CamDir,mediaIsMvtAsked(),mediaGetMvAngle(),this.Vehicules);
 				
 				//Update Cam Position function of CamDir and Vehicule Poisition
 				if(this.Hero.State =="Vehicule")

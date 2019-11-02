@@ -10,8 +10,8 @@ class CEnemies
         this.humans=[];
         for(var i =0 ;i<pNbEnemies;i++){
 
-            var  x = Math.sin(5*(i/pNbEnemies*2*Math.PI)) *300;
-            var  z = Math.sin(4*(i/pNbEnemies*2*Math.PI)) *300;
+            var  x = Math.sin(5*(i/pNbEnemies*2*Math.PI)) *150;
+            var  z = Math.sin(4*(i/pNbEnemies*2*Math.PI)) *150;
             var  y = groundGetY(x,z);
 
             var dir = [-x,0.0,z];
@@ -27,7 +27,8 @@ class CEnemies
        //     this.humans.push(new CHuman([-300,y,20],2));
 	
         this.NbALive=pNbEnemies;
-        this.IsInTarget=false;
+        this.IsInTarget = null;
+
         CEnemiesInst = this;
     }
 
@@ -37,15 +38,21 @@ class CEnemies
     {
         this.IsInTarget=null;
         this.NbALive=0;
+        var bestTargetSquaredDist = null;
         for(var i =0 ;i<this.humans.length;i++){
             this.humans[i].UpdateEnemie(pCamPos,pCamDir,pHeroPos);
             if(!(this.humans[i].IsDead()))
             { 
                 this.NbALive++;
             }
-            if(this.IsInTarget==null && this.humans[i].IsInTarget)
+            if (this.humans[i].CamRayCollisionPos==null) continue;
+            
+            var targetSquaredDist = vec3.squaredDistance(pHeroPos,this.humans[i].CamRayCollisionPos);
+
+            if(this.humans[i].IsInTarget && (this.IsInTarget==null || (targetSquaredDist < bestTargetSquaredDist)))
             {
                 this.IsInTarget =  this.humans[i];
+                bestTargetSquaredDist = targetSquaredDist;
             }
 		} 
     }
@@ -203,7 +210,9 @@ constructor(pPos,pSpeed,pDir,pHero,pName) {
     this.GlowDownShaderProgram = gGlowDownShaderProgram;
     this.GlowSphereShaderProgram = gGlowSphereShaderProgram;
 
-   
+    
+    this.TargetPos=null;
+    this.CamRayCollisionPos = null;
 }
 
 reInit()
@@ -430,7 +439,6 @@ GetMultiPlayerData()
 UpdateMultiPlayer(pCamPos,pCamDir)
 {
 
-
     this.CameraRayCollisionDetection(pCamPos,pCamDir)
 }
 
@@ -565,12 +573,15 @@ UpdateMultiPlayerData(pDistArray,pHeroId)
 
 }
 
-UpdateHero(pFire,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnectionTimeInMs)
+UpdateHero(pFire,pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnectionTimeInMs)
 {
 
     var elapsed = timeGetElapsedInS();
     this.IsTouched = false;
-
+    
+    var humanInTarget = CEnemiesInst.IsInTarget;
+    this.TargetPos=null
+    if(humanInTarget!=null) this.TargetPos = humanInTarget.CamRayCollisionPos;
 
     // Update Hero Direction and Hero Horz Speed
     if(this.State !="Vehicule"){
@@ -624,22 +635,21 @@ UpdateHero(pFire,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnectionTimeInMs
     // Human State Machine
     switch (this.State) {
         case "Running":
-            if(pFire && this.GunSelected.WeaponsCount>0) 
+            if((pFire || (this.TargetPos!=null && pFireAuto)) && this.GunSelected.WeaponsCount>0) 
             {
-                vec3.copy(this.HeadDir,pFireDir);
+                vec3.copy(this.HeadDir,pFireDir );
                 this.State="Fire";
             }   
             break;
         case "Fire": 
             vec3.copy(this.HeadDir,pFireDir);
             this.FireCount +=1;
-            this.GunSelected.fire(this.Pos,pFireDir,this);
             this.AnimReload.start(150,0,2*3.14);      
             this.State="ReadyToFire";        
             break;
         case "ReadyToFire":
-            vec3.copy(this.HeadDir,pFireDir); 
-            if(!pFire)
+            vec3.copy(this.HeadDir,pFireDir ); 
+            if(!pFire && (this.TargetPos==null || !pFireAuto))
             {
                 this.AnimFireToRunning.start(800,0,1);
                 this.State = "FireToRunning";
@@ -676,7 +686,7 @@ UpdateHero(pFire,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnectionTimeInMs
         if (this.AnimCounter < -10.0 * Math.PI)  this.AnimCounter = -10.0 * Math.PI - this.AnimCounter;
     }
 
-    //Bazooka to heavy
+    //Bazooka too heavy
     if(this.GunSelected == this.Bazooka)
     {
         this.Dir[0]=this.GunDir[0];
@@ -702,7 +712,9 @@ UpdateHero(pFire,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnectionTimeInMs
         //Collision Check is finished apply new pos to current
         vec3.copy(this.Pos,this.NewPos);
     }
-    
+
+        
+   
 }
 
 
@@ -724,11 +736,14 @@ CameraRayCollisionDetection(pCamPos,pCamDir)
     this.IsInTarget = false;
     if (Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Box))
     {
-        for (var i=0;i<this.CollisionMatrixList.length;i++)
+
+        var point2 = [pCamPos[0] + pCamDir[0]*500.0,pCamPos[1] + pCamDir[1]*500.0,pCamPos[2] + pCamDir[2]*500.0];
+        this.CamRayCollisionPos = Sphere.GetCollisionPosUsingMatrixList(pCamPos,point2,this.CollisionMatrixList,null,0,null);
+
+        if(this.CamRayCollisionPos != null) 
         {
-            this.IsInTarget = Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.CollisionMatrixList[i]);
-            if (this.IsInTarget ) break;
-        }   
+            this.IsInTarget = true;
+        }
     }  
 }
 
@@ -823,7 +838,6 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos)
             vec3.copy(this.GunDir,this.Dir);
             break;
         case "Fire":   
-            this.GunSelected.fire(this.Pos,this.GunDir,this);
             //Start  Reload Animation
             this.AnimReload.start(500,0,2*3.14);
             this.State  = "Reload";
@@ -990,14 +1004,16 @@ _ArmDraw(pAnimCounter,pIsLeft)
             mvPushMatrix();  
                 mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);
                 mat4.translate(mvMatrix,mvMatrix,[0.0,-1.0,-0.5]); 
-                this.GunSelected.draw(true) ;
+                this.GunSelected.draw(this.State == "Fire",this.TargetPos,this.GunDir,this) ;
+                this._drawTargetVector();
             mvPopMatrix(); 
         }
         //Gun Uzi
         else if(this.GunSelected == this.Uzi)
         { 
             mat4.translate(mvMatrix,mvMatrix, [0.0,-0.7,0.55]);   
-            this.GunSelected.draw(this.State == "Fire"); 
+            this.GunSelected.draw(this.State == "Fire",this.TargetPos,this.GunDir,this) ;
+            this._drawTargetVector();
         } 
     }
 
@@ -1064,6 +1080,23 @@ _LegDraw(pX,pY,pAnimCounter)
 
 }
 
+_drawTargetVector()
+{
+
+    // fire vector
+    if(this.targetDir!=null)    
+    {
+        mvPushMatrix();   
+            var targetDir = getCurDirByPos(this.targetPos) ;    
+            lookAt(targetDir); 
+            mat4.translate(mvMatrix,mvMatrix, [0.0,0.0,100]);
+            mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,100.0]);
+            Sphere.Draw(SphereShaderProgram); 
+        mvPopMatrix();
+    }
+
+}
+
 draw()
 {
 
@@ -1094,7 +1127,7 @@ draw()
     mat4.translate(mvMatrix,mvMatrix, [0,Math.sin(animCounter*2.0)*this.AngleRange/40.0,0]);
     mat4.rotate(mvMatrix,mvMatrix,  degToRad(Math.sin(animCounter)*this.AngleRange*0.5), [0, 0, 1]);
 
-
+        
 
     // body down
     mvPushMatrix();  
@@ -1145,6 +1178,7 @@ draw()
     //head
     mvPushMatrix(); 
         mat4.translate(mvMatrix,mvMatrix, [0,4.2,0]);
+        if(this.TargetPos!=null) this.HeadDir = getCurDirByPos(this.TargetPos)
         lookAt(this.HeadDir);
 
         shaderVertexColorVector = [0.0,0.0,0.0,1.0]; 
@@ -1199,9 +1233,12 @@ draw()
             mat4.rotate(mvMatrix,mvMatrix,  degToRad(-10), [0, 0, 1]);
             mat4.scale(mvMatrix,mvMatrix,[0.12,0.04,0.05]);         
             Sphere.Draw(SphereShaderProgram);  
+            this._drawTargetVector()
+  
             shaderVertexColorVector = [0.0,0.0,0.0,1.0];  
             mat4.scale(mvMatrix,mvMatrix,[0.02,1.0,1.2]);         
-            Sphere.Draw(SphereShaderProgram);    
+            Sphere.Draw(SphereShaderProgram); 
+            this._drawTargetVector()   
     	mvPopMatrix();
 
         shaderVertexColorVector = [100.0,100.0,150.0,1.0];
