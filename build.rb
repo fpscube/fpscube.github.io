@@ -1,4 +1,5 @@
-
+require 'socket'
+	
 htmlString = File.read("index.html")
 
 newHtmlString = ""
@@ -23,5 +24,10 @@ end
  newHtmlString.gsub!(/\/\*.*?\*\//, "" );
  newHtmlString.gsub!(/[ \t]+/, " " );
 
-File.write('server/index.html', newHtmlString);
-system("gzip server/index.html")
+system('mkdir build')
+File.write('build/index.html', newHtmlString);
+system ('gzip -f build/index.html')
+system ('gcc -D MY_ADDR=\'"192.168.1.71"\' server/web.c -o build/webDbg') 
+system ('gcc -D MY_ADDR=\'"192.168.1.71"\' server/multi.c -o build/multiDbg') 
+system ('gcc -D MY_ADDR=\'"192.168.1.57"\' server/web.c -o build/web') 
+system ('gcc -D MY_ADDR=\'"192.168.1.57"\' server/multi.c -o build/multi') 

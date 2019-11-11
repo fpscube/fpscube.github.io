@@ -11,8 +11,8 @@
 #include <sys/time.h> //FD_SET, FD_ISSET, FD_ZERO macros  
      
 
-#define MY_PORT				8080
- #define MY_ADDR				"192.168.1.57"
+#define MY_PORT				8080 
+//#define MY_ADDR				"192.168.1.57"
 //#define MY_ADDR				"127.0.0.1"
 #define K_MAX_SIZE_TCP_IP_FRAME		4096
 #define K_MAX_READ_SIZE				4096 
