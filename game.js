@@ -117,7 +117,7 @@ class CGame
 
 
 				// Update Enemies
-				if(this.MultiPlayer.NbPlayers==1)
+				if(this.MultiPlayer.NbOnlinePlayers==0)
 				{
 					this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,this.HeroFire);
 				}
@@ -128,7 +128,7 @@ class CGame
 					this.State="Lose";
 					this.EndAnim.start(2000,0,1);
 				}	
-				else if (this.Enemies.NbALive==0 && this.MultiPlayer.NbPlayers==1) 
+				else if (this.Enemies.NbALive==0 && this.MultiPlayer.NbOnlinePlayers==0) 
 				{
 					this.State="Win";
 					this.EndAnim.start(2000,0,1);
@@ -141,7 +141,7 @@ class CGame
 				vec3.rotateY(this.CamDir,this.CamDir,[0,0,0],gElapsed/4);	
 
 				// Update Enemies
-				if(this.MultiPlayer.NbPlayers==1)
+				if(this.MultiPlayer.NbOnlinePlayers==0)
 				{
 					this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,false);				
 				}
@@ -150,7 +150,7 @@ class CGame
 
 				if (this.LastFire && !mediaIsKey("Fire") && !this.EndAnim.running)
 				{
-					(this.MultiPlayer.NbPlayers==1) ? this.init() : this.reInitMulti();
+					(this.MultiPlayer.NbOnlinePlayers==0) ? this.init() : this.reInitMulti();
 				}	
 				var projDir = [];
 				vec3.rotateY(projDir,this.CamDir,[0,0,0],0.125);
@@ -194,7 +194,7 @@ class CGame
 
 		this.Trees.draw();
 		this.Stone.draw(false);	 
-		(this.MultiPlayer.NbPlayers==1) ? this.Enemies.draw(): this.MultiPlayer.draw();
+		(this.MultiPlayer.NbOnlinePlayers==0) ? this.Enemies.draw(): this.MultiPlayer.draw();
 		this.Vehicules.draw();		
 		this.Hero.draw();
 		this.Guns.draw();

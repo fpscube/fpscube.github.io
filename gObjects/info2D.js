@@ -26,7 +26,7 @@ class CInfo
 	update()
 	{	
 		
-		var humanInTarget = (CMultiPlayerInst.NbPlayers==1)?CEnemiesInst.IsInTarget:CMultiPlayerInst.IsInTarget;
+		var humanInTarget = (CMultiPlayerInst.NbOnlinePlayers==0)?CEnemiesInst.IsInTarget:CMultiPlayerInst.IsInTarget;
 
 		// if (!this.AnimTextRefresh.running) 
 		// {
@@ -42,7 +42,7 @@ class CInfo
 				this.CrossColor =  [1.0,0.0,0.0,1.0];
 				this.EnName = humanInTarget.Name;
 				this.TargetPos = humanInTarget.TargetPos;
-				if(CMultiPlayerInst.NbPlayers>1) this.EnLife = humanInTarget.Life*10 + "%";
+				if(CMultiPlayerInst.NbOnlinePlayers>0) this.EnLife = humanInTarget.Life*10 + "%";
 			}
 			else{
 				this.CrossColor = [1.0,1.0,1.0,1.0];
@@ -67,7 +67,7 @@ class CInfo
 		
 		}
 
-		if(CMultiPlayerInst.NbPlayers>1 && (this.GameState == "Lose" || mediaIsKey("Tab")))
+		if(CMultiPlayerInst.NbOnlinePlayers>0 && (this.GameState == "Lose" || mediaIsKey("Tab")))
 		{
 			this.ScoreTab = CMultiPlayerInst.getScoreTable(GameInst.Hero);
 			this.ScoreTab.sort(function(a, b) {
@@ -102,7 +102,7 @@ class CInfo
 		legendText += "Time : " +  this.Time +  " - ";
 		legendText += "Resolution : " + canvas3D.width + "x" + canvas3D.height  +  " - ";
 
-		if (CMultiPlayerInst.NbPlayers>1) legendText += " TAB for Score -";
+		if (CMultiPlayerInst.NbOnlinePlayers>0) legendText += " TAB for Score -";
 
 		ctx2d.fillText(legendText,10,15);
 		

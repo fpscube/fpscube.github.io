@@ -14,6 +14,7 @@ class CMultiPlayer
         CMultiPlayerInst = this;
         this.PlayersDataModel = null;
         this.NbPlayers = 1;
+        this.NbOnlinePlayers = 1;
         this.IsInTarget=null;
         this.RxBinData=null;
         this.Heros = [];
@@ -79,11 +80,12 @@ class CMultiPlayer
             CMultiPlayerInst.RxBinData = null;
         }
 
-        
+        var nbOnlinePlayers=0;
         for(var heroId=0;heroId<8;heroId++)
         {
             
             if(this.Heros[heroId].MultiConnexionTime==null) continue;
+			nbOnlinePlayers +=1;
             this.Heros[heroId].UpdateMultiPlayer(GameInst.CamPos,GameInst.CamDir);    
             if(this.IsInTarget==null && this.Heros[heroId].IsInTarget)
             {
@@ -91,7 +93,8 @@ class CMultiPlayer
             }
 
         }
-
+		
+		this.NbOnlinePlayers = nbOnlinePlayers;
 
 
     }
@@ -150,6 +153,7 @@ class CMultiPlayer
         return eventTab;
     }
 
+	
 
     getScoreTable(pHero)
     {

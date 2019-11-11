@@ -281,7 +281,7 @@ function  _gunsAllCollisionGetPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquare
 {
     var collision = pCollision;
     collision = GameInst.Hero.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
-    if(CMultiPlayerInst.NbPlayers >1)
+    if(CMultiPlayerInst.NbOnlinePlayers>0)
     {
         collision = CMultiPlayerInst.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
     }
