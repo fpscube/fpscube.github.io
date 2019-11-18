@@ -143,10 +143,10 @@ function mediaSetTouchStart(evt){
     currentTime = timeGetCurrentInMs();
 
     // Convert Double tap to fire
-    if (((currentTime-gMediaDoubleTapTimer)<500) &&  
+    if (((currentTime-gMediaDoubleTapTimer)<200) &&  
         (touches.length==1)   &&
-        (Math.abs(gMediaDoubleTapX - touches[0].pageX)<200) &&
-        (Math.abs(gMediaDoubleTapY - touches[0].pageY)<200))
+        (Math.abs(gMediaDoubleTapX - touches[0].pageX)<50) &&
+        (Math.abs(gMediaDoubleTapY - touches[0].pageY)<50))
     {
         
         gMediaKeyPressed["Fire"]=1;
