@@ -10,7 +10,7 @@ class CEnemies
         this.humans=[];
     
         var i=0;
-        var enCount=0
+        var enCount=0;
         while(enCount<pNbEnemies)
         {
 
