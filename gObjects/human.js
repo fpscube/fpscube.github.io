@@ -8,7 +8,11 @@ class CEnemies
     constructor(pNbEnemies)
     {
         this.humans=[];
-        for(var i =0 ;i<pNbEnemies;i++){
+    
+        var i=0;
+        var enCount=0
+        while(enCount<pNbEnemies)
+        {
 
             var  x = Math.sin(5*(i/pNbEnemies*2*Math.PI)) *150;
             var  z = Math.sin(4*(i/pNbEnemies*2*Math.PI)) *150;
@@ -19,9 +23,10 @@ class CEnemies
             if (!groundIsUnderWater(y))
             {
                 this.humans.push(new CHuman([x,1000,z],Math.random()*8,dir,false,"Bot_" + i));
+                enCount+=1;
             }
-    	}	
-    
+            i++;
+        }
     
          //   y =groundGetY(-300,20) +30.0;
        //     this.humans.push(new CHuman([-300,y,20],2));

@@ -7,6 +7,7 @@ class CGame
 		if(playerName == "") playerName="NoName";
 		this.UserData = {};
 		this.UserData["playerName"]=playerName;
+		this.CurrentLevel = 0;
 		this.init();
 	}
 
@@ -39,7 +40,7 @@ class CGame
 		this.Vehicules = new CVehicules();
 		this.Info = new CInfo();
 		this.Trees = new CTrees();
-		this.Enemies = new CEnemies(30);
+		this.Enemies = new CEnemies(this.CurrentLevel*10 + 5);
 		var  x = Math.sin(Math.random()*2*Math.PI) * 900;
 		var  z = Math.sin(Math.random()*2*Math.PI) * 900;
 		var intPos = [x,600,z];
@@ -131,6 +132,7 @@ class CGame
 				else if (this.Enemies.NbALive==0 && this.MultiPlayer.NbOnlinePlayers==0) 
 				{
 					this.State="Win";
+					this.CurrentLevel+=1;
 					this.EndAnim.start(2000,0,1);
 				}
 

@@ -18,6 +18,8 @@ class CInfo
 		this.ScoreTab = null;
 		this.EventTab = null;
 		this.TargetPos = null;
+		this.Level = null;
+		this.LevelTitleAnim = new CTimeAnim();
 
 	}
 
@@ -53,6 +55,13 @@ class CInfo
 		this.InjuryAlpha = this.AnimInjury.getValue();
 		this.NbEnemies = CEnemiesInst.NbALive;
 		this.GameState = GameInst.State;
+		if((this.CurrentLevel != GameInst.CurrentLevel) &&
+		   (this.GameState == "Play"))
+		{
+			this.LevelTitleAnim.start(10000,1,0);
+			this.CurrentLevel = GameInst.CurrentLevel;
+		}
+
 		
 		if(this.GameState != "Win" &&  this.GameState != "Lose") 
 		{
@@ -99,6 +108,7 @@ class CInfo
 		var legendText =  "Life : " + this.LifeQt*10 	+ "%  -  ";
 		legendText += "Enemies : " +  this.NbEnemies  + "  -  ";
 		legendText += "Weapons : " +  this.WeaponsCount  + "  -  ";
+		legendText += "Level : " +  this.CurrentLevel  + "  -  ";
 		legendText += "Time : " +  this.Time +  " - ";
 		legendText += "Resolution : " + canvas3D.width + "x" + canvas3D.height  +  " - ";
 
@@ -159,6 +169,20 @@ class CInfo
 				ctx2d.fillStyle = 'white';
 			}	
 			
+		}
+		// LEVEL TITLE Display
+		if(this.LevelTitleAnim.running)
+		{
+			var text = "LEVEL " + this.CurrentLevel + " : KILL " + this.NbEnemies + " ENEMIES";
+			var coef = this.LevelTitleAnim.getValue();
+			var fontSize=canvas2D.width/text.length;
+			var xPos = canvas2D.width/2 - (fontSize*text.length)/4;
+			var yPos = canvas2D.height/2 + (fontSize)/4; ;
+			ctx2d.globalAlpha = coef;
+			ctx2d.fillStyle = 'white';
+			ctx2d.font = "Bold " + fontSize + "px Arial";
+			
+			ctx2d.fillText(text,xPos,yPos);
 		}
 		
 		// Cross Display
