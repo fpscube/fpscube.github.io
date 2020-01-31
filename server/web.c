@@ -14,8 +14,7 @@
 #define K_MAX_NB_PLAYER 32     
 
 #define MY_PORT				80
-// #define MY_ADDR				"192.168.1.57"
-// #define MY_ADDR				"192.168.1.71"
+#define MY_ADDR				"0.0.0.0"
 #define K_MAX_SIZE_TCP_IP_FRAME		4096
 #define K_MAX_READ_SIZE				4096 
 #define K_MAX_SIZE_HTTP_HEADER		2048

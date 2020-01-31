@@ -349,8 +349,10 @@ function groundWaterDraw()
 {
 
   shaderWaterY = groundWaterYLevel;
+  var offset = Math.cos(shaderCounter/20.0 + 2.0)/2.0+Math.cos(shaderCounter/15.0 +3.0)/4.0;
+  shaderWaterY += offset;
 	mat4.identity(mvMatrix); 
-	mat4.translate(mvMatrix,mvMatrix, [0.0,groundWaterYLevel-32.0,0.0]);	
+	mat4.translate(mvMatrix,mvMatrix, [0.0,groundWaterYLevel-32.0 + offset,0.0]);	
 	mat4.scale(mvMatrix,mvMatrix,[9000.0,30.0,9000.0]);	
 
 	gl.uniform1f (groundShaderProgram.counter, shaderCounter);

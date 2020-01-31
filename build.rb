@@ -25,10 +25,21 @@ end
  newHtmlString.gsub!(/\/\*.*?\*\//, "" );
  newHtmlString.gsub!(/[ \t]+/, " " );
 
+
+ 
 FileUtils.mkdir_p 'build/dbgNotMin'
 File.write('build/index.html', newHtmlString);
 system ('gzip -f build/index.html')
-system ('gcc -D MY_ADDR=\'"192.168.1.20"\' server/web.c -o build/webDbg') 
-system ('gcc -D MY_ADDR=\'"192.168.1.20"\' server/multi.c -o build/multiDbg') 
-system ('gcc -D MY_ADDR=\'"192.168.1.57"\' server/web.c -o build/web') 
-system ('gcc -D MY_ADDR=\'"192.168.1.57"\' server/multi.c -o build/multi') 
+puts "build web server \n"
+system ('gcc server/web.c -o build/web') 
+puts "build multi server \n"
+system ('gcc server/multi.c -o build/multi') 
+puts "launch web server \n"
+Thread.new do 
+ system("cd build && web")
+end
+puts "launch multi server \n"
+Thread.new do 
+	system("cd build && multi")
+end
+
