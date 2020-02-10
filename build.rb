@@ -3,6 +3,8 @@ require 'fileutils'
 	
 htmlString = File.read("index.html")
 
+ # concat in one file
+
 newHtmlString = ""
 
 htmlString.each_line do |line|
@@ -19,16 +21,20 @@ htmlString.each_line do |line|
 	
 end
 
+ # minify
+
+if(ARGV[0]!="debug") # minify
+
  newHtmlString.gsub!(/\/\/[^\r\n]*/ , "" );
  newHtmlString.gsub!(/[\r\n]/ , "" );
 
  newHtmlString.gsub!(/\/\*.*?\*\//, "" );
  newHtmlString.gsub!(/[ \t]+/, " " );
+end
 
-
- 
-FileUtils.mkdir_p 'build/dbgNotMin'
 File.write('build/index.html', newHtmlString);
+
+
 system ('gzip -f build/index.html')
 puts "build web server \n"
 system ('gcc server/web.c -o build/web') 

@@ -28,7 +28,6 @@ class CInfo
 	update()
 	{	
 		
-		var humanInTarget = (CMultiPlayerInst.NbOnlinePlayers==0)?CEnemiesInst.IsInTarget:CMultiPlayerInst.IsInTarget;
 
 		// if (!this.AnimTextRefresh.running) 
 		// {
@@ -40,11 +39,11 @@ class CInfo
 		this.CrossColor = [0.0,0.0,0.0,0.0];
 		if (GameInst.State=="Play")
 		{
-			if(humanInTarget!=null)	{
+			if(GameInst.HumanInTarget!=null)	{
 				this.CrossColor =  [1.0,0.0,0.0,1.0];
-				this.EnName = humanInTarget.Name;
-				this.TargetPos = humanInTarget.TargetPos;
-				if(CMultiPlayerInst.NbOnlinePlayers>0) this.EnLife = humanInTarget.Life*10 + "%";
+				this.EnName = GameInst.HumanInTarget.Name;
+				this.TargetPos = GameInst.HumanInTarget.TargetPos;
+				this.EnLife = GameInst.HumanInTarget.Life*10 + "%";
 			}
 			else{
 				this.CrossColor = [1.0,1.0,1.0,1.0];

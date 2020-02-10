@@ -22,6 +22,7 @@ class CGame
 		this.State = "Play";
 		this.EndAnim = new CTimeAnim();
 		this.LastFire = 0;
+		this.HumanInTarget = null;
 
 		// gl init
 		gl.clearColor(6.0/256.0, 10.0/256.0, 42.0/256.0, 1.0);	
@@ -41,9 +42,7 @@ class CGame
 		this.Info = new CInfo();
 		this.Trees = new CTrees();
 		this.Enemies = new CEnemies(this.CurrentLevel*10 + 5);
-		var  x = Math.sin(Math.random()*2*Math.PI) * 900;
-		var  z = Math.sin(Math.random()*2*Math.PI) * 900;
-		var intPos = [x,600,z];
+		var intPos = [200,600,200];
 		this.Hero = new CHuman(intPos,2,[1,0,-1],true,this.UserData["playerName"].substring(0, 10));
 		if (this.MultiPlayer==undefined) this.MultiPlayer = new CMultiPlayer(this.Hero);
 
@@ -53,7 +52,8 @@ class CGame
 	reInitMulti() {
 		var  x = Math.sin(Math.random()*2*Math.PI) * 400 + Math.random()*200;
 		var  z = Math.sin(Math.random()*2*Math.PI) * 400 + Math.random()*200;
-		this.Hero.Pos = [x,600,z];
+		this.Hero.Pos = [200,600,200];
+		var intPos = [200,600,200];
 		// Data Init
 		this.CamPos = [-370,13,100]; 
 		this.SpeedCoef=50;
@@ -61,6 +61,7 @@ class CGame
 		this.State = "Play";
 		this.LastFire = 0;
 		this.Hero.reInit();
+		this.HumanInTarget = null;
 	}
 
 	update() {
@@ -81,6 +82,9 @@ class CGame
 		this.CamDir[2] += mvVector[2]*this.CamMvVec[0];
 		vec3.normalize(this.CamDir,this.CamDir);
 
+		//Clear Human In Target
+		this.HumanInTarget = null;
+
 		//Change Gun
 		if(mediaWheelEvt()) {
 			this.Hero.ChangeGun();
@@ -94,9 +98,29 @@ class CGame
 					this.Vehicules.Free = true; 
 					this.Hero.ExitVehicule(this.Vehicules )
 				}
+
+
+				// Update Enemies
+				this.MultiPlayer.update();
+				this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,this.HeroFire);
+
+				if (this.Hero.Life<=0 )
+				{
+					this.Hero.Life = 0 ;
+					this.State="Lose";
+					this.EndAnim.start(2000,0,1);
+				}	
+				else if (this.Enemies.NbALive==0) 
+				{
+					this.State="Win";
+					this.CurrentLevel+=1;
+					this.EndAnim.start(2000,0,1);
+				}
+
+
 				var autoFire = mediaIsTouchModeActivated();
 				this.Hero.UpdateHero(mediaIsKey("Fire"),autoFire,this.CamDir,mediaIsMvtAsked(),mediaGetMvAngle(),this.Vehicules);
-				
+
 				//Update Cam Position function of CamDir and Vehicule Poisition
 				if(this.Hero.State =="Vehicule")
 				{
@@ -114,29 +138,20 @@ class CGame
 					this.CamPos[1] = this.Hero.Pos[1] + 5.5 ;
 					this.Vehicules.EngineOn = false;
 				}
-				// Update Enemies
-				this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,this.HeroFire);
 
-				if (this.Hero.Life<=0 )
-				{
-					this.State="Lose";
-					this.EndAnim.start(2000,0,1);
-				}	
-				else if (this.Enemies.NbALive==0) 
-				{
-					this.State="Win";
-					this.CurrentLevel+=1;
-					this.EndAnim.start(2000,0,1);
-				}
-
+				
+				
+				
+	
 				break;
 			case "Win":
 			case "Lose":
 				
 				vec3.rotateY(this.CamDir,this.CamDir,[0,0,0],gElapsed/4);	
 
-				// Update Enemies
-				this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,false);	
+				// Update Enemies	
+				this.MultiPlayer.update();
+				this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,false);
 				
 				this.Hero.UpdateHeroDead();
 
@@ -157,7 +172,6 @@ class CGame
 		this.Guns.update();
 		this.LastFire = mediaIsKey("Fire");
 	
-		this.MultiPlayer.update(this.CamPos,this.CamDir);
 
 		this.Info.update();
 			

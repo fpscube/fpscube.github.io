@@ -15,7 +15,6 @@ class CMultiPlayer
         this.PlayersDataModel = null;
         this.NbPlayers = 1;
         this.NbOnlinePlayers = 1;
-        this.IsInTarget=null;
         this.RxBinData=null;
         this.Heros = [];
 
@@ -60,9 +59,8 @@ class CMultiPlayer
    
 
 
-    update(pCamPos,pCamDir)
+    update()
     {
-        this.IsInTarget=null; 
         this.TxBinData=GameInst.Hero.GetMultiPlayerData();
         if(GameInst.Hero.Id >=0 ) this.NbPlayers=8;
 
@@ -81,17 +79,27 @@ class CMultiPlayer
         }
 
         var nbOnlinePlayers=0;
+        var bestTargetSquaredDist = null;
+        if(GameInst.HumanInTarget != null && GameInst.HumanInTarget.CamRayCollisionPos != null )
+        {
+            bestTargetSquaredDist = vec3.squaredDistance(GameInst.Hero.Pos,GameInst.HumanInTarget.CamRayCollisionPos);
+        }
         for(var heroId=0;heroId<8;heroId++)
         {
-            
             if(this.Heros[heroId].MultiConnexionTime==null) continue;
 			nbOnlinePlayers +=1;
-            this.Heros[heroId].UpdateMultiPlayer(GameInst.CamPos,GameInst.CamDir);    
-            if(this.IsInTarget==null && this.Heros[heroId].IsInTarget)
-            {
-                this.IsInTarget = this.Heros[heroId];
-            }
+            this.Heros[heroId].UpdateMultiPlayer(GameInst.CamPos,GameInst.CamDir);
+            
+            if (this.Heros[heroId].CamRayCollisionPos==null) continue;
+            
+            var targetSquaredDist = vec3.squaredDistance(GameInst.Hero.Pos,this.Heros[heroId].CamRayCollisionPos);
 
+            if(GameInst.HumanInTarget==null || (targetSquaredDist < bestTargetSquaredDist))
+            {
+                GameInst.HumanInTarget =  this.Heros[heroId];
+                bestTargetSquaredDist = targetSquaredDist;
+            }
+		    
         }
 		
 		this.NbOnlinePlayers = nbOnlinePlayers;

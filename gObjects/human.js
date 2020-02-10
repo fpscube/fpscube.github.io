@@ -41,9 +41,15 @@ class CEnemies
 
     update(pCamPos,pCamDir,pHeroPos)
     {
-        this.IsInTarget=null;
-        this.NbALive=0;
+
         var bestTargetSquaredDist = null;
+        if(GameInst.HumanInTarget != null)
+        {
+            bestTargetSquaredDist = vec3.squaredDistance(pHeroPos,GameInst.HumanInTarget.CamRayCollisionPos);
+        }
+
+        this.NbALive=0;
+        
         for(var i =0 ;i<this.humans.length;i++){
             this.humans[i].UpdateEnemie(pCamPos,pCamDir,pHeroPos);
             if(!(this.humans[i].IsDead()))
@@ -54,9 +60,9 @@ class CEnemies
             
             var targetSquaredDist = vec3.squaredDistance(pHeroPos,this.humans[i].CamRayCollisionPos);
 
-            if(this.humans[i].IsInTarget && (this.IsInTarget==null || (targetSquaredDist < bestTargetSquaredDist)))
+            if(GameInst.HumanInTarget==null || (targetSquaredDist < bestTargetSquaredDist))
             {
-                this.IsInTarget =  this.humans[i];
+                GameInst.HumanInTarget =  this.humans[i];
                 bestTargetSquaredDist = targetSquaredDist;
             }
 		} 
@@ -444,7 +450,9 @@ GetMultiPlayerData()
 UpdateMultiPlayer(pCamPos,pCamDir)
 {
 
-    this.CameraRayCollisionDetection(pCamPos,pCamDir)
+    this.CameraRayCollisionDetection(pCamPos,pCamDir);
+
+    this.State
 }
 
 
@@ -549,7 +557,7 @@ UpdateMultiPlayerData(pDistArray,pHeroId)
 
     if (firecount > this.FireCount)
     {
-        this.GunSelected.fire(this.Pos,this.GunDir,this);
+        this.State = "Fire";
         this.FireCount = firecount;
     }
     if(firecount< this.FireCount) this.FireCount = firecount;
@@ -578,15 +586,14 @@ UpdateMultiPlayerData(pDistArray,pHeroId)
 
 }
 
-UpdateHero(pFire,pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnectionTimeInMs)
+UpdateHero(pFire,pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnectionTimeInMs,pHumanInTarget)
 {
 
     var elapsed = timeGetElapsedInS();
     this.IsTouched = false;
     
-    var humanInTarget = CEnemiesInst.IsInTarget;
     this.TargetPos=null;
-    if(humanInTarget!=null) this.TargetPos = humanInTarget.CamRayCollisionPos;
+    if(GameInst.HumanInTarget!=null) this.TargetPos = GameInst.HumanInTarget.CamRayCollisionPos;
 
     // Update Hero Direction and Hero Horz Speed
     if(this.State !="Vehicule"){
@@ -738,25 +745,17 @@ ExitVehicule(pVehicule)
 CameraRayCollisionDetection(pCamPos,pCamDir)
 {
     //Human collision Detection
-    this.IsInTarget = false;
     if (Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Box))
     {
 
         var point2 = [pCamPos[0] + pCamDir[0]*500.0,pCamPos[1] + pCamDir[1]*500.0,pCamPos[2] + pCamDir[2]*500.0];
         this.CamRayCollisionPos = Sphere.GetCollisionPosUsingMatrixList(pCamPos,point2,this.CollisionMatrixList,null,0,null);
-
-        if(this.CamRayCollisionPos != null) 
-        {
-            this.IsInTarget = true;
-        }
     }  
 }
 
 
 UpdateEnemie(pCamPos,pCamDir,pHeroPos)
 {
-
-    this.IsInTarget = false;
     if (this.State=="Dead") return;
 
     var elapsed = timeGetElapsedInS();
@@ -889,15 +888,16 @@ BulletCollision(pDir,pSpeed,pPower,pHumanSrc)
     {
         this.IsTouched = true;
         this.Life -= pPower;
+        if(this.Life < 0) this.Life = 0;
     }
  
-    if(this.Life <= 0 && prevLife>0 && pHumanSrc.Id>=0)
+    if(this.Life == 0 && prevLife>0 && pHumanSrc.Id>=0)
     {
         this.KillBy[pHumanSrc.Id]++; 
         this.KillByEventTime[pHumanSrc.Id] = timeGetCurrentInMs();
     }    
 
-    if (this.Life <= 0  ||  !this.Hero)
+    if (this.Life == 0  ||  !this.Hero)
     {
 
         if(this.State =="Vehicule")   this.ExitVehicule(GameInst.Vehicules); 

@@ -160,7 +160,7 @@ class CGunsUzi
         }
 
         playSound(wavList[0]);
-        GunsInst.BulletList.push(new CBullet(currentPos,bulletDir,0.3,1,2000,0.4,pHumanSrc));
+        GunsInst.BulletList.push(new CBullet(currentPos,bulletDir,0.2,0.25,2000,0.4,pHumanSrc));
         this.WeaponsCount--;     
     }
 
@@ -281,14 +281,8 @@ function  _gunsAllCollisionGetPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquare
 {
     var collision = pCollision;
     collision = GameInst.Hero.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
-    if(CMultiPlayerInst.NbOnlinePlayers>0)
-    {
-        collision = CMultiPlayerInst.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
-    }
-    else
-    {
-        collision = CEnemiesInst.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
-    }
+    collision = CMultiPlayerInst.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
+    collision = CEnemiesInst.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
     collision = CTreesInst.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
     collision = CStoneInst.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
     collision = groundGetCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
@@ -374,7 +368,11 @@ class CBullet
             if (collision != null && collision[3]!=null) 
             {
                 var human = collision[3];
-                human.BulletCollision(this.Dir,1,2,this.HumanSrc);
+                // prevent gun source explosion collision
+                if(human!=this.HumanSrc)
+                {
+                    human.BulletCollision(this.Dir,1,2,this.HumanSrc)
+                }
             }
 
             if ((collision != null) || ((timeGetCurrentInS()-this.StartTimeInS) > this.LifeTime))  

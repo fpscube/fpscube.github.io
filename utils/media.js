@@ -27,8 +27,8 @@ function mediaInit()
 function fullScreenRequest()
 {
 	var container = document.getElementById('game');
-	if(container.webkitRequestFullScreen) container.webkitRequestFullScreen();
-	if(container.mozRequestFullScreen)	container.mozRequestFullScreen();
+	//if(container.webkitRequestFullScreen) container.webkitRequestFullScreen();
+	//if(container.mozRequestFullScreen)	container.mozRequestFullScreen();
 }
 
 function mediaMouseMove(evt) {
