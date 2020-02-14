@@ -20,7 +20,7 @@
 
 #define K_HEADER_SIZE		164
 #define K_MAX_NB_PLAYER		8
-#define K_DATA_SIZE			160
+#define K_DATA_SIZE			172
 
 static char gHeader[] = 	"HTTP/1.1 200 OK\nConnection: Keep-Alive\nContent-Type: text/html; charset=utf-8\nKeep-Alive: timeout=5, max=1000\nAccess-Control-Allow-Origin: *\nContent-Length:       ";
 

@@ -187,15 +187,14 @@ class CGunsUzi
             mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
             mvPushMatrix();	
             mat4.scale(mvMatrix,mvMatrix,[1.0,0.0,0.25]);
-            this.fire(pTargetPos,pTargetDir,pHumanSrc);
             Sphere.Draw(this.FireShaderProgram);
             mvPopMatrix();
             mvPushMatrix();	
             mat4.scale(mvMatrix,mvMatrix,[0.25,0.0,1.0]);
-            this.fire(pTargetPos,pTargetDir,pHumanSrc);
             Sphere.Draw(this.FireShaderProgram);
             mvPopMatrix();
             mvPopMatrix();
+            this.fire(pTargetPos,pTargetDir,pHumanSrc);
         }
     }
 
@@ -309,6 +308,7 @@ class CBullet
         this.StartTimeInS = timeGetCurrentInS();
         this.LifeTime = pLifeTime;
         this.HumanSrc = pHumanSrc;
+        console.log("new bullet\n");
     }
 
 
@@ -371,6 +371,7 @@ class CBullet
                 // prevent gun source explosion collision
                 if(human!=this.HumanSrc)
                 {
+                    console.log("col1\n");
                     human.BulletCollision(this.Dir,1,2,this.HumanSrc)
                 }
             }
@@ -394,25 +395,29 @@ class CBullet
             this.Color = [1.0,1.0,0.0,1.0]; 
             this.Scale =  this.ExplosionAnim.coef**2 *this.ScaleExp;
             this.Color[3] = 1.0-(this.ExplosionAnim.coef)**3*0.4;
-            if(!this.ExplosionAnim.running) 
+            if(!this.ExplosionAnim.running ) 
             {
-                var humanList = CEnemiesInst.getHumansInSphere(this.Pos,this.Scale); 
-                for(var i =0 ;i<humanList.length;i++){
-                    var expDir=[];
-                    vec3.subtract(expDir,humanList[i].Pos,this.Pos);
-                    vec3.normalize(expDir,expDir);
-                    humanList[i].BulletCollision(expDir,2,2,this.HumanSrc);
-                }
-                var humanSquaredDist = vec3.squaredDistance(GameInst.Hero.Pos,this.Pos);
-                var squaredScale =  this.Scale**2;
-                if (humanSquaredDist < squaredScale)
-                {           
-                    var coef = humanSquaredDist/squaredScale;
-                    var power = Math.floor((1-coef)*10);
-                    var expDir=[];
-                    vec3.subtract(expDir,GameInst.Hero.Pos,this.Pos);
-                    vec3.normalize(expDir,expDir);
-                    GameInst.Hero.BulletCollision(expDir,2,power,this.HumanSrc);
+                if(this.ScaleExp> 5.0)
+                {
+                    var humanList = CEnemiesInst.getHumansInSphere(this.Pos,this.Scale); 
+                    for(var i =0 ;i<humanList.length;i++){
+                        var expDir=[];
+                        vec3.subtract(expDir,humanList[i].Pos,this.Pos);
+                        vec3.normalize(expDir,expDir);
+                        humanList[i].BulletCollision(expDir,2,2,this.HumanSrc);                        
+                    }
+                    var humanSquaredDist = vec3.squaredDistance(GameInst.Hero.Pos,this.Pos);
+                    var squaredScale =  this.Scale**2;
+                    if (humanSquaredDist < squaredScale)
+                    {           
+                        var coef = humanSquaredDist/squaredScale;
+                        var power = Math.floor((1-coef)*10);
+                        var expDir=[];
+                        vec3.subtract(expDir,GameInst.Hero.Pos,this.Pos);
+                        vec3.normalize(expDir,expDir);
+                        GameInst.Hero.BulletCollision(expDir,2,power,this.HumanSrc);
+                        console.log("col2\n");
+                    }
                 }
                 this.HasExplosed = true;
             }

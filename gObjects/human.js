@@ -208,7 +208,7 @@ constructor(pPos,pSpeed,pDir,pHero,pName) {
 
     
     this.HumanPhy = new CHumanPhysical();
-    this.BinDataSize = 160;
+    this.BinDataSize = 172;
  
     if(gGlowShaderProgram==-1)
     {
@@ -427,7 +427,14 @@ GetMultiPlayerData()
     i=_formatBinVec(this.NormalDir,i,float32Array);
     i=_formatBinVec(this.HeadDir,i,float32Array);
     i=_formatBinVec(this.GunDir,i,float32Array); 
-
+    if(this.TargetPos == null)
+    {
+        float32Array[i]=1000000; i+=3;
+    }
+    else
+    {
+        i=_formatBinVec(this.TargetPos,i,float32Array);
+    }
     
     i=_formatBinVec(VehiculesInst.Pos,i,float32Array);
     i=_formatBinVec(VehiculesInst.Dir,i,float32Array);
@@ -451,8 +458,17 @@ UpdateMultiPlayer(pCamPos,pCamDir)
 {
 
     this.CameraRayCollisionDetection(pCamPos,pCamDir);
-
-    this.State
+    if (this.State == "FireEvt")
+    {
+        console.log("fire evt2\n");
+        this.State = "Fire";
+    }
+    else if (this.State == "Fire")
+    {
+        
+        console.log("run\n");
+        this.State = "Running";
+    }
 }
 
 
@@ -544,6 +560,15 @@ UpdateMultiPlayerData(pDistArray,pHeroId)
     i=_unformatBinVec(this.NormalDir,i,float32Array);
     i=_unformatBinVec(this.HeadDir,i,float32Array);
     i=_unformatBinVec(this.GunDir,i,float32Array);
+    if(float32Array[i]>100000)
+    {
+        this.TargetPos = null;i+=3;
+    }
+    else
+    {
+        this.TargetPos=[];
+        i=_unformatBinVec(this.TargetPos,i,float32Array);
+    }   
 
     if(this.State =="Vehicule")   
     { 
@@ -557,8 +582,9 @@ UpdateMultiPlayerData(pDistArray,pHeroId)
 
     if (firecount > this.FireCount)
     {
-        this.State = "Fire";
+        this.State = "FireEvt";
         this.FireCount = firecount;
+        console.log("fire evt\n");
     }
     if(firecount< this.FireCount) this.FireCount = firecount;
     
@@ -884,10 +910,12 @@ BulletCollision(pDir,pSpeed,pPower,pHumanSrc)
 
     var prevLife = this.Life;
 
-    if(this.Hero)
+    if(this.Hero && GameInst.Hero == this)
     {
         this.IsTouched = true;
+        console.log(pPower + " " + this.Life);
         this.Life -= pPower;
+        console.log(this.Life);
         if(this.Life < 0) this.Life = 0;
     }
  
