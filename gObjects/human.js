@@ -162,7 +162,7 @@ constructor(pPos,pSpeed,pDir,pHero,pName) {
     this.VSpeed=0;
     this.VAcc=-300.0;
     this.Hero = pHero;
-    this.Life = 10;
+    this.Life = 100;
     this.Name = pName;
     this.Id = -1;
 
@@ -231,7 +231,7 @@ reInit()
     this.HSpeed=0;
     this.VSpeed=0;
     this.VAcc=-300.0;
-    this.Life = 10;
+    this.Life = 100;
 
 
     this.Dir=[1,0,-1];
@@ -915,7 +915,6 @@ BulletCollision(pDir,pSpeed,pPower,pHumanSrc)
         this.IsTouched = true;
         console.log(pPower + " " + this.Life);
         this.Life -= pPower;
-        console.log(this.Life);
         if(this.Life < 0) this.Life = 0;
     }
  

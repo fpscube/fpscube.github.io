@@ -160,7 +160,7 @@ class CGunsUzi
         }
 
         playSound(wavList[0]);
-        GunsInst.BulletList.push(new CBullet(currentPos,bulletDir,0.2,0.25,2000,0.4,pHumanSrc));
+        GunsInst.BulletList.push(new CBullet(currentPos,bulletDir,0.2,0.25,2000,0.4,pHumanSrc,10));
         this.WeaponsCount--;     
     }
 
@@ -228,7 +228,7 @@ class CGunsBazooka
         }
 
         playSound(wavList[1]);
-        GunsInst.BulletList.push(new CBullet(currentPos,bulletDir,0.6,70,300,3,pHumanSrc));
+        GunsInst.BulletList.push(new CBullet(currentPos,bulletDir,0.6,70,300,3,pHumanSrc,100));
         this.WeaponsCount--;     
     }
 
@@ -293,7 +293,7 @@ function  _gunsAllCollisionGetPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquare
 class CBullet
 {
 
-    constructor(pPos,pDir,pSize,pSizeExp,pSpeed,pLifeTime,pHumanSrc)
+    constructor(pPos,pDir,pSize,pSizeExp,pSpeed,pLifeTime,pHumanSrc,pPower)
     {
         this.Pos=[pPos[0],pPos[1],pPos[2]];
         this.Dir=[pDir[0],pDir[1],pDir[2]];
@@ -308,6 +308,7 @@ class CBullet
         this.StartTimeInS = timeGetCurrentInS();
         this.LifeTime = pLifeTime;
         this.HumanSrc = pHumanSrc;
+        this.Power= pPower;
         console.log("new bullet\n");
     }
 
@@ -372,7 +373,7 @@ class CBullet
                 if(human!=this.HumanSrc)
                 {
                     console.log("col1\n");
-                    human.BulletCollision(this.Dir,1,2,this.HumanSrc)
+                    human.BulletCollision(this.Dir,1,this.Power,this.HumanSrc)
                 }
             }
 
@@ -401,17 +402,19 @@ class CBullet
                 {
                     var humanList = CEnemiesInst.getHumansInSphere(this.Pos,this.Scale); 
                     for(var i =0 ;i<humanList.length;i++){
+                        var coef = humanSquaredDist/squaredScale;
+                        var power = Math.floor((1-coef)*this.Power);
                         var expDir=[];
                         vec3.subtract(expDir,humanList[i].Pos,this.Pos);
                         vec3.normalize(expDir,expDir);
-                        humanList[i].BulletCollision(expDir,2,2,this.HumanSrc);                        
+                        humanList[i].BulletCollision(expDir,2,power,this.HumanSrc);                        
                     }
                     var humanSquaredDist = vec3.squaredDistance(GameInst.Hero.Pos,this.Pos);
                     var squaredScale =  this.Scale**2;
                     if (humanSquaredDist < squaredScale)
                     {           
                         var coef = humanSquaredDist/squaredScale;
-                        var power = Math.floor((1-coef)*10);
+                        var power = Math.floor((1-coef)*this.Power);
                         var expDir=[];
                         vec3.subtract(expDir,GameInst.Hero.Pos,this.Pos);
                         vec3.normalize(expDir,expDir);
