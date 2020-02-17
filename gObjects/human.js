@@ -771,6 +771,7 @@ ExitVehicule(pVehicule)
 CameraRayCollisionDetection(pCamPos,pCamDir)
 {
     //Human collision Detection
+    this.CamRayCollisionPos = null;
     if (Sphere.IsRayCollisionDetected(pCamPos,pCamDir,this.MvMatrix_Box))
     {
 
@@ -929,6 +930,7 @@ BulletCollision(pDir,pSpeed,pPower,pHumanSrc)
 
         if(this.State =="Vehicule")   this.ExitVehicule(GameInst.Vehicules); 
         this.State = "StartFalling";
+        this.Life = 0;
          
         this.HumanPhy = new CHumanPhysical();
         vec3.scale(this.HumanPhy.Speed,pDir,pSpeed*100);

@@ -43,7 +43,10 @@ class CInfo
 				this.CrossColor =  [1.0,0.0,0.0,1.0];
 				this.EnName = GameInst.HumanInTarget.Name;
 				this.TargetPos = GameInst.HumanInTarget.TargetPos;
-				this.EnLife = GameInst.HumanInTarget.Life + "%";
+				if(GameInst.HumanInTarget.Life>0)
+					this.EnLife = GameInst.HumanInTarget.Life + "%";
+				else
+					this.EnLife = "DEAD";
 			}
 			else{
 				this.CrossColor = [1.0,1.0,1.0,1.0];
