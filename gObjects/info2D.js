@@ -78,15 +78,6 @@ class CInfo
 		
 		}
 
-		if(CMultiPlayerInst.NbOnlinePlayers>0 && (this.GameState == "Lose" || mediaIsKey("Tab")))
-		{
-			this.ScoreTab = CMultiPlayerInst.getScoreTable(GameInst.Hero);
-			this.ScoreTab.sort(function(a, b) {
-				return  b[1]*1000 - a[1]*1000 + a[2] - b[2]  ;
-			});
-		}
-
-		this.EventTab = CMultiPlayerInst.getEventTable();
 
 		this.WeaponsCount  = GameInst.Hero.GunSelected.WeaponsCount;
 		if (GameInst.Hero.GunSelected == GunsInst.No) this.WeaponsCount = 0;
@@ -107,14 +98,13 @@ class CInfo
 		ctx2d.globalAlpha = 1.0;
 		ctx2d.font = "14px Arial";
 
-		var legendText =  "Life : " + this.LifeQt*10 	+ "%  -  ";
+		var legendText =  "Life : " + this.LifeQt 	+ "%  -  ";
 		legendText += "Enemies : " +  this.NbEnemies  + "  -  ";
 		legendText += "Weapons : " +  this.WeaponsCount  + "  -  ";
 		legendText += "Level : " +  this.CurrentLevel  + "  -  ";
 		legendText += "Time : " +  this.Time +  " - ";
 		legendText += "Resolution : " + canvas3D.width + "x" + canvas3D.height  +  " - ";
 
-		if (CMultiPlayerInst.NbOnlinePlayers>0) legendText += " TAB for Score -";
 
 		ctx2d.fillText(legendText,10,15);
 		

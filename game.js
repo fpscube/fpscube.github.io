@@ -44,24 +44,8 @@ class CGame
 		this.Enemies = new CEnemies(this.CurrentLevel*10 + 5);
 		var intPos = [200,600,200];
 		this.Hero = new CHuman(intPos,2,[1,0,-1],true,this.UserData["playerName"].substring(0, 10));
-		if (this.MultiPlayer==undefined) this.MultiPlayer = new CMultiPlayer(this.Hero);
 
 		
-	}
-
-	reInitMulti() {
-		var  x = Math.sin(Math.random()*2*Math.PI) * 400 + Math.random()*200;
-		var  z = Math.sin(Math.random()*2*Math.PI) * 400 + Math.random()*200;
-		this.Hero.Pos = [200,600,200];
-		var intPos = [200,600,200];
-		// Data Init
-		this.CamPos = [-370,13,100]; 
-		this.SpeedCoef=50;
-		this.CamDir = [0.88,-0.15,-0.43];
-		this.State = "Play";
-		this.LastFire = 0;
-		this.Hero.reInit();
-		this.HumanInTarget = null;
 	}
 
 	update() {
@@ -101,7 +85,6 @@ class CGame
 
 
 				// Update Enemies
-				this.MultiPlayer.update();
 				this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,this.HeroFire);
 
 				if (this.Hero.Life<=0 )
@@ -150,7 +133,6 @@ class CGame
 				vec3.rotateY(this.CamDir,this.CamDir,[0,0,0],gElapsed/4);	
 
 				// Update Enemies	
-				this.MultiPlayer.update();
 				this.Enemies.update(this.CamPos,this.CamDir,this.Hero.Pos,this.HeroDir,false);
 				
 				this.Hero.UpdateHeroDead();
@@ -158,7 +140,6 @@ class CGame
 				if (this.LastFire && !mediaIsKey("Fire") && !this.EndAnim.running)
 				{
 					this.init();
-					this.reInitMulti();
 				}	
 				var projDir = [];
 				vec3.rotateY(projDir,this.CamDir,[0,0,0],0.125);
@@ -202,7 +183,6 @@ class CGame
 		this.Trees.draw();
 		this.Stone.draw(false);	 
 		this.Enemies.draw();
-		this.MultiPlayer.draw();
 		this.Vehicules.draw();		
 		this.Hero.draw();
 		this.Guns.draw();

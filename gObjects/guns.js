@@ -280,7 +280,6 @@ function  _gunsAllCollisionGetPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquare
 {
     var collision = pCollision;
     collision = GameInst.Hero.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
-    collision = CMultiPlayerInst.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
     collision = CEnemiesInst.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
     collision = CTreesInst.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
     collision = CStoneInst.getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);

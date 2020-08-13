@@ -33,19 +33,3 @@ if(ARGV[0]!="debug") # minify
 end
 
 File.write('build/index.html', newHtmlString);
-
-
-system ('gzip -f build/index.html')
-puts "build web server \n"
-system ('gcc server/web.c -o build/web') 
-puts "build multi server \n"
-system ('gcc server/multi.c -o build/multi') 
-puts "launch web server \n"
-Thread.new do 
- system("cd build && web")
-end
-puts "launch multi server \n"
-Thread.new do 
-	system("cd build && multi")
-end
-
