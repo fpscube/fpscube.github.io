@@ -42,7 +42,7 @@ class CGame
 		this.Info = new CInfo();
 		this.Trees = new CTrees();
 		this.Enemies = new CEnemies(this.CurrentLevel*10 + 5);
-		var intPos = [200,600,200];
+		var intPos = [-630,600,90];
 		this.Hero = new CHuman(intPos,2,[1,0,-1],true,this.UserData["playerName"].substring(0, 10));
 
 		
