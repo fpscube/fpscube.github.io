@@ -97,9 +97,9 @@ class CHumanPhysical
 
 class CPhysicalPt
 {
-    constructor()
+    constructor(initPos)
     {
-        this.Pos=[0,0,0];
+        this.Pos=[initPos[0],initPos[1],initPos[2]];
         this.NewPos=[0,0,0];
         this.Dir=[0,0,0];
         this.Speed=[0,0,0];

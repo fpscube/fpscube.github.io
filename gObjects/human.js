@@ -380,16 +380,7 @@ UpdateHero(pFire,pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnecti
     }
     else
     {				
-        vec3.copy(pVehicules.WheelDir,pFireDir);
-        if(mediaIsMvtAsked())
-        {
-            pVehicules.Power = (Math.abs(mediaGetMvAngle())<Math.PI/4)?60:-100;
-        }
-        else
-        {
-            pVehicules.Power = 0;
-        }		
-        pVehicules.update();	
+        pVehicules.update(this);	
         vec3.copy(this.Pos,pVehicules.DriverPos);
         vec3.copy(this.Dir,pVehicules.Dir);
         vec3.normalize(this.Dir,this.Dir);

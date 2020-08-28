@@ -37,7 +37,6 @@ class CVehicules
         this.Pos = [-600,0,90];
         this.Pos[1] = groundGetY(this.Pos[0],this.Pos[2]) + 10.0;  
 
-        this.Power = 0;
         this.EngineOn = false;
         this.Free = true;
 
@@ -52,20 +51,17 @@ class CVehicules
 
         this.Distance = 0;
 
-        this.FrontPt = new CPhysicalPt();
+        this.FrontPt = new CPhysicalPt(this.Pos);
         this.FrontPt.Pos = this.Pos;
-        this.FrontPt.Dir = this.WheelDir;
-        this.FrontPt.Power = this.Power;
+        this.FrontWheelLeftPt = new CPhysicalPt(this.Pos);
+        this.FrontWheelRightPt = new CPhysicalPt(this.Pos);
 
-        this.FrontWheelLeftPt = new CPhysicalPt();
-        this.FrontWheelRightPt = new CPhysicalPt();
-
-        this.BackPt = new CPhysicalPt();
+        this.BackPt = new CPhysicalPt(this.Pos);
         this.BackPt.Pos = [this.Pos[0]-13.0,this.Pos[1],this.Pos[2]];
         this.BackPt.Pos[1] = groundGetY(this.BackPt.Pos[0],this.BackPt.Pos[2]) + 10.0; 
 
-        this.BackWheelLeftPt = new CPhysicalPt();
-        this.BackWheelRightPt = new CPhysicalPt();
+        this.BackWheelLeftPt = new CPhysicalPt(this.Pos);
+        this.BackWheelRightPt = new CPhysicalPt(this.Pos);
 
         this.DriverPos =[];
         this.DriverOutPos =[];
@@ -108,47 +104,95 @@ class CVehicules
 
   
 
-    update()
+    update(pHuman)
     {
         var elapsed = timeGetElapsedInS();
 
-        //save current Pos
-        var savedPos = [];
-        vec3.copy(savedPos,this.Pos);
+
+
+        // Save new Front and wheel position
+        var prevFrontPtPos = [];
+        var prevFrontWheelLeftPtPos = [];
+        var prevFrontWheelRightPtPos = [];
+        vec3.copy(prevFrontPtPos,this.FrontPt.Pos);
+        vec3.copy(prevFrontWheelLeftPtPos,this.FrontWheelLeftPt.Pos);
+        vec3.copy(prevFrontWheelRightPtPos,this.FrontWheelRightPt.Pos);
 
         //Project WheelDir to Dir plane
+        vec3.copy(this.WheelDir,this.Dir);
         vec3.normalize(this.WheelDir,this.WheelDir);
         vec3.cross(this.WheelDir,this.FrontNormalDir,this.WheelDir,);
         vec3.normalize(this.WheelDir,this.WheelDir);
         vec3.cross(this.WheelDir,this.WheelDir,this.FrontNormalDir);
         vec3.normalize(this.WheelDir,this.WheelDir);
 
-        //Compute Rotation Max of Front Wheels
-        var dotWheel = vec3.dot(this.Dir,this.WheelDir);    
-        var dotMax = 0.5 + (vec3.length(this.FrontPt.Speed)/150)*0.5;        
-        var dotSpeedDir = vec3.dot(this.FrontPt.Speed,this.WheelDir);
-    
-        if (dotMax>1.0) dotMax=0.999;
-        if(dotWheel<dotMax) 
-        {    
-            var orthoDir  = [];   
-            vec3.rotateY(orthoDir,this.Dir,[0,0,0],Math.PI/2);
-            dotWheel = vec3.dot(orthoDir,this.WheelDir);
-            var angle = Math.acos(dotMax);
-            angle =(dotWheel<0.0)?-angle:angle;    
-            vec3.rotateY(this.WheelDir,this.Dir,[0,0,0],angle);
-        }
-       
-       dotSpeedDir = vec3.dot(this.FrontPt.Speed,this.WheelDir);
-       var speed = vec3.length(this.FrontPt.Speed);
-       if(dotSpeedDir<0) //Backward
-       {    
-            if(this.Power<0) this.Power = this.Power/10;
-            speed = -speed;
-       }
-       if(this.FrontPt.Ground) vec3.scale(this.FrontPt.Speed,this.WheelDir,speed);  
 
-        this.FrontPt.Power =  this.Power ;
+        var dotSpeedDir = vec3.dot(this.FrontPt.Speed,this.Dir);
+        var speedVal = vec3.length(this.FrontPt.Speed);
+        if(dotSpeedDir<0) speedVal = -speedVal;
+
+        if(this.EngineOn)
+        {
+            this.Brake=0;
+
+            var maxDriftAngle = 0.8 - speedVal/200;
+            if(maxDriftAngle<0) maxDriftAngle = 0.05;
+
+
+            if(mediaIsKey("Left"))
+            {
+                vec3.rotateY(this.WheelDir,this.Dir,[0,0,0],0.8);
+                vec3.rotateY(this.FrontPt.Dir,this.Dir,[0,0,0],maxDriftAngle);
+            }
+            else if(mediaIsKey("Right"))
+            {
+                vec3.rotateY(this.WheelDir,this.Dir,[0,0,0],-0.8);
+                vec3.rotateY(this.FrontPt.Dir,this.Dir,[0,0,0],-maxDriftAngle);
+            }
+            else
+            {
+                vec3.copy(this.FrontPt.Dir,this.WheelDir);
+            }
+
+
+            if(mediaIsKey("Up"))
+            {
+                this.FrontPt.Power=60;
+            }
+            else if(mediaIsKey("Down"))
+            {
+                if(dotSpeedDir>0)/*Forward*/
+                {
+                    // brake
+                    this.FrontPt.Power=-100;
+                    vec3.copy(this.FrontPt.Dir,this.FrontPt.Speed);
+                    vec3.normalize(this.FrontPt.Dir,this.FrontPt.Dir);
+                } 
+                else
+                {
+                    this.FrontPt.Power=-10;
+                }
+                
+            }
+            else
+            {
+                this.FrontPt.Power=0;
+            }
+
+
+            /* Force wheel adherence */
+            vec3.copy(this.FrontPt.Speed,this.FrontPt.Dir);
+            vec3.normalize(this.FrontPt.Speed,this.FrontPt.Speed);
+            vec3.scale(this.FrontPt.Speed,this.FrontPt.Speed,speedVal);           
+            
+
+        }
+        else
+        {
+
+            vec3.scale(this.FrontPt.Speed,this.FrontPt.Speed,0.0);  
+        }
+
         
         // Update Front
         this.FrontPt.update();
@@ -248,7 +292,7 @@ class CVehicules
 
         //Update Total Distance (for wheel rotation)
         var currentDistVec=[];
-        vec3.subtract(currentDistVec,this.Pos,savedPos);
+        vec3.subtract(currentDistVec,this.Pos,prevFrontPtPos);
         var currentDist = vec3.length(currentDistVec);
         if(dotSpeedDir<0) //Backward
             currentDist = -currentDist;
@@ -275,7 +319,33 @@ class CVehicules
         if(!this.EngineOn) soundCoef=0;
         playCarSound(soundCoef);
 
+        //Check enemies collision
 
+        if(this.EngineOn)
+        {
+            var humanList = CEnemiesInst.getHumansInSphere(this.FrontPt.Pos,20.0);
+
+            for(var i =0 ;i<humanList.length;i++){
+                
+                var collision = null;
+                for(var t=0.0;t<=1.0;t=t+0.1)
+                {
+                    var pointA = [t*(prevFrontWheelRightPtPos[0]-prevFrontWheelLeftPtPos[0])+prevFrontWheelLeftPtPos[0],
+                                  t*(prevFrontWheelRightPtPos[1]-prevFrontWheelLeftPtPos[1])+prevFrontWheelLeftPtPos[1],
+                                  t*(prevFrontWheelRightPtPos[2]-prevFrontWheelLeftPtPos[2])+prevFrontWheelLeftPtPos[2]]
+                    var pointB = [t*(this.FrontWheelRightPt.Pos[0]-this.FrontWheelLeftPt.Pos[0])+this.FrontWheelLeftPt.Pos[0],
+                                  t*(this.FrontWheelRightPt.Pos[1]-this.FrontWheelLeftPt.Pos[1])+this.FrontWheelLeftPt.Pos[1],
+                                  t*(this.FrontWheelRightPt.Pos[2]-this.FrontWheelLeftPt.Pos[2])+this.FrontWheelLeftPt.Pos[2]]
+                    collision = humanList[i].getCollisionPoint(pointA,pointB,null,0);
+                    if(collision!=null) break;
+                }
+                if(collision!=null)
+                {
+                    humanList[i].BulletCollision(this.FrontPt.Dir,1.0,1.0,pHuman);    
+                }                       
+            }
+
+        }
 
     }
 
