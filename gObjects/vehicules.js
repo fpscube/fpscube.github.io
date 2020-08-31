@@ -328,7 +328,7 @@ class CVehicules
             for(var i =0 ;i<humanList.length;i++){
                 
                 var collision = null;
-                for(var t=0.0;t<=1.0;t=t+0.1)
+                for(var t=-0.1;t<=1.1;t=t+0.1)
                 {
                     var pointA = [t*(prevFrontWheelRightPtPos[0]-prevFrontWheelLeftPtPos[0])+prevFrontWheelLeftPtPos[0],
                                   t*(prevFrontWheelRightPtPos[1]-prevFrontWheelLeftPtPos[1])+prevFrontWheelLeftPtPos[1],
@@ -341,7 +341,13 @@ class CVehicules
                 }
                 if(collision!=null)
                 {
-                    humanList[i].BulletCollision(this.FrontPt.Dir,1.0,1.0,pHuman);    
+                    if(!(humanList[i].IsDead()) )
+                    {
+                        playSound(wavList[3]);
+                        
+                        vec3.scale(this.FrontPt.Speed,this.FrontPt.Speed,0.85);     
+                    } 
+                    humanList[i].BulletCollision(this.FrontPt.Dir,speedVal,1.0,pHuman);    
                 }                       
             }
 

@@ -372,7 +372,7 @@ class CBullet
                 if(human!=this.HumanSrc)
                 {
                     console.log("col1\n");
-                    human.BulletCollision(this.Dir,1,this.Power,this.HumanSrc)
+                    human.BulletCollision(this.Dir,100.0,this.Power,this.HumanSrc)
                 }
             }
 
@@ -406,7 +406,7 @@ class CBullet
                         var expDir=[];
                         vec3.subtract(expDir,humanList[i].Pos,this.Pos);
                         vec3.normalize(expDir,expDir);
-                        humanList[i].BulletCollision(expDir,2,power,this.HumanSrc);                        
+                        humanList[i].BulletCollision(expDir,200.0,power,this.HumanSrc);                        
                     }
                     var humanSquaredDist = vec3.squaredDistance(GameInst.Hero.Pos,this.Pos);
                     var squaredScale =  this.Scale**2;
@@ -417,7 +417,7 @@ class CBullet
                         var expDir=[];
                         vec3.subtract(expDir,GameInst.Hero.Pos,this.Pos);
                         vec3.normalize(expDir,expDir);
-                        GameInst.Hero.BulletCollision(expDir,2,power,this.HumanSrc);
+                        GameInst.Hero.BulletCollision(expDir,200.0,power,this.HumanSrc);
                         console.log("col2\n");
                     }
                 }

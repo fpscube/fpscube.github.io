@@ -130,6 +130,12 @@ class CGame
 			case "Win":
 			case "Lose":
 				
+				if( this.Hero.State =="Vehicule")
+				{
+					this.Vehicules.Free = true; 
+					this.Hero.ExitVehicule(this.Vehicules );
+				}
+
 				vec3.rotateY(this.CamDir,this.CamDir,[0,0,0],gElapsed/4);	
 
 				// Update Enemies	

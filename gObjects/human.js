@@ -665,7 +665,7 @@ BulletCollision(pDir,pSpeed,pPower,pHumanSrc)
         this.Life = 0;
          
         this.HumanPhy = new CHumanPhysical();
-        vec3.scale(this.HumanPhy.Speed,pDir,pSpeed*100);
+        vec3.scale(this.HumanPhy.Speed,pDir,pSpeed);
         this.HumanPhy.Pos1 = this.Pos;
         this.HumanPhy.Pos2[0] = this.Pos[0] - this.NormalDir[0]*4.0;
         this.HumanPhy.Pos2[1] = this.Pos[1] - this.NormalDir[1]*4.0;

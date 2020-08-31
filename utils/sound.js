@@ -30,11 +30,12 @@ function filter(input)
 var fireGunConfig = [[0.1,2,1.0],[0.3,5,0.8],[0.5,8,0.4],[1.0,10,0.1],[2.0,15,0.01]];
 var fireBazGunConfig = [[0.1,25,1.0],[0.3,50,0.8],[0.5,50,0.4],[1.0,50,0.1],[2.0,80,0.01]];
 var expConfig = [[0.5,8,0.4],[1.0,25,0.3],[2.0,30,0.4],[2.5,40,0.6],[3.0,50,0.4]];
+var enVehiculCollision = [[0.3,300,8.0]];
 
-var configList=[fireGunConfig , fireBazGunConfig,expConfig];
-var durationList=[2.0,2.0,3.0];
-var filerCoefList=[7.0,7.0,10.0];
-var wavList=[[],[],[]];
+var configList=[fireGunConfig , fireBazGunConfig,expConfig,enVehiculCollision];
+var durationList=[2.0,2.0,3.0,2.0];
+var filerCoefList=[7.0,7.0,10.0,7.0];
+var wavList=[[],[],[],[]];
 
 for (var confListI=0;confListI<configList.length;confListI++ )
 {
