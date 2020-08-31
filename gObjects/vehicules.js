@@ -347,7 +347,7 @@ class CVehicules
                         
                         vec3.scale(this.FrontPt.Speed,this.FrontPt.Speed,0.85);     
                     } 
-                    humanList[i].BulletCollision(this.FrontPt.Dir,speedVal,1.0,pHuman);    
+                    humanList[i].BulletCollision(this.FrontPt.Dir,speedVal*1.8,1.0,pHuman);    
                 }                       
             }
 
