@@ -176,6 +176,8 @@ constructor(pPos,pSpeed,pDir,pHero,pName) {
     this.Acc=1;
     this.AngleRange=0;
     this.State="Running";
+    this.InVehicule = false;
+    this.Vehicule = null;
     this.FireCount = 0;
     this.Uzi = new CGunsUzi();
     this.Bazooka = new CGunsBazooka();
@@ -247,6 +249,7 @@ reInit()
     this.Uzi = new CGunsUzi();
     this.Bazooka = new CGunsBazooka();
     this.GunSelected = this.Uzi;
+    this.InVehicule = false;
 
     this.IsTouched = false;
    
@@ -314,8 +317,12 @@ computeNewPosition()
     return mvCollision;
 }
 
-ChangeGun(){   
-    this.GunSelected = ((this.GunSelected == this.Uzi))?this.Bazooka:this.Uzi;
+ChangeGun(){ 
+    if(!this.InVehicule)
+    {
+        this.GunSelected = ((this.GunSelected == this.Uzi))?this.Bazooka:this.Uzi;
+    }  
+    
 }
 
 UpdateHeroDead()
@@ -363,7 +370,7 @@ UpdateHero(pFire,pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnecti
     if(GameInst.HumanInTarget!=null) this.TargetPos = GameInst.HumanInTarget.CamRayCollisionPos;
 
     // Update Hero Direction and Hero Horz Speed
-    if(this.State !="Vehicule"){
+    if(!this.InVehicule){
 
         // if Running process hero dir function of camdir and media angle
         if (pMvAsk){
@@ -386,6 +393,7 @@ UpdateHero(pFire,pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnecti
         vec3.normalize(this.Dir,this.Dir);
         this.HSpeed = 0;        
         pVehicules.EngineOn = true;	
+        this.GunSelected = this.Uzi;
     }
 
 
@@ -464,7 +472,7 @@ UpdateHero(pFire,pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnecti
     }
     
     // Move and Check for gun or vehicules selection 
-    if(this.State != "Vehicule" )
+    if(!this.InVehicule )
     {
         //Update hero position according position speed and collision
         this.computeNewPosition();
@@ -476,7 +484,8 @@ UpdateHero(pFire,pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnecti
         if(pVehicules.Free &&  pVehicules.checkCollision(this.Pos,this.NewPos))
         {
             pVehicules.Free = false;
-            this.State = "Vehicule";
+            this.InVehicule = true;
+            this.Vehicule = pVehicules;
         }
 
         //Collision Check is finished apply new pos to current
@@ -491,6 +500,7 @@ UpdateHero(pFire,pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnecti
 
 ExitVehicule(pVehicule)
 {
+    this.InVehicule = false;
     vec3.copy(this.Pos,pVehicule.DriverOutPos);
     this.State = "Running";
     this.Dir[1]=0;
@@ -660,7 +670,7 @@ BulletCollision(pDir,pSpeed,pPower,pHumanSrc)
     if (this.Life == 0  ||  !this.Hero)
     {
 
-        if(this.State =="Vehicule")   this.ExitVehicule(GameInst.Vehicules); 
+        if(this.InVehicule)   this.ExitVehicule(GameInst.Vehicules); 
         this.State = "StartFalling";
         this.Life = 0;
          
@@ -693,12 +703,8 @@ _ArmDraw(pAnimCounter,pIsLeft)
     //Arm Part 1
     var  armUpAngle=0;
     var  armDownAngle=0;
-    if (this.State=="Vehicule")
-    {
-        armUpAngle= degToRad(-60 );
-        armDownAngle =  degToRad(-15);
-    }
-    else if(this.GunSelected == this.Bazooka)
+
+    if(this.GunSelected == this.Bazooka)
     {
         armDownAngle=degToRad(-90);
         armUpAngle=0;
@@ -722,6 +728,12 @@ _ArmDraw(pAnimCounter,pIsLeft)
             default:
                 armUpAngle =  degToRad(Math.sin(pAnimCounter)*this.AngleRange*6.0);
                 armDownAngle = degToRad(Math.sin(pAnimCounter + Math.PI/2)-1.0)*this.AngleRange*3.0;
+
+                if (this.InVehicule)
+                {
+                    armUpAngle= degToRad(-60 );
+                    armDownAngle =  degToRad(-15);
+                }
                 break;
         }
 
@@ -762,10 +774,10 @@ _ArmDraw(pAnimCounter,pIsLeft)
         Sphere.Draw(SphereShaderProgram); 
     mvPopMatrix();   
 
-    if(this.State!="Vehicule")
+    //if(this.State!="Vehicule")
     {
         //Gun Bazooka
-        if((this.GunSelected == this.Bazooka) && pIsLeft)
+        if((this.GunSelected == this.Bazooka) && pIsLeft )
         {
             mvPushMatrix();  
                 mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);
@@ -795,7 +807,7 @@ _LegDraw(pX,pY,pAnimCounter)
     var  legDownAngle=0; 
     var  posZ = 0.08;
 
-    if(this.State == "Vehicule")
+    if(this.InVehicule)
     {
         legUpAngle = degToRad(-82);
         legMidAngle = 0;
@@ -1025,8 +1037,11 @@ draw()
     Sphere.Optim = false;
 
     //Legs
+    mvPushMatrix();
+    if(this.InVehicule) lookAt(this.Vehicule.Dir);
     this._LegDraw(0.46,0.2,animCounter,true);
     this._LegDraw(-0.46,0.2,animCounter  +  Math.PI,false);
+    mvPopMatrix();
     //Arms
 
     mvPushMatrix();  
