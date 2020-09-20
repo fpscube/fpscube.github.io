@@ -20,6 +20,7 @@ class CInfo
 		this.TargetPos = null;
 		this.Level = null;
 		this.LevelTitleAnim = new CTimeAnim();
+		this.BigCross = false;
 
 	}
 
@@ -52,6 +53,8 @@ class CInfo
 				this.CrossColor = [1.0,1.0,1.0,1.0];
 			}
 			if (GameInst.Hero.IsTouched) this.AnimInjury.start(200,0.7,0.0);
+			this.BigCross = GameInst.Hero.Zoom;
+	
 		}
 		this.LifeQt = GameInst.Hero.Life;
 		this.InjuryAlpha = this.AnimInjury.getValue();
@@ -184,6 +187,18 @@ class CInfo
 		mat4.translate(mvMatrix,mvMatrix, [ gl.viewportWidth/2.0,gl.viewportHeight/2.0,0.0]);
 		mat4.scale(mvMatrix,mvMatrix,[2.0,2.0,1.0]);
 		squareDraw(SquareShaderProgram);
+		if(this.BigCross )
+		{
+			mat4.identity(mvMatrix);
+			mat4.translate(mvMatrix,mvMatrix, [ gl.viewportWidth/2.0,gl.viewportHeight/2.0,0.0]);
+			mat4.scale(mvMatrix,mvMatrix,[1.0,gl.viewportHeight/2.0,1.0]);
+			squareDraw(SquareShaderProgram);
+			mat4.identity(mvMatrix);
+			mat4.translate(mvMatrix,mvMatrix, [ gl.viewportWidth/2.0,gl.viewportHeight/2.0,0.0]);
+			mat4.scale(mvMatrix,mvMatrix,[gl.viewportWidth/2.0,1.0,1.0]);
+			squareDraw(SquareShaderProgram);
+		}
+		
 		
 		// Enemy name Display
 		ctx2d.font = "14px Arial";

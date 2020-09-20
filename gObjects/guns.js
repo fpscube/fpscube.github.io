@@ -275,6 +275,94 @@ class CGunsBazooka
     }
 }
 
+class CGunsSniper
+{
+    constructor()
+    {
+        this.Selected = false;
+        this.WeaponsCount = 900;  
+        if(gFireShaderProgram==-1)
+        {
+            gFireShaderProgram =  SphereInitShaders(SphereVertexShader,gunsFragmentShaderFire);
+        }     
+        this.FireShaderProgram = gFireShaderProgram;
+    }
+
+    fire(pTargetPos,pTargetDir,pHumanSrc)
+    {
+        var bulletDir ;
+        var currentPos = vec3.create();
+        mat4.getTranslation(currentPos,mvMatrix);
+        if(pTargetPos==null)
+        {
+            bulletDir = pTargetDir;
+        }
+        else
+        {
+            bulletDir = [pTargetPos[0]-currentPos[0],pTargetPos[1]-currentPos[1],pTargetPos[2]-currentPos[2]];
+            vec3.normalize(bulletDir,bulletDir);
+        }
+
+        playSound(wavList[0]);
+        GunsInst.BulletList.push(new CBullet(currentPos,bulletDir,0.2,0.05,10000,0.4,pHumanSrc,10));
+        this.WeaponsCount--;     
+    }
+
+    draw(pFire,pTargetPos,pTargetDir,pHumanSrc)
+    {
+      //Gun    
+      shaderVertexColorVector = [0.2,0.2,0.2,1.0];
+      mvPushMatrix();
+      mat4.scale(mvMatrix,mvMatrix,[0.2,2.5,0.2]);
+      Sphere.Draw(SphereShaderProgram);
+      mvPopMatrix();
+      shaderVertexColorVector = [0.25,0.25,0.25,1.0];
+      mvPushMatrix();
+      mat4.translate(mvMatrix,mvMatrix, [0.0,0.8,0.35]);
+      mat4.scale(mvMatrix,mvMatrix,[0.15,0.8,0.15]);        
+      Sphere.Draw(SphereShaderProgram);
+      mvPopMatrix();   
+      shaderVertexColorVector = [0.0,0.0,0.0,1.0];
+      mvPushMatrix();
+      mat4.translate(mvMatrix,mvMatrix, [0.0,1.2,-0.35]);
+      mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.4]);        
+      Sphere.Draw(SphereShaderProgram);
+      mvPopMatrix();   
+      mvPushMatrix();
+      mat4.translate(mvMatrix,mvMatrix, [0.0,-0.3,-0.2]);
+      mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.4]);        
+      Sphere.Draw(SphereShaderProgram);
+      mvPopMatrix();   
+      mvPushMatrix();
+      mat4.translate(mvMatrix,mvMatrix, [0.0,0.8,0.1]);
+      mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.2]);        
+      Sphere.Draw(SphereShaderProgram);
+      mvPopMatrix();   
+      
+      shaderVertexColorVector = [0.99,0.76,0.67,1.0];   
+
+        if(pFire)
+        {
+            
+            mvPushMatrix();	
+            mat4.translate(mvMatrix,mvMatrix, [0.0,-1.1,0.0]);
+            mvPushMatrix();	
+            mat4.scale(mvMatrix,mvMatrix,[1.0,0.0,0.25]);
+            Sphere.Draw(this.FireShaderProgram);
+            mvPopMatrix();
+            mvPushMatrix();	
+            mat4.scale(mvMatrix,mvMatrix,[0.25,0.0,1.0]);
+            Sphere.Draw(this.FireShaderProgram);
+            mvPopMatrix();
+            mvPopMatrix();
+            this.fire(pTargetPos,pTargetDir,pHumanSrc);
+        }
+    }
+
+}
+
+
+
 
 function  _gunsAllCollisionGetPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOffset)
 {

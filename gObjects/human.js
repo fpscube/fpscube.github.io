@@ -181,6 +181,8 @@ constructor(pPos,pSpeed,pDir,pHero,pName) {
     this.FireCount = 0;
     this.Uzi = new CGunsUzi();
     this.Bazooka = new CGunsBazooka();
+    this.Sniper = new CGunsSniper();
+    this.Zoom =  false;
     this.GunSelected = this.Uzi;
 
     this.KillBy=[0,0,0,0,0,0,0,0];
@@ -248,7 +250,9 @@ reInit()
     this.State="Running";
     this.Uzi = new CGunsUzi();
     this.Bazooka = new CGunsBazooka();
+    this.Sniper = new CGunsSniper();
     this.GunSelected = this.Uzi;
+    this.Zoom =  false;
     this.InVehicule = false;
 
     this.IsTouched = false;
@@ -320,7 +324,10 @@ computeNewPosition()
 ChangeGun(){ 
     if(!this.InVehicule)
     {
-        this.GunSelected = ((this.GunSelected == this.Uzi))?this.Bazooka:this.Uzi;
+        if(this.GunSelected == this.Uzi) this.GunSelected = this.Bazooka;
+        else if(this.GunSelected == this.Bazooka) this.GunSelected = this.Sniper;
+        else if(this.GunSelected == this.Sniper)  this.GunSelected = this.Uzi;
+        this.Zoom =  false;
     }  
     
 }
@@ -328,6 +335,7 @@ ChangeGun(){
 UpdateHeroDead()
 {
 
+    this.Zoom=false;
     this.IsTouched = false;
     switch (this.State) {
         case "StartFalling":
@@ -386,7 +394,8 @@ UpdateHero(pFire,pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnecti
         pVehicules.EngineOn = false;
     }
     else
-    {				
+    {	
+        this.Zoom=false;			
         pVehicules.update(this);	
         vec3.copy(this.Pos,pVehicules.DriverPos);
         vec3.copy(this.Dir,pVehicules.Dir);
@@ -416,7 +425,15 @@ UpdateHero(pFire,pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnecti
             if((pFire || (this.TargetPos!=null && pFireAuto)) && this.GunSelected.WeaponsCount>0) 
             {
                 vec3.copy(this.HeadDir,pFireDir );
-                this.State="Fire";
+                if(this.GunSelected == this.Sniper && this.Zoom == false )
+                {
+                    this.Zoom = true;
+                    this.State="ReadyToFire";
+                }
+                else
+                {
+                    this.State="Fire";
+                }
             }   
             break;
         case "Fire": 
@@ -704,6 +721,7 @@ _ArmDraw(pAnimCounter,pIsLeft)
     var  armUpAngle=0;
     var  armDownAngle=0;
 
+
     if(this.GunSelected == this.Bazooka)
     {
         armDownAngle=degToRad(-90);
@@ -785,6 +803,29 @@ _ArmDraw(pAnimCounter,pIsLeft)
                 this.GunSelected.draw(this.State == "Fire",this.TargetPos,this.GunDir,this) ;
                 this._drawTargetVector();
             mvPopMatrix(); 
+        }     
+         //Gun Sniper
+        else if((this.GunSelected == this.Sniper) && pIsLeft )
+        {
+            if(this.Zoom && this.State == "Fire")
+            {
+
+                mvPushMatrix();  	
+                    mat4.identity(mvMatrix);
+                    mat4.translate(mvMatrix,mvMatrix, this.Pos);
+                    mat4.translate(mvMatrix,mvMatrix,[0.0,5.5,0.0]); 
+                    this.GunSelected.draw(true,this.TargetPos,this.GunDir,this);
+                    this._drawTargetVector();
+                mvPopMatrix();
+            }
+            else
+            {
+                mvPushMatrix();  
+                    mat4.translate(mvMatrix,mvMatrix,[0.0,-1.2,0.5]); 
+                    this.GunSelected.draw(false,this.TargetPos,this.GunDir,this);
+                    this._drawTargetVector();
+                mvPopMatrix();
+            }
         }
         //Gun Uzi
         else if(this.GunSelected == this.Uzi)

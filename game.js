@@ -116,9 +116,19 @@ class CGame
 				{							
 					var projDir = [];
 					vec3.rotateY(projDir,this.CamDir,[0,0,0],0.125);
-					this.CamPos[0] = this.Hero.Pos[0] - projDir[0]*15;
-					this.CamPos[2] = this.Hero.Pos[2] - projDir[2]*15;
-					this.CamPos[1] = this.Hero.Pos[1] + 5.5 ;
+					if(this.Hero.Zoom) 
+					{
+						this.CamPos[0] = this.Hero.Pos[0];
+						this.CamPos[2] = this.Hero.Pos[2];
+						this.CamPos[1] = this.Hero.Pos[1] + 5.5 ;
+
+					}
+					else
+					{
+						this.CamPos[0] = this.Hero.Pos[0] - projDir[0]*15;
+						this.CamPos[2] = this.Hero.Pos[2] - projDir[2]*15;
+						this.CamPos[1] = this.Hero.Pos[1] + 5.5 ;
+					}
 					this.Vehicules.EngineOn = false;
 				}
 
@@ -175,7 +185,9 @@ class CGame
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 		//Perceptive projection
-		mat4.perspective(pMatrix,45, gl.viewportWidth / gl.viewportHeight, 1.0, 10000.0);
+		var fov = 45;
+		if(this.Hero.Zoom) fov = 44.2;
+		mat4.perspective(pMatrix,fov, gl.viewportWidth / gl.viewportHeight, 1.0, 10000.0);
 
 		// Camera managment
 		var lookAtMatrix = mat4.create();
