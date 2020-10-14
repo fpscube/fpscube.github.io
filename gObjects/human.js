@@ -800,7 +800,7 @@ _ArmDraw(pAnimCounter,pIsLeft)
             mvPushMatrix();  
                 mat4.rotate(mvMatrix,mvMatrix, degToRad(90), [1, 0, 0]);
                 mat4.translate(mvMatrix,mvMatrix,[0.0,-1.0,-0.5]); 
-                this.GunSelected.draw(this.State == "Fire",this.TargetPos,this.GunDir,this) ;
+                this.GunSelected.draw(this.State == "Fire",this.TargetPos,this.GunDir,this,this.Zoom) ;
                 this._drawTargetVector();
             mvPopMatrix(); 
         }     
@@ -814,7 +814,7 @@ _ArmDraw(pAnimCounter,pIsLeft)
                     mat4.identity(mvMatrix);
                     mat4.translate(mvMatrix,mvMatrix, this.Pos);
                     mat4.translate(mvMatrix,mvMatrix,[0.0,5.5,0.0]); 
-                    this.GunSelected.draw(true,this.TargetPos,this.GunDir,this);
+                    this.GunSelected.draw(true,this.TargetPos,this.GunDir,this,this.Zoom);
                     this._drawTargetVector();
                 mvPopMatrix();
             }
@@ -822,7 +822,7 @@ _ArmDraw(pAnimCounter,pIsLeft)
             {
                 mvPushMatrix();  
                     mat4.translate(mvMatrix,mvMatrix,[0.0,-1.2,0.5]); 
-                    this.GunSelected.draw(false,this.TargetPos,this.GunDir,this);
+                    this.GunSelected.draw(false,this.TargetPos,this.GunDir,this,this.Zoom);
                     this._drawTargetVector();
                 mvPopMatrix();
             }
@@ -831,7 +831,7 @@ _ArmDraw(pAnimCounter,pIsLeft)
         else if(this.GunSelected == this.Uzi)
         { 
             mat4.translate(mvMatrix,mvMatrix, [0.0,-0.7,0.55]);   
-            this.GunSelected.draw(this.State == "Fire",this.TargetPos,this.GunDir,this) ;
+            this.GunSelected.draw(this.State == "Fire",this.TargetPos,this.GunDir,this,this.Zoom) ;
             this._drawTargetVector();
         } 
     }

@@ -6,6 +6,7 @@ class CScreen
     constructor(pCanva3DName,pCanva2DName) {
         this.windowWidth=0;
         this.windowHeight =0;
+        this.windowRatio=1;
         this.newwindowWidth=0;
         this.newwindowHeight =0;        
 	    this.canvas3D = document.getElementById(pCanva3DName);
@@ -65,6 +66,8 @@ class CScreen
 
         gl.viewportWidth = this.newwindowWidth;
         gl.viewportHeight = this.newwindowHeight;
+
+        this.windowRatio = this.newwindowWidth/this.newwindowHeight;
 	
 
 	    pGl.viewport(0, 0, this.newwindowWidth, this.newwindowHeight);

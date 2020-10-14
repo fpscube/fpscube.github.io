@@ -186,7 +186,7 @@ class CGame
 
 		//Perceptive projection
 		var fov = 45;
-		if(this.Hero.Zoom) fov = 44.2;
+	//	if(this.Hero.Zoom) fov = 44.2;
 		mat4.perspective(pMatrix,fov, gl.viewportWidth / gl.viewportHeight, 1.0, 10000.0);
 
 		// Camera managment

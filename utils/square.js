@@ -1,27 +1,24 @@
+
+
+var SquareVertexShader = `    
+	attribute vec4 aVertexPosition;
+	uniform mat4 uMVMatrix;
+  uniform mat4 uPMatrix;    
+	void main() {
+  
+	gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
+
+	}
+`;
+
 var SquareFragmentShader = `
 precision lowp float;
    
 uniform vec4 uVertexColor;   
 
 void main() {
-  gl_FragColor = uVertexColor;
+  gl_FragColor = vec4(1.0,0.0,0.0,1.0);
 }`;
-
-var SquareVertexShader = `    
-	attribute vec4 aVertexPosition;
-	uniform mat4 uMVMatrix;
-  uniform mat4 uPMatrix;  
-   
-	void main() {
-
-	// Multiply the position by the matrix.
-	gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
-
-	}
-`;
-
-
-
 
 
 var SquareShaderProgram;
@@ -43,6 +40,7 @@ function SquareInitShaders(vertexShaderStr,fragmentShaderStr) {
   outShaderProgram.vertexPositionAttribute = gl.getAttribLocation(outShaderProgram, "aVertexPosition");
   gl.enableVertexAttribArray(outShaderProgram.vertexPositionAttribute);
 
+  outShaderProgram.screenRatioUniform = gl.getUniformLocation(outShaderProgram, "uScreenRatio");
   outShaderProgram.vertexColorAttribute = gl.getUniformLocation(outShaderProgram, "uVertexColor");
   outShaderProgram.pMatrixUniform = gl.getUniformLocation(outShaderProgram, "uPMatrix");
   outShaderProgram.mvMatrixUniform = gl.getUniformLocation(outShaderProgram, "uMVMatrix");
@@ -98,6 +96,7 @@ function squareInit()
 }
 
 
+
 function squareDraw(pShaderProgram)
 {
 
@@ -118,6 +117,7 @@ function squareDraw(pShaderProgram)
       gCurrentGraphicalObject = 2;
     }  
 
+    gl.uniform1f(pShaderProgram.screenRatioUniform, GameInst.Screen.windowRatio);
     gl.uniform4fv (pShaderProgram.vertexColorAttribute, shaderVertexColorVector);
     gl.uniformMatrix4fv(pShaderProgram.mvMatrixUniform, false, mvMatrix);
     gl.uniformMatrix4fv(pShaderProgram.pMatrixUniform, false, pMatrix);

@@ -24,9 +24,55 @@ gl_FragColor = vec4(1.0,1.0,1.0,1.0-dist);
 
 }`;
 
+
+var gunZoomVertexShader = `    
+attribute vec4 aVertexPosition;
+uniform mat4 uMVMatrix;
+uniform mat4 uPMatrix; 
+uniform float uScreenRatio;  
+varying vec4 a_position;  
+
+void main() {
+
+    // Multiply the position by the matrix.
+    a_position = aVertexPosition;
+    a_position.x = a_position.x * uScreenRatio;  
+
+    gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
+
+}`;
+
+var gunZoomFragmentShader = `
+precision lowp float;
+
+varying vec4 a_position;   
+uniform vec4 uVertexColor;  
+
+void main() {
+
+  vec2 uv = a_position.xy;
+  float length = length(uv);
+  if(length > 0.90)
+  {
+    gl_FragColor = vec4(0.0,0.0,0.0,1.0);
+  }
+  else if(length > 0.85)
+  {
+    gl_FragColor = vec4(0.0,0.0,0.0,(length-0.85)*20.0);
+  }
+  else
+  {   
+    gl_FragColor = vec4(0.0,0.0,0.0,0.0);
+  }
+}`;
+
+
+
+
 var GunsInst;
 
 var gBulletShaderProgram=-1;
+var gGunZoomShaderProgram=-1;
 
 class CGuns
 {
@@ -164,7 +210,7 @@ class CGunsUzi
         this.WeaponsCount--;     
     }
 
-    draw(pFire,pTargetPos,pTargetDir,pHumanSrc)
+    draw(pFire,pTargetPos,pTargetDir,pHumanSrc,pZoom)
     {
         //Gun    
         shaderVertexColorVector = [0.9,0.9,1.0,1.0];
@@ -232,7 +278,7 @@ class CGunsBazooka
         this.WeaponsCount--;     
     }
 
-    draw(pFire,pTargetPos,pTargetDir,pHumanSrc)
+    draw(pFire,pTargetPos,pTargetDir,pHumanSrc,pZoom)
     {
         var toogle=0;
 
@@ -285,7 +331,12 @@ class CGunsSniper
         {
             gFireShaderProgram =  SphereInitShaders(SphereVertexShader,gunsFragmentShaderFire);
         }     
+        if(gGunZoomShaderProgram==-1)
+        {
+            gGunZoomShaderProgram =  SquareInitShaders(gunZoomVertexShader,gunZoomFragmentShader);
+        }     
         this.FireShaderProgram = gFireShaderProgram;
+        this.ZoomShaderProgram = gGunZoomShaderProgram;
     }
 
     fire(pTargetPos,pTargetDir,pHumanSrc)
@@ -308,39 +359,51 @@ class CGunsSniper
         this.WeaponsCount--;     
     }
 
-    draw(pFire,pTargetPos,pTargetDir,pHumanSrc)
+    draw(pFire,pTargetPos,pTargetDir,pHumanSrc,pZoom)
     {
-      //Gun    
-      shaderVertexColorVector = [0.2,0.2,0.2,1.0];
-      mvPushMatrix();
-      mat4.scale(mvMatrix,mvMatrix,[0.2,2.5,0.2]);
-      Sphere.Draw(SphereShaderProgram);
-      mvPopMatrix();
-      shaderVertexColorVector = [0.25,0.25,0.25,1.0];
-      mvPushMatrix();
-      mat4.translate(mvMatrix,mvMatrix, [0.0,0.8,0.35]);
-      mat4.scale(mvMatrix,mvMatrix,[0.15,0.8,0.15]);        
-      Sphere.Draw(SphereShaderProgram);
-      mvPopMatrix();   
-      shaderVertexColorVector = [0.0,0.0,0.0,1.0];
-      mvPushMatrix();
-      mat4.translate(mvMatrix,mvMatrix, [0.0,1.2,-0.35]);
-      mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.4]);        
-      Sphere.Draw(SphereShaderProgram);
-      mvPopMatrix();   
-      mvPushMatrix();
-      mat4.translate(mvMatrix,mvMatrix, [0.0,-0.3,-0.2]);
-      mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.4]);        
-      Sphere.Draw(SphereShaderProgram);
-      mvPopMatrix();   
-      mvPushMatrix();
-      mat4.translate(mvMatrix,mvMatrix, [0.0,0.8,0.1]);
-      mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.2]);        
-      Sphere.Draw(SphereShaderProgram);
-      mvPopMatrix();   
-      
-      shaderVertexColorVector = [0.99,0.76,0.67,1.0];   
+        if(pZoom)
+        {
+            mvPushMatrix();
+			mat4.ortho(pMatrix, -1.0, 1.0, -1.0, 1.0, 0.0, 1.0);	
+			mat4.identity(mvMatrix);
+			squareDraw(this.ZoomShaderProgram);
+            mvPopMatrix();
+        }
+        else
+        {    
+            shaderVertexColorVector = [0.2,0.2,0.2,1.0];
+            mvPushMatrix();
+            mat4.scale(mvMatrix,mvMatrix,[0.2,2.5,0.2]);
+            Sphere.Draw(SphereShaderProgram);
+            mvPopMatrix();
+            shaderVertexColorVector = [0.25,0.25,0.25,1.0];
+            mvPushMatrix();
+            mat4.translate(mvMatrix,mvMatrix, [0.0,0.8,0.35]);
+            mat4.scale(mvMatrix,mvMatrix,[0.15,0.8,0.15]);        
+            Sphere.Draw(SphereShaderProgram);
+            mvPopMatrix();   
+            shaderVertexColorVector = [0.0,0.0,0.0,1.0];
+            mvPushMatrix();
+            mat4.translate(mvMatrix,mvMatrix, [0.0,1.2,-0.35]);
+            mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.4]);        
+            Sphere.Draw(SphereShaderProgram);
+            mvPopMatrix();   
+            mvPushMatrix();
+            mat4.translate(mvMatrix,mvMatrix, [0.0,-0.3,-0.2]);
+            mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.4]);        
+            Sphere.Draw(SphereShaderProgram);
+            mvPopMatrix();   
+            mvPushMatrix();
+            mat4.translate(mvMatrix,mvMatrix, [0.0,0.8,0.1]);
+            mat4.scale(mvMatrix,mvMatrix,[0.1,0.1,0.2]);        
+            Sphere.Draw(SphereShaderProgram);
+            mvPopMatrix();   
+            
+            shaderVertexColorVector = [0.99,0.76,0.67,1.0];   
+    
 
+        }          
+        
         if(pFire)
         {
             
