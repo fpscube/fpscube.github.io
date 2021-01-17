@@ -336,7 +336,6 @@ class CGunsSniper
             gGunZoomShaderProgram =  SquareInitShaders(gunZoomVertexShader,gunZoomFragmentShader);
         }     
         this.FireShaderProgram = gFireShaderProgram;
-        this.ZoomShaderProgram = gGunZoomShaderProgram;
     }
 
     fire(pTargetPos,pTargetDir,pHumanSrc)
@@ -361,16 +360,8 @@ class CGunsSniper
 
     draw(pFire,pTargetPos,pTargetDir,pHumanSrc,pZoom)
     {
-        if(pZoom)
+        if(!pZoom)
         {
-            mvPushMatrix();
-			mat4.ortho(pMatrix, -1.0, 1.0, -1.0, 1.0, 0.0, 1.0);	
-			mat4.identity(mvMatrix);
-			squareDraw(this.ZoomShaderProgram);
-            mvPopMatrix();
-        }
-        else
-        {    
             shaderVertexColorVector = [0.2,0.2,0.2,1.0];
             mvPushMatrix();
             mat4.scale(mvMatrix,mvMatrix,[0.2,2.5,0.2]);

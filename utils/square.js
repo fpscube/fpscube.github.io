@@ -1,26 +1,24 @@
-
-
-var SquareVertexShader = `    
-	attribute vec4 aVertexPosition;
-	uniform mat4 uMVMatrix;
-  uniform mat4 uPMatrix;    
-	void main() {
-  
-	gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
-
-	}
-`;
-
 var SquareFragmentShader = `
 precision lowp float;
    
 uniform vec4 uVertexColor;   
 
 void main() {
-  gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+  gl_FragColor = uVertexColor;
 }`;
 
+var SquareVertexShader = `    
+	attribute vec4 aVertexPosition;
+	uniform mat4 uMVMatrix;
+  uniform mat4 uPMatrix;  
+   
+	void main() {
 
+	// Multiply the position by the matrix.
+	gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
+
+	}
+`;
 var SquareShaderProgram;
 
 function SquareInitShaders(vertexShaderStr,fragmentShaderStr) {

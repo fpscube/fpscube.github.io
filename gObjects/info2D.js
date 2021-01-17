@@ -1,4 +1,6 @@
 
+
+
 class CInfo
 {
 	constructor()
@@ -20,6 +22,7 @@ class CInfo
 		this.TargetPos = null;
 		this.Level = null;
 		this.LevelTitleAnim = new CTimeAnim();
+		this.Zoom = 0;
 
 	}
 
@@ -82,6 +85,8 @@ class CInfo
 
 		this.WeaponsCount  = GameInst.Hero.GunSelected.WeaponsCount;
 		if (GameInst.Hero.GunSelected == GunsInst.No) this.WeaponsCount = 0;
+
+		this.Zoom  = GameInst.Hero.Zoom;
 		
 	}
 
@@ -150,6 +155,18 @@ class CInfo
 		mat4.scale(mvMatrix,mvMatrix,[2.0,2.0,1.0]);
 		squareDraw(SquareShaderProgram);	
 		
+
+		// Zoom Display
+		if(this.Zoom)
+		{
+			mvPushMatrix();
+			mat4.ortho(pMatrix, -1.0, 1.0, -1.0, 1.0, 0.0, 1.0);	
+			mat4.identity(mvMatrix);
+			squareDraw(gGunZoomShaderProgram);
+			mvPopMatrix();
+		}
+
+  
 		// Enemy name Display
 		ctx2d.font = "14px Arial";
 		ctx2d.fillText(this.EnName,canvas2D.width/2.0 + 14,canvas2D.height/2.0);
@@ -161,16 +178,15 @@ class CInfo
 		ctx2d.fillStyle = 'white'; 	
 		if(this.GameState == "Win") 	ctx2d.fillText("You Win - " + this.Time,canvas2D.width/2,canvas2D.height/2 );
 		if(this.GameState == "Lose") 	ctx2d.fillText("You Lose ",canvas2D.width/2,canvas2D.height/2 );
-
-		// Injury Display		
+		
+		// Injury Display			
 		if (this.InjuryAlpha>0)
 		{
-			shaderVertexColorVector = [0.0,1.0,0.0,0.5];
-			mat4.ortho(pMatrix, -1.0, 2.0, -1.0, 1.0, 0.0, 1.0);	
+			shaderVertexColorVector = [1.0,0.0,0.0,this.InjuryAlpha];
+			mat4.ortho(pMatrix, -1.0, 1.0, -1.0, 1.0, 0.0, 1.0);	
 			mat4.identity(mvMatrix);
 			squareDraw(SquareShaderProgram);
 		}
-		
 
 	}
 
