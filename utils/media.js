@@ -76,12 +76,22 @@ function mediaIsKey(name)
 function mediaSetMouseUpFct(evt){
 	if (evt.button==0) 
 	gMediaKeyPressed["Fire"]=0;
+    if (evt.button>0) 
+    {
+	    gMediaKeyPressed["Zoom"]=0;
+        gMediaKeyPressed["Exit"]=0;
+    }
 }
 
 function mediaSetMouseDownFct(evt){	
     fullScreenRequest();
 	if (evt.button==0)
     gMediaKeyPressed["Fire"]=1;
+    if (evt.button>0) 
+    {
+        gMediaKeyPressed["Zoom"]=1;
+        gMediaKeyPressed["Exit"]=1;
+    }
 }
 
 

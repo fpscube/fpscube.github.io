@@ -77,7 +77,7 @@ class CGame
 		switch (this.State) {
 			case "Play":
 				// Vehicule Exit
-				if (mediaIsKey(" ") &&  this.Hero.InVehicule)
+				if ((mediaIsKey("Exit")  || mediaIsKey(" ")) &&  this.Hero.InVehicule)
 				{
 					this.Vehicules.Free = true; 
 					this.Hero.ExitVehicule(this.Vehicules )
@@ -102,7 +102,7 @@ class CGame
 
 
 				var autoFire = mediaIsTouchModeActivated();
-				this.Hero.UpdateHero(mediaIsKey("Fire"),autoFire,this.CamDir,mediaIsMvtAsked(),mediaGetMvAngle(),this.Vehicules);
+				this.Hero.UpdateHero(autoFire,this.CamDir,mediaIsMvtAsked(),mediaGetMvAngle(),this.Vehicules);
 
 				//Update Cam Position function of CamDir and Vehicule Poisition
 				if(this.Hero.InVehicule)

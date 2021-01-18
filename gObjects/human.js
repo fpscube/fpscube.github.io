@@ -368,10 +368,12 @@ UpdateHeroDead()
 
 
 
-UpdateHero(pFire,pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnectionTimeInMs,pHumanInTarget)
+UpdateHero(pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnectionTimeInMs,pHumanInTarget)
 {
 
     var elapsed = timeGetElapsedInS();
+    var pFire = mediaIsKey("Fire");
+    var pZoom = mediaIsKey("Zoom");
     this.IsTouched = false;
     
     this.TargetPos=null;
@@ -406,7 +408,11 @@ UpdateHero(pFire,pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnecti
     }
 
 
-
+    // Toggle zoom sniper
+    if(this.GunSelected == this.Sniper)
+    {
+        this.Zoom = pZoom;
+    }
 
     // Remove guns with no more weapons
     if(this.GunSelected.WeaponsCount == 0) 
@@ -425,15 +431,7 @@ UpdateHero(pFire,pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnecti
             if((pFire || (this.TargetPos!=null && pFireAuto)) && this.GunSelected.WeaponsCount>0) 
             {
                 vec3.copy(this.HeadDir,pFireDir );
-                if(this.GunSelected == this.Sniper && this.Zoom == false )
-                {
-                    this.Zoom = true;
-                    this.State="ReadyToFire";
-                }
-                else
-                {
-                    this.State="Fire";
-                }
+                this.State="Fire";
             }   
             break;
         case "Fire": 
