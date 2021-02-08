@@ -61,7 +61,7 @@ int main(int Count, char *Strings[])
 
 	if(sizeof(gHeader) != K_HEADER_SIZE)
 	{
-		printf("Error Sizeof(gHeader):%d not equal K_HEADER_SIZE:%d",sizeof(gHeader),K_HEADER_SIZE);
+		printf("Error Sizeof(gHeader):%d not equal K_HEADER_SIZE:%d",(int)sizeof(gHeader),(int)K_HEADER_SIZE);
 		return 0;
 	}
 

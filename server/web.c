@@ -49,7 +49,7 @@ int main(int Count, char *Strings[])
 
 	if(sizeof(gHeader) != K_HEADER_SIZE)
 	{
-		printf("Error Sizeof(gHeader):%d not equal K_HEADER_SIZE:%d",sizeof(gHeader),K_HEADER_SIZE);
+		printf("Error Sizeof(gHeader):%d not equal K_HEADER_SIZE:%d",(int)sizeof(gHeader),(int)K_HEADER_SIZE);
 		return 0;
 	}
 	
@@ -69,8 +69,8 @@ int main(int Count, char *Strings[])
 	}
 
 	// Add Size of message in http header
-	char lengthString[8];
-	sprintf (lengthString,"%9d\n\n", fileSize);
+	char lengthString[15];
+	sprintf (lengthString,"%9d\n\n", (int)fileSize);
 	memcpy(gTxBuffer.header + K_HEADER_SIZE - 11,lengthString,11);	
 
     //set of socket descriptors  
@@ -78,7 +78,7 @@ int main(int Count, char *Strings[])
 
 	printf("Server initalize");
 
-	printf("-Initialise %d client_sd[] to 0\n",K_MAX_NB_PLAYER);
+	printf("-Initialise %d client_sd[] to 0\n",(int)K_MAX_NB_PLAYER);
     for (int i = 0; i < K_MAX_NB_PLAYER; i++)   
     {   
         client_fd[i] = 0;   
@@ -96,7 +96,7 @@ int main(int Count, char *Strings[])
 	self.sin_addr.s_addr = inet_addr(MY_ADDR);
 
 	printf("-Bind structure to the socket\n");
-    if ( bind(socketfd, (struct sockaddr*)&self, sizeof(self)) != 0 )
+    if ( bind(socketfd, (struct sockaddr*)&self, (int)sizeof(self)) != 0 )
 	{
 		perror("socket--bind");
 		exit(errno);
