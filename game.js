@@ -7,8 +7,8 @@ class CGame
 		if(playerName == "") playerName="NoName";
 		this.UserData = {};
 		this.UserData["playerName"]=playerName;
-		this.CurrentLevel = 0;
 		this.init();
+
 	}
 
  	init() {
@@ -23,6 +23,10 @@ class CGame
 		this.EndAnim = new CTimeAnim();
 		this.LastFire = 0;
 		this.HumanInTarget = null;
+
+
+		this.Save = new CSave();
+		this.CurrentLevel = this.Save.getLevel();
 
 		// gl init
 		gl.clearColor(6.0/256.0, 10.0/256.0, 42.0/256.0, 1.0);	
@@ -97,6 +101,8 @@ class CGame
 				{
 					this.State="Win";
 					this.CurrentLevel+=1;
+
+					this.Save.saveLevel(this.CurrentLevel);
 					this.EndAnim.start(2000,0,1);
 				}
 

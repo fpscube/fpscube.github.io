@@ -23,6 +23,7 @@ class CInfo
 		this.Level = null;
 		this.LevelTitleAnim = new CTimeAnim();
 		this.Zoom = 0;
+		this.CurrentLevel  = -1;
 
 	}
 
