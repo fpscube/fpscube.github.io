@@ -373,7 +373,7 @@ UpdateHero(pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnectionTime
 
     var elapsed = timeGetElapsedInS();
     var pFire = mediaIsKey("Fire");
-    var pZoom = mediaIsKey("Zoom");
+    var pExit = mediaIsKey("Exit");
     this.IsTouched = false;
     
     this.TargetPos=null;
@@ -409,9 +409,13 @@ UpdateHero(pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnectionTime
 
 
     // Toggle zoom sniper
-    if(this.GunSelected == this.Sniper)
+    if(this.GunSelected == this.Sniper && pFire)
     {
-        this.Zoom = pZoom;
+        this.Zoom = true;
+    }
+    if(this.GunSelected == this.Sniper && pExit)
+    {
+        this.Zoom = false;
     }
 
     // Remove guns with no more weapons

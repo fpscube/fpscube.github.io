@@ -114,6 +114,7 @@ class CInfo
 
 
 		ctx2d.fillText(legendText,10,15);
+	
 		
 		if (this.EventTab!=null)
 		{
@@ -146,6 +147,15 @@ class CInfo
 			ctx2d.font = "Bold " + fontSize + "px Arial";
 			
 			ctx2d.fillText(text,xPos,yPos);
+
+
+			ctx2d.fillStyle = 'white';
+			ctx2d.globalAlpha = 1.0;
+			ctx2d.font = "20px Arial";
+			var offset = 150;
+			ctx2d.fillText("Mouse Left : Fire",50,offset);
+			ctx2d.fillText("Mouse Right : Exit Vehicule",50,offset + 30*1);
+			ctx2d.fillText("Mouse Scroll Wheel : Change weapon ",50,offset + 30*2);
 		}
 		
 		// Cross Display

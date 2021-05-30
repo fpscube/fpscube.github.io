@@ -40,7 +40,7 @@ function mediaMouseMove(evt) {
 
 function mediaSetKeyDownFct(evt)
 {
-    if (evt.key=="ArrowUp" || evt.key=="z" ){
+    if (evt.key=="ArrowUp" || evt.key=="z" || evt.key=="w" ){
         gMediaKeyPressed["Up"]=1;
         gMediaKeyPressed["Down"]=0;
     }
@@ -52,7 +52,7 @@ function mediaSetKeyDownFct(evt)
         gMediaKeyPressed["Left"]=0;
         gMediaKeyPressed["Right"]=1;
     }
-    else if (evt.key=="ArrowLeft" || evt.key=="q" ){
+    else if (evt.key=="ArrowLeft" || evt.key=="q"  || evt.key=="a" ){
         gMediaKeyPressed["Left"]=1;
         gMediaKeyPressed["Right"]=0;
     }
@@ -61,10 +61,10 @@ function mediaSetKeyDownFct(evt)
 
 function mediaSetKeyUpFct(evt)
 {
-    if (evt.key=="ArrowUp" || evt.key=="z" ){gMediaKeyPressed["Up"]=0;}
+    if (evt.key=="ArrowUp" || evt.key=="z"  || evt.key=="w" ){gMediaKeyPressed["Up"]=0;}
     else if (evt.key=="ArrowDown" || evt.key=="s" ){gMediaKeyPressed["Down"]=0;}
     else if (evt.key=="ArrowRight" || evt.key=="d" ){gMediaKeyPressed["Right"]=0;}
-    else if (evt.key=="ArrowLeft" || evt.key=="q" ){gMediaKeyPressed["Left"]=0;}
+    else if (evt.key=="ArrowLeft" || evt.key=="q"  || evt.key=="a" ){gMediaKeyPressed["Left"]=0;}
     gMediaKeyPressed[evt.key]=0;
 }
 
