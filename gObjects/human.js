@@ -374,6 +374,7 @@ UpdateHero(pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnectionTime
     var elapsed = timeGetElapsedInS();
     var pFire = mediaIsKey("Fire");
     var pExit = mediaIsKey("Exit");
+    var pJump = mediaIsKey(" ");
     this.IsTouched = false;
     
     this.TargetPos=null;
@@ -407,6 +408,10 @@ UpdateHero(pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnectionTime
         this.GunSelected = this.Uzi;
     }
 
+    if(pJump && this.VSpeed==0)
+    {
+        this.VSpeed=110;
+    }
 
     // Toggle zoom sniper
     if(this.GunSelected == this.Sniper && pFire)

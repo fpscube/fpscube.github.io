@@ -95,13 +95,14 @@ class CGame
 				{
 					this.Hero.Life = 0 ;
 					this.State="Lose";
+					this.CurrentLevel=0;
+					this.Save.saveLevel(this.CurrentLevel);
 					this.EndAnim.start(2000,0,1);
 				}	
 				else if (this.Enemies.NbALive==0) 
 				{
 					this.State="Win";
 					this.CurrentLevel+=1;
-
 					this.Save.saveLevel(this.CurrentLevel);
 					this.EndAnim.start(2000,0,1);
 				}

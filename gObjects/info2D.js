@@ -153,9 +153,10 @@ class CInfo
 			ctx2d.globalAlpha = 1.0;
 			ctx2d.font = "20px Arial";
 			var offset = 150;
-			ctx2d.fillText("Mouse Left : Fire",50,offset);
-			ctx2d.fillText("Mouse Right : Exit Vehicule",50,offset + 30*1);
-			ctx2d.fillText("Mouse Scroll Wheel : Change weapon ",50,offset + 30*2);
+			ctx2d.fillText("Fire: Mouse Left ",50,offset);
+			ctx2d.fillText("Exit Vehicule: Mouse Right",50,offset + 30*1);
+			ctx2d.fillText("Change weapon: Mouse Scroll Wheel",50,offset + 30*2);
+			ctx2d.fillText("Jump: Space",50,offset + 30*3);
 		}
 		
 		// Cross Display
