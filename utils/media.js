@@ -9,6 +9,7 @@ var gMediaTouchMode=false;
 var gMediaDoubleTapTimer=0;
 var gMediaDoubleTapX=0;
 var gMediaDoubleTapY=0;
+var gMediaSpeedCoef = 3.5;
 
 function mediaInit()
 {
@@ -31,11 +32,21 @@ function fullScreenRequest()
 	if(container.mozRequestFullScreen)	container.mozRequestFullScreen();
 }
 
+function mediaSetSpeedSlow(speedCoef)
+{
+    gMediaSpeedCoef= 0.1
+}
+
+
+function mediaSetSpeedNormal(speedCoef)
+{
+    gMediaSpeedCoef =  2.5
+} 
+
 function mediaMouseMove(evt) {
     gMediaTouchMode = false;
-	speedCoef = 2.5;
-	gMediaCamMvVec[0] += speedCoef*evt.movementX/screen.width;
-	gMediaCamMvVec[1] += speedCoef*evt.movementY/screen.height;
+	gMediaCamMvVec[0] += gMediaSpeedCoef*evt.movementX/screen.width;
+	gMediaCamMvVec[1] += gMediaSpeedCoef*evt.movementY/screen.height;
 }
 
 function mediaSetKeyDownFct(evt)
@@ -72,6 +83,8 @@ function mediaIsKey(name)
 {   
     return (gMediaKeyPressed[name]>0);
 }
+
+
 
 function mediaSetMouseUpFct(evt){
 	if (evt.button==0) 
@@ -194,9 +207,8 @@ function mediaSetTouchMove(evt){
         }
         else
         {
-            speedCoef = 3.5;
-            gMediaCamMvVec[0] += speedCoef*touchDir[0]/screen.width;
-            gMediaCamMvVec[1] += speedCoef*touchDir[1]/screen.height;    
+            gMediaCamMvVec[0] += gMediaSpeedCoef*touchDir[0]/screen.width;
+            gMediaCamMvVec[1] += gMediaSpeedCoef*touchDir[1]/screen.height;    
             gMediaTouchStartPos[id] = [ touches[i].pageX,touches[i].pageY];
         }
     }
