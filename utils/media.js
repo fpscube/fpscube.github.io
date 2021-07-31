@@ -1,5 +1,7 @@
+const { ESTALE } = require("constants");
 
 var gMediaKeyPressed;
+var gMediaKeyPressedOnce;
 var gMediaTouchStartPos;
 var gMediaCamMvVec;
 var gMediaTouchMvInProgress;
@@ -14,6 +16,7 @@ var gMediaSpeedCoef = 3.5;
 function mediaInit()
 {
     gMediaKeyPressed={};
+    gMediaKeyPressedOnce={};
     gMediaTouchStartPos={};
     gMediaCamMvVec=[0,0];
     gMediaTouchMvInProgress=0;
@@ -27,9 +30,9 @@ function mediaInit()
 
 function fullScreenRequest()
 {
-	var container = document.getElementById('game');
-	if(container.webkitRequestFullScreen) container.webkitRequestFullScreen();
-	if(container.mozRequestFullScreen)	container.mozRequestFullScreen();
+	// var container = document.getElementById('game');
+	// if(container.webkitRequestFullScreen) container.webkitRequestFullScreen();
+	// if(container.mozRequestFullScreen)	container.mozRequestFullScreen();
 }
 
 function mediaSetSpeedSlow(speedCoef)
@@ -77,6 +80,7 @@ function mediaSetKeyUpFct(evt)
     else if (evt.key=="ArrowRight" || evt.key=="d" ){gMediaKeyPressed["Right"]=0;}
     else if (evt.key=="ArrowLeft" || evt.key=="q"  || evt.key=="a" ){gMediaKeyPressed["Left"]=0;}
     gMediaKeyPressed[evt.key]=0;
+    gMediaKeyPressedOnce[evt.key]=null;
 }
 
 function mediaIsKey(name)
@@ -84,6 +88,18 @@ function mediaIsKey(name)
     return (gMediaKeyPressed[name]>0);
 }
 
+function mediaIsKeyOnce(name)
+{   
+    if (gMediaKeyPressed[name]>0 && gMediaKeyPressedOnce[name]==null)
+    {
+        gMediaKeyPressedOnce[name]=1;
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
 
 
 function mediaSetMouseUpFct(evt){

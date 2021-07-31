@@ -35,6 +35,7 @@ const mimeTypes = {
   '.jgp': 'image/jpeg',
   '.css': 'text/css',
   '.js': 'text/javascript',
+  '.json': 'text/javascript',
   '.png': 'image/png',
   '.ico': 'image/x-icon',
 };
@@ -55,13 +56,11 @@ const getContentType = pathName => {
 
 // Main method to be called to start the server. 
 //'port' defaults to 3000 and 'host' defaults to 127.0.0.1
-server.init = (port = 8080, host = '127.0.0.1') => {
+server.init = (port = 8081, host = '127.0.0.1') => {
   httpServer.listen(port, () => {
     console.log(`\x1b[32m%s\x1b[0m`, `Server is running at http://${host}:${port}`);
   });
 };
 module.exports = server;
-
-console.log("coucou")
 
 server.init();

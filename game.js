@@ -7,8 +7,8 @@ class CGame
 		if(playerName == "") playerName="NoName";
 		this.UserData = {};
 		this.UserData["playerName"]=playerName;
+		this.Level={};
 		this.init();
-
 	}
 
  	init() {
@@ -19,6 +19,7 @@ class CGame
 		this.CamPos = [-370,13,100]; 
 		this.SpeedCoef=50;
 		this.CamDir = [0.88,-0.15,-0.43];
+		this.CamSpeed = 50;
 		this.State = "Play";
 		this.EndAnim = new CTimeAnim();
 		this.LastFire = 0;
@@ -41,10 +42,11 @@ class CGame
 		groundInit();
 		this.Screen = new CScreen("canvas3D","canvas2D");
 		this.Guns = new CGuns();
-		this.Stone = new CStone();
+		this.Stone = new CStone(this);
 		this.Vehicules = new CVehicules();
 		this.Info = new CInfo();
-		this.Trees = new CTrees();
+		this.Trees = new CTrees(this);
+		
 		this.Enemies = new CEnemies(this.CurrentLevel*10 + 5);
 		var intPos = [-630,600,90];
 		this.Hero = new CHuman(intPos,2,[1,0,-1],true,this.UserData["playerName"].substring(0, 10));
@@ -77,8 +79,45 @@ class CGame
 		if(mediaWheelEvt()) {
 			this.Hero.ChangeGun();
 		}
+
+		if(mediaIsKeyOnce("c")) this.State="Create";
+		if(mediaIsKeyOnce("p")) this.State="Play";
 		// Game State Machine
 		switch (this.State) {
+			case "Create":
+				if(mediaIsKeyOnce("+"))this.CamSpeed*=2.0;
+				if(mediaIsKeyOnce("-"))this.CamSpeed/=2.0;
+
+				if(mediaIsMvtAsked())
+				{
+					var mvDir = [0,0,0];
+					vec3.rotateY(mvDir,this.CamDir,[0,0,0],mediaGetMvAngle());
+					
+					this.CamPos[0] = this.CamPos[0] +  mvDir[0]*gElapsed*this.CamSpeed;
+					this.CamPos[2] = this.CamPos[2] +  mvDir[2]*gElapsed*this.CamSpeed;
+					this.CamPos[1] = this.CamPos[1] +  mvDir[1]*gElapsed*this.CamSpeed;
+				}
+				if(mediaIsKey(" "))//jump
+				{
+
+					this.CamPos[1] +=gElapsed*this.CamSpeed;
+				}
+
+				if(mediaIsKeyOnce('&')) this.Stone.add();
+				if(mediaIsKeyOnce("\u00e9"))	 this.Trees.add();
+				if(mediaIsKeyOnce("7"))
+				{
+					try{
+						navigator.clipboard.readText().then(
+							clipText => this.Level = JSON.parse(clipText));
+					}
+					catch (e) {
+						alert("you need a valid json in your clipboard")
+					}
+				}
+
+				if(mediaIsKeyOnce("9")) navigator.clipboard.writeText(JSON.stringify(this.Level , null, 2));
+			break;
 			case "Play":
 				// Vehicule Exit
 				if ((mediaIsKey("Exit")  || mediaIsKey(" ")) &&  this.Hero.InVehicule)
