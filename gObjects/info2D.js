@@ -41,6 +41,9 @@ class CInfo
 		this.EnName = "";
 		this.EnLife = "";
 		this.CrossColor = [0.0,0.0,0.0,0.0];
+		this.HelpCreationMode = 0;
+
+
 		if (GameInst.State=="Play")
 		{
 			if(GameInst.HumanInTarget!=null)	{
@@ -57,6 +60,10 @@ class CInfo
 			}
 			if (GameInst.Hero.IsTouched) this.AnimInjury.start(200,0.7,0.0);
 	
+		}
+		else if (GameInst.State=="Create")
+		{
+			this.HelpCreationMode = 1;
 		}
 		this.LifeQt = GameInst.Hero.Life;
 		this.InjuryAlpha = this.AnimInjury.getValue();
@@ -134,8 +141,15 @@ class CInfo
 			
 		}
 		
+	
+
+		// help creation mode
+		if(this.HelpCreationMode)
+		{
+	
+		}
 		// LEVEL TITLE Display
-		if(this.LevelTitleAnim.running)
+		else if(this.LevelTitleAnim.running)
 		{
 			var text = "LEVEL " + this.CurrentLevel + " : KILL " + this.NbEnemies + " ENEMIES";
 			var coef = this.LevelTitleAnim.getValue();
@@ -158,6 +172,8 @@ class CInfo
 			ctx2d.fillText("Change weapon: Mouse Scroll Wheel",50,offset + 30*2);
 			ctx2d.fillText("Jump: Space",50,offset + 30*3);
 		}
+		
+				
 		
 		// Cross Display
 		shaderVertexColorVector  = this.CrossColor;
