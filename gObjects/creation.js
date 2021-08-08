@@ -9,7 +9,18 @@ class CCreation
         this.MenuLevel = 1;
         this.SelectedObject = ""
         this.SelectedObjectId = 0
+        this.CameraDist = 50.0;
 
+    }
+
+    _mvCamToSelectedObject()
+    {
+        if(this.SelectedObjectType.length >0)
+        {
+            GameInst.CamPos[0] = this.SelectedObjectType[this.SelectedObjectId].position[0] - GameInst.CamDir[0]*this.CameraDist;
+            GameInst.CamPos[2] = this.SelectedObjectType[this.SelectedObjectId].position[2] - GameInst.CamDir[2]*this.CameraDist;
+            GameInst.CamPos[1] = this.SelectedObjectType[this.SelectedObjectId].position[1] - GameInst.CamDir[1]*this.CameraDist;
+        }
     }
 
 
@@ -18,9 +29,6 @@ class CCreation
     {
 
 		var gElapsed = timeGetElapsedInS();
-        if(mediaIsKeyOnce("+"))this.CamSpeed*=2.0;
-        if(mediaIsKeyOnce("-"))this.CamSpeed/=2.0;
-
         if(mediaIsMvtAsked())
         {
             var mvDir = [0,0,0];
@@ -38,6 +46,9 @@ class CCreation
 
         if(this.MenuLevel == 1)
         {
+            if(mediaIsKeyOnce("+"))this.CamSpeed*=2.0;
+            if(mediaIsKeyOnce("-"))this.CamSpeed/=2.0;
+    
             if(mediaIsKeyOnce('1'))
              {
                  this.SelectedObjectType = GameInst.Level["stones"]; this.MenuLevel=2;
@@ -58,84 +69,80 @@ class CCreation
             if(this.MenuLevel==2)
             {
                 this.SelectedObjectId = this.SelectedObjectType.length -1
-                if(this.SelectedObjectType.length >0)
-                {
-                    GameInst.CamPos[0] = this.SelectedObjectType[this.SelectedObjectId].position[0] - GameInst.CamDir[0]*50.0;
-                    GameInst.CamPos[2] = this.SelectedObjectType[this.SelectedObjectId].position[2] - GameInst.CamDir[2]*50.0;
-                    GameInst.CamPos[1] = this.SelectedObjectType[this.SelectedObjectId].position[1] - GameInst.CamDir[1]*50.0;
-                }
+                this._mvCamToSelectedObject();
+
             }
         }
         else if(this.MenuLevel == 2)
         {
             if(this.SelectedObjectType.length >0)
             {
-                this.SelectedObjectType[this.SelectedObjectId].position = [GameInst.CamPos[0] +  GameInst.CamDir[0]*50.0,
-                                                    GameInst.CamPos[1] +  GameInst.CamDir[1]*50.0,
-                                                    GameInst.CamPos[2] +  GameInst.CamDir[2]*50.0];
+                this.SelectedObjectType[this.SelectedObjectId].position = [GameInst.CamPos[0] +  GameInst.CamDir[0]*this.CameraDist,
+                                                    GameInst.CamPos[1] +  GameInst.CamDir[1]*this.CameraDist,
+                                                    GameInst.CamPos[2] +  GameInst.CamDir[2]*this.CameraDist];
             }
 
+            if(mediaIsKeyOnce('+'))
+            {
+                this.CameraDist*=0.75;
+                this._mvCamToSelectedObject();
+            }  
+            else if(mediaIsKeyOnce('-')) 
+            {
+                this.CameraDist*=1.5;
+                this._mvCamToSelectedObject();
+            } 
+    
 
-            if(mediaIsKeyOnce('1'))
+            else if(mediaIsKeyOnce('1'))// CREATE Obj
             {
                 this.SelectedObjectType.push(
                     {   
                         "position":
-                            [GameInst.CamPos[0] +  GameInst.CamDir[0]*50.0,
-                             GameInst.CamPos[1] +  GameInst.CamDir[1]*50.0,
-                             GameInst.CamPos[2] +  GameInst.CamDir[2]*50.0],
+                            [GameInst.CamPos[0] +  GameInst.CamDir[0]*this.CameraDist,
+                             GameInst.CamPos[1] +  GameInst.CamDir[1]*this.CameraDist,
+                             GameInst.CamPos[2] +  GameInst.CamDir[2]*this.CameraDist],
                         "color":[0.52,0.7,1.0,0.6]
                     }
                 );
                 this.SelectedObjectId = this.SelectedObjectType.length-1
+                this._mvCamToSelectedObject();
             } 
-            if(mediaIsKeyOnce('2')) 
+            else if(mediaIsKeyOnce('2')) // DELETE Obj
             {
                 if(this.SelectedObjectType.length >0)
                 {
-                    this.SelectedObjectType.splice(this.SelectedObjectId,1)
+                    this.SelectedObjectType.splice(this.SelectedObjectId,1)  
+                    this.MenuLevel=1
                 }
                 else
                 {
                     alert("there is no object to remove")
                 }
-                if(this.SelectedObjectId>=this.SelectedObjectType.length )
-                {
-                    this.SelectedObjectId = this.SelectedObjectType.length -1
-                }
-
-
-                if(this.SelectedObjectType.length >0)
-                {
-                    GameInst.CamPos[0] = this.SelectedObjectType[this.SelectedObjectId].position[0] - GameInst.CamDir[0]*50.0;
-                    GameInst.CamPos[2] = this.SelectedObjectType[this.SelectedObjectId].position[2] - GameInst.CamDir[2]*50.0;
-                    GameInst.CamPos[1] = this.SelectedObjectType[this.SelectedObjectId].position[1] - GameInst.CamDir[1]*50.0;
-                }   
+        
             }
-            if(mediaIsKeyOnce("4"))
+            else if(mediaIsKeyOnce("4")) // Prev Object
             {
                 if(this.SelectedObjectType.length >0)
                 {
                     this.SelectedObjectId = (this.SelectedObjectId-1)
                     if(this.SelectedObjectId <0) this.SelectedObjectId = (this.SelectedObjectType.length -1)
-                    GameInst.CamPos[0] = this.SelectedObjectType[this.SelectedObjectId].position[0] - GameInst.CamDir[0]*50.0;
-                    GameInst.CamPos[2] = this.SelectedObjectType[this.SelectedObjectId].position[2] - GameInst.CamDir[2]*50.0;
-                    GameInst.CamPos[1] = this.SelectedObjectType[this.SelectedObjectId].position[1] - GameInst.CamDir[1]*50.0;
                 }
+                this._mvCamToSelectedObject();
 
             }
-            if(mediaIsKeyOnce("5")) 
+            else if(mediaIsKeyOnce("5")) // Next Object
             {
                 if(this.SelectedObjectType.length >0)
                 {
                     this.SelectedObjectId = (this.SelectedObjectId+1) % this.SelectedObjectType.length
-                    GameInst.CamPos[0] = this.SelectedObjectType[this.SelectedObjectId].position[0] - GameInst.CamDir[0]*50.0;
-                    GameInst.CamPos[2] = this.SelectedObjectType[this.SelectedObjectId].position[2] - GameInst.CamDir[2]*50.0;
-                    GameInst.CamPos[1] = this.SelectedObjectType[this.SelectedObjectId].position[1] - GameInst.CamDir[1]*50.0;
                 }
+                this._mvCamToSelectedObject();
             }
-            if(mediaIsKeyOnce("6"))
+            else if(mediaIsKeyOnce("6")) // Return Object
+            {
                 this.MenuLevel=1
+            }
             
         }
     }
@@ -151,33 +158,26 @@ class CCreation
             ctx2d.font = "20px Arial";
             var offset = 150;
             ctx2d.fillText("Creation Mode",50,offset);
-            ctx2d.fillText("1 - Stone",50,offset + 30*1);
-            ctx2d.fillText("2 - Tree",50,offset + 30*2);
-            ctx2d.fillText("8 - LOAD level from clipboard ",50,offset + 30*4);
-            ctx2d.fillText("9 - WRITE level to clipboard ",50,offset + 30*5);
+            ctx2d.fillText("  1 : Stone",50,offset + 30*1);
+            ctx2d.fillText("  2 : Tree",50,offset + 30*2);
+            ctx2d.fillText("  7 : Load from clipboard ",50,offset + 30*3);
+            ctx2d.fillText("  9 : Save to clipboard ",50,offset + 30*4);
+            ctx2d.fillText("-/+ : Move Speed",50,offset + 30*5);
         }
         else if (this.MenuLevel==2)
-        {
+        {   
             ctx2d.fillStyle = 'white';
             ctx2d.globalAlpha = 1.0;
             ctx2d.font = "20px Arial";
             var offset = 150;
             ctx2d.fillText("Creation Mode",50,offset);
-            ctx2d.fillText("1 - New Object",50,offset + 30*1);
-            ctx2d.fillText("2 - Delete",50,offset + 30*2);
-            ctx2d.fillText("4 - Previous",50,offset + 30*3);
-            ctx2d.fillText("5 - Next",50,offset + 30*4);
-            ctx2d.fillText("6 - Exit",50,offset + 30*5);
+            ctx2d.fillText("  1 : New Object",50,offset + 30*1);
+            ctx2d.fillText("  2 : Delete",50,offset + 30*2);
+            ctx2d.fillText("  4 : Previous",50,offset + 30*3);
+            ctx2d.fillText("  5 : Next",50,offset + 30*4);
+            ctx2d.fillText("  6 : Exit",50,offset + 30*5);
+            ctx2d.fillText("-/+ : Zoom",50,offset + 30*6);
 
-
-            if(this.SelectedObjectId>0)
-            {
-                mvPushMatrix();
-                mat4.translate(mvMatrix,mvMatrix, this.SelectedObjectType[this.SelectedObjectId-1].position);
-                mat4.scale(mvMatrix,mvMatrix,[0.3,1000,0.3]);
-                Sphere.Draw(SphereShaderProgram);
-                mvPopMatrix();
-            }
         }
 
 

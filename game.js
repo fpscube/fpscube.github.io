@@ -75,10 +75,6 @@ class CGame
 		//Clear Human In Target
 		this.HumanInTarget = null;
 
-		//Change Gun
-		if(mediaWheelEvt()) {
-			this.Hero.ChangeGun();
-		}
 
 		if(mediaIsKeyOnce("c"))
 		{
@@ -94,6 +90,12 @@ class CGame
 				this.Creation.update();
 				break;
 			case "Play":
+
+				//Change Gun
+				if(mediaWheelEvt()) {
+					this.Hero.ChangeGun();
+				}
+
 				// Vehicule Exit
 				if ((mediaIsKey("Exit")  || mediaIsKey(" ")) &&  this.Hero.InVehicule)
 				{
