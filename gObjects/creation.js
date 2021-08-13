@@ -17,6 +17,10 @@ class CCreation
     {
         if(this.SelectedObjectType.length >0)
         {
+            if(this.SelectedObjectId >= this.SelectedObjectType.length)
+            {
+                this.SelectedObjectId = this.SelectedObjectType.length-1;
+            }
             GameInst.CamPos[0] = this.SelectedObjectType[this.SelectedObjectId].position[0] - GameInst.CamDir[0]*this.CameraDist;
             GameInst.CamPos[2] = this.SelectedObjectType[this.SelectedObjectId].position[2] - GameInst.CamDir[2]*this.CameraDist;
             GameInst.CamPos[1] = this.SelectedObjectType[this.SelectedObjectId].position[1] - GameInst.CamDir[1]*this.CameraDist;
@@ -49,11 +53,11 @@ class CCreation
             if(mediaIsKeyOnce("+"))this.CamSpeed*=2.0;
             if(mediaIsKeyOnce("-"))this.CamSpeed/=2.0;
     
-            if(mediaIsKeyOnce('1'))
-             {
-                 this.SelectedObjectType = GameInst.Level["stones"]; this.MenuLevel=2;
-                }
-            if(mediaIsKeyOnce('2')) {this.SelectedObjectType = GameInst.Level["trees"]; this.MenuLevel=2;}
+    
+            if(mediaIsKeyOnce('1')) {this.SelectedObjectType = GameInst.Level["stones"];this.MenuLevel=2;}
+            if(mediaIsKeyOnce('2')) {this.SelectedObjectType = GameInst.Level["trees"]; this.MenuLevel=2;}   
+            if(mediaIsKeyOnce('3')) {this.SelectedObjectType = GameInst.Level["enemies"]; this.MenuLevel=2;}
+
             if(mediaIsKeyOnce("7"))
             {
                 try{
@@ -102,7 +106,7 @@ class CCreation
                             [GameInst.CamPos[0] +  GameInst.CamDir[0]*this.CameraDist,
                              GameInst.CamPos[1] +  GameInst.CamDir[1]*this.CameraDist,
                              GameInst.CamPos[2] +  GameInst.CamDir[2]*this.CameraDist],
-                        "color":[0.52,0.7,1.0,0.6]
+                        "color":[0.52,0.7,1.0,0.6],
                     }
                 );
                 this.SelectedObjectId = this.SelectedObjectType.length-1
@@ -113,12 +117,13 @@ class CCreation
                 if(this.SelectedObjectType.length >0)
                 {
                     this.SelectedObjectType.splice(this.SelectedObjectId,1)  
-                    this.MenuLevel=1
                 }
                 else
                 {
                     alert("there is no object to remove")
                 }
+      
+                this._mvCamToSelectedObject();
         
             }
             else if(mediaIsKeyOnce("4")) // Prev Object
@@ -160,9 +165,10 @@ class CCreation
             ctx2d.fillText("Creation Mode",50,offset);
             ctx2d.fillText("  1 : Stone",50,offset + 30*1);
             ctx2d.fillText("  2 : Tree",50,offset + 30*2);
-            ctx2d.fillText("  7 : Load from clipboard ",50,offset + 30*3);
-            ctx2d.fillText("  9 : Save to clipboard ",50,offset + 30*4);
-            ctx2d.fillText("-/+ : Move Speed",50,offset + 30*5);
+            ctx2d.fillText("  3 : Enemie",50,offset + 30*3);
+            ctx2d.fillText("  7 : Load from clipboard ",50,offset + 30*4);
+            ctx2d.fillText("  9 : Save to clipboard ",50,offset + 30*5);
+            ctx2d.fillText("-/+ : Move Speed",50,offset + 30*6);
         }
         else if (this.MenuLevel==2)
         {   

@@ -1,106 +1,5 @@
-var CEnemiesInst;
+
 var CHumansInst;
-
-
-class CEnemies
-{
-
-    constructor(pNbEnemies)
-    {
-        this.humans=[];
-    
-        var i=0;
-        var enCount=0;
-        while(enCount<pNbEnemies)
-        {
-
-            var  x = Math.sin(5*(i/pNbEnemies*2*Math.PI)) *150;
-            var  z = Math.sin(4*(i/pNbEnemies*2*Math.PI)) *150;
-            var  y = groundGetY(x,z);
-
-            var dir = [-x,0.0,z];
-
-            if (!groundIsUnderWater(y))
-            {
-                this.humans.push(new CHuman([x,1000,z],Math.random()*8,dir,false,"Bot_" + i));
-                enCount+=1;
-            }
-            i++;
-        }
-    
-         //   y =groundGetY(-300,20) +30.0;
-       //     this.humans.push(new CHuman([-300,y,20],2));
-	
-        this.NbALive=pNbEnemies;
-        this.IsInTarget = null;
-
-        CEnemiesInst = this;
-    }
-
-
-
-    update(pCamPos,pCamDir,pHeroPos)
-    {
-
-        var bestTargetSquaredDist = null;
-        if(GameInst.HumanInTarget != null)
-        {
-            bestTargetSquaredDist = vec3.squaredDistance(pHeroPos,GameInst.HumanInTarget.CamRayCollisionPos);
-        }
-
-        this.NbALive=0;
-        
-        for(var i =0 ;i<this.humans.length;i++){
-            this.humans[i].UpdateEnemie(pCamPos,pCamDir,pHeroPos);
-            if(!(this.humans[i].IsDead()))
-            { 
-                this.NbALive++;
-            }
-            if (this.humans[i].CamRayCollisionPos==null) continue;
-            
-            var targetSquaredDist = vec3.squaredDistance(pHeroPos,this.humans[i].CamRayCollisionPos);
-
-            if(GameInst.HumanInTarget==null || (targetSquaredDist < bestTargetSquaredDist))
-            {
-                GameInst.HumanInTarget =  this.humans[i];
-                bestTargetSquaredDist = targetSquaredDist;
-            }
-		} 
-    }
-
-    draw()
-    {
-        for(var i =0 ;i<this.humans.length;i++){
-            this.humans[i].draw()
-		} 
-
-    }
-
-    getCollisionPoint(pRayPoint1,pRayPoint2,pLastCollPt,pDistSquaredOffset)
-    {
-        var collision = pLastCollPt;
-        for(var i =0 ;i<this.humans.length;i++){
-            collision = this.humans[i].getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
-        }
-        return collision;
-    }
-
-    
-    getHumansInSphere(pCenter,pRadius)
-    {
-        var humanList = [];
-        var squaredRadius = pRadius*pRadius;
-
-        for(var i =0 ;i<this.humans.length;i++){
-            if (vec3.squaredDistance(this.humans[i].Pos,pCenter) < squaredRadius)
-            {
-                humanList.push(this.humans[i]);
-            }
-        }
-        return humanList;
-    }
-
-}
 
 
 
@@ -589,13 +488,20 @@ UpdateEnemie(pCamPos,pCamDir,pHeroPos)
         var objectCollision = this.computeNewPosition();
         var rotationAngle = -3.14;
 
-        while((groundIsUnderWater(groundGetY(this.NewPos[0],this.NewPos[2])) || objectCollision)  && rotationAngle<3.14)
+        if(groundIsUnderWater(this.Pos[1]) )
         {
-            rotationAngle+=0.5;
-            vec3.rotateY(this.Dir,this.Dir,[0,0,0],rotationAngle);
-            this.AnimDir.running = false;
-            objectCollision = this.computeNewPosition();
-        } 
+            this.State = "StartFalling";
+        }
+        else
+        {
+            while((groundIsUnderWater(this.NewPos[1]) || objectCollision)  && rotationAngle<3.14)
+            {
+                rotationAngle+=0.5;
+                vec3.rotateY(this.Dir,this.Dir,[0,0,0],rotationAngle);
+                this.AnimDir.running = false;
+                objectCollision = this.computeNewPosition();
+            } 
+        }
 
         
         vec3.copy(this.Pos,this.NewPos );

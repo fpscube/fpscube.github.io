@@ -5,10 +5,14 @@ var CStoneInst;
 class CStone
 {
 
-    constructor(pGame){
+    constructor(pGame)
+    {
         CStoneInst = this;
         this.CollisionMatrixList = [];this.turn=0;
-        pGame.Level["stones"]=[];
+        if (pGame.Level["stones"]==null)
+        {
+            pGame.Level["stones"]=[];
+        }
     }
 
     _clearCollisionMatrix()
@@ -23,18 +27,6 @@ class CStone
         this.CollisionMatrixList.push(collMat);
     }
 
-    add()
-    {
-        GameInst.Level["stones"].push(
-            {   
-                "position":
-                    [GameInst.CamPos[0] +  GameInst.CamDir[0]*20.0,
-                     GameInst.CamPos[1] - 20.0,
-                     GameInst.CamPos[2] +  GameInst.CamDir[2]*20.0],
-                "color":[0.52,0.7,1.0,0.6]
-            }
-        );
-    }
 
     update()
     {

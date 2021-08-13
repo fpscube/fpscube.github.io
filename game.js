@@ -47,7 +47,7 @@ class CGame
 		this.Trees = new CTrees(this);
 		this.Creation = new CCreation(this);
 		
-		this.Enemies = new CEnemies(this.CurrentLevel*10 + 5);
+		this.Enemies = new CEnemies(this);
 		var intPos = [-630,600,90];
 		this.Hero = new CHuman(intPos,2,[1,0,-1],true,this.UserData["playerName"].substring(0, 10));
 
@@ -79,7 +79,10 @@ class CGame
 		if(mediaIsKeyOnce("c"))
 		{
 			if(this.State!="Create")
+			{
+				this.Creation.MenuLevel=1;
 				this.State="Create";
+			}
 			else
 				this.State="Play";
 		} 
@@ -88,6 +91,7 @@ class CGame
 		switch (this.State) {
 			case "Create":
 				this.Creation.update();
+				this.Enemies.updateCreation();
 				break;
 			case "Play":
 

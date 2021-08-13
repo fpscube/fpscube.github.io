@@ -7,8 +7,11 @@ class CTrees
     constructor(pGame)
     {
         CTreesInst = this;
-        this.collisionMatrixList = [];   
-        pGame.Level["trees"]=[];
+        this.collisionMatrixList = [];  
+        if (pGame.Level["trees"]==null)
+        {
+            pGame.Level["trees"]=[];
+        }
     }
 
      
@@ -24,17 +27,6 @@ class CTrees
     }
 
 
-    add()
-    {
-        GameInst.Level["trees"].push(
-            {   
-                "position":
-                    [GameInst.CamPos[0] +  GameInst.CamDir[0]*20.0,
-                    GameInst.CamPos[1] - 20.0,
-                     GameInst.CamPos[2] +  GameInst.CamDir[2]*20.0]
-            }
-        );
-    }
 
     storeCollisionMatrix(pMvMatrix)
     {
