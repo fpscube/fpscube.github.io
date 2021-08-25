@@ -1,4 +1,3 @@
-const { ESTALE } = require("constants");
 
 var gMediaKeyPressed;
 var gMediaKeyPressedOnce;

@@ -9,10 +9,9 @@ class CStone
     {
         CStoneInst = this;
         this.CollisionMatrixList = [];this.turn=0;
-        if (pGame.Level["stones"]==null)
-        {
-            pGame.Level["stones"]=[];
-        }
+        if (pGame.Level["stones"]==null) pGame.Level["stones"]=[];
+        if (pGame.Level["tower1"]==null) pGame.Level["tower1"]=[];
+        if (pGame.Level["tower2"]==null) pGame.Level["tower2"]=[];
     }
 
     _clearCollisionMatrix()
@@ -28,9 +27,10 @@ class CStone
     }
 
 
-    update()
+    updateCreation()
     {
-    }   
+
+    }
 
     getCollisionPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOffset)
     {
@@ -65,9 +65,55 @@ class CStone
         }
 
 
-        //shaderVertexColorVector = [0.52,0.7,1.0,0.6];
 
 
+ 
+        //Tower 1
+        var levelInfo = GameInst.Level.tower1;
+        for(var iLevel=0;iLevel<levelInfo.length;iLevel++)
+        {
+            mvPushMatrix();          
+            mat4.translate(mvMatrix,mvMatrix,levelInfo[iLevel].position);       
+
+            for (var i=70;i<(360);i+=45)
+            {
+                var c = (i%17)/17.0+0.5;
+                
+                shaderVertexColorVector = [c,c,0.2,1.0]; 
+                mvPushMatrix();   
+                mat4.rotate(mvMatrix,mvMatrix,  degToRad(i+180), [0, 1, 0]);  
+                mat4.translate(mvMatrix,mvMatrix,[0.0,50.0,-60.0]); 
+                mat4.rotate(mvMatrix,mvMatrix,  degToRad(115), [1, 0, 0]);   
+                mat4.scale(mvMatrix,mvMatrix,[60.0,6.0,350]); 
+                Sphere.Draw(SphereShaderGlowProgram);   
+                this._storeCollisionMatrix(mvMatrix);
+                mvPopMatrix(); 
+            }               
+            mvPopMatrix();
+        }
+
+        //Tower 2
+        var levelInfo = GameInst.Level.tower2;    
+        for(var iLevel=0;iLevel<levelInfo.length;iLevel++)
+        {     
+            mvPushMatrix();       
+            mat4.translate(mvMatrix,mvMatrix,levelInfo[iLevel].position);     
+                for (var i=70;i<(360);i+=45)
+                {
+                    var c = (i%17)/17.0+0.5;
+                    
+                    shaderVertexColorVector = [0.1,c*0.8,c*1.2,1.0]; 
+                    mvPushMatrix();   
+                    mat4.rotate(mvMatrix,mvMatrix,  degToRad(i+180), [0, 1, 0]);  
+                    mat4.translate(mvMatrix,mvMatrix,[0.0,50.0,-60.0]); 
+                    mat4.rotate(mvMatrix,mvMatrix,  degToRad(140), [1, 0, 0]);   
+                    mat4.scale(mvMatrix,mvMatrix,[60.0,6.0,350]); 
+                    Sphere.Draw(SphereShaderGlowProgram);   
+                    this._storeCollisionMatrix(mvMatrix);
+                    mvPopMatrix(); 
+                }   
+            mvPopMatrix();          
+        }
       
     }
 

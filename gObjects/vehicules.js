@@ -29,13 +29,33 @@ void main() {
   gl_FragColor = vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,uVertexColor.a);
 }`;
 
+
+
 class CVehicules
 {
 
-    constructor()
+    constructor(pGame)
     {
-        this.Pos = [-600,0,90];
-        this.Pos[1] = groundGetY(this.Pos[0],this.Pos[2]) + 10.0;  
+        if (pGame.Level["vehicules"]==null)
+        {
+            pGame.Level["vehicules"]=[];
+            this.Pos = [0,0,0];
+        }
+        else
+        {
+            var levelInfo = pGame.Level.vehicules;
+
+            if(levelInfo.length>0) 
+            {
+                var initPos = levelInfo[0].position;
+                this.Pos = [initPos[0],initPos[1],initPos[2]];
+            }
+            else
+            {
+                this.Pos = [0,0,0];
+
+            }
+        }
 
         this.EngineOn = false;
         this.Free = true;
@@ -70,13 +90,17 @@ class CVehicules
         this.FWheelNormalDir = [];
         this.CollisionMatrixList = [];   
         this.EnterCollisionMatrix = mat4.create();
+
+
+        this.ShaderGlowProgram = SphereInitShaders(SphereVertexShader,VehiculesSphereGlowFragmentShader);
+            this.ShaderGlowProgram2 = SphereInitShaders(SphereVertexShader,VehiculesSphereGlowFragmentShader2);
+        
+        
         VehiculesInst = this;
 
-        
-        this.ShaderGlowProgram = SphereInitShaders(SphereVertexShader,VehiculesSphereGlowFragmentShader);
-        this.ShaderGlowProgram2 = SphereInitShaders(SphereVertexShader,VehiculesSphereGlowFragmentShader2);
-
     }
+
+
     
     storeCollisionMatrix(pMvMatrix)
     {
@@ -103,12 +127,27 @@ class CVehicules
     }
 
   
+    updateCreation()
+    {   
+        var levelInfo = GameInst.Level.vehicules;
+
+        if(levelInfo.length>0) 
+        {
+            this.Pos[0] = levelInfo[0].position[0];
+            this.Pos[1] = levelInfo[0].position[1];
+            this.Pos[2] = levelInfo[0].position[2];
+        }
+    }
+
 
     update(pHuman)
     {
         var elapsed = timeGetElapsedInS();
 
 
+        var levelInfo = GameInst.Level.vehicules;
+
+        if(levelInfo.length==0) return;
 
         // Save new Front and wheel position
         var prevFrontPtPos = [];
@@ -194,8 +233,8 @@ class CVehicules
         }
 
         
-        // Update Front
-        this.FrontPt.update();
+        // Update Front and back
+        this.FrontPt.update();  
         
         // Compute new Dir
         vec3.subtract(this.Dir,this.FrontPt.Pos,this.BackPt.Pos); 
@@ -205,7 +244,7 @@ class CVehicules
         this.BackPt.Pos[0] = this.FrontPt.Pos[0] - this.Dir[0]*13.0;    
         this.BackPt.Pos[1] = this.FrontPt.Pos[1] - this.Dir[1]*13.0;    
         this.BackPt.Pos[2] = this.FrontPt.Pos[2] - this.Dir[2]*13.0;
-        this.BackPt.update();         
+        this.BackPt.update();       
         
         // Compute new Dir
         vec3.subtract(this.Dir,this.FrontPt.Pos,this.BackPt.Pos);
@@ -357,6 +396,10 @@ class CVehicules
 
     draw()
     {   
+        var levelInfo = GameInst.Level.vehicules;
+
+        if(levelInfo.length==0) return; 
+
         this.CollisionMatrixList = [];   
         mat4.identity(mvMatrix);
         shaderVertexColorVector = [1.0,1.0,1.0,1.0]; 

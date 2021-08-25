@@ -50,13 +50,18 @@ class CCreation
 
         if(this.MenuLevel == 1)
         {
+            var objName;
+
             if(mediaIsKeyOnce("+"))this.CamSpeed*=2.0;
             if(mediaIsKeyOnce("-"))this.CamSpeed/=2.0;
     
     
-            if(mediaIsKeyOnce('1')) {this.SelectedObjectType = GameInst.Level["stones"];this.MenuLevel=2;}
-            if(mediaIsKeyOnce('2')) {this.SelectedObjectType = GameInst.Level["trees"]; this.MenuLevel=2;}   
-            if(mediaIsKeyOnce('3')) {this.SelectedObjectType = GameInst.Level["enemies"]; this.MenuLevel=2;}
+            if(mediaIsKeyOnce('1')) {objName="stones";   this.MenuLevel=2; this.MaxObject=100}
+            if(mediaIsKeyOnce('2')) {objName="trees";    this.MenuLevel=2; this.MaxObject=20} 
+            if(mediaIsKeyOnce('3')) {objName="enemies";  this.MenuLevel=2; this.MaxObject=50}
+            if(mediaIsKeyOnce('4')) {objName="vehicules";this.MenuLevel=2; this.MaxObject=1}
+            if(mediaIsKeyOnce('5')) {objName="tower1";  this.MenuLevel=2; this.MaxObject=20}
+            if(mediaIsKeyOnce('6')) {objName="tower2";  this.MenuLevel=2; this.MaxObject=20}
 
             if(mediaIsKeyOnce("7"))
             {
@@ -72,6 +77,7 @@ class CCreation
 
             if(this.MenuLevel==2)
             {
+                this.SelectedObjectType = GameInst.Level[objName];
                 this.SelectedObjectId = this.SelectedObjectType.length -1
                 this._mvCamToSelectedObject();
 
@@ -100,17 +106,24 @@ class CCreation
 
             else if(mediaIsKeyOnce('1'))// CREATE Obj
             {
-                this.SelectedObjectType.push(
-                    {   
-                        "position":
-                            [GameInst.CamPos[0] +  GameInst.CamDir[0]*this.CameraDist,
-                             GameInst.CamPos[1] +  GameInst.CamDir[1]*this.CameraDist,
-                             GameInst.CamPos[2] +  GameInst.CamDir[2]*this.CameraDist],
-                        "color":[0.52,0.7,1.0,0.6],
-                    }
-                );
-                this.SelectedObjectId = this.SelectedObjectType.length-1
-                this._mvCamToSelectedObject();
+                if(this.SelectedObjectType.length>= this.MaxObject)
+                {
+                    alert("Max object is " + this.MaxObject );
+                }
+                else
+                {
+                    this.SelectedObjectType.push(
+                        {   
+                            "position":
+                                [GameInst.CamPos[0] +  GameInst.CamDir[0]*this.CameraDist,
+                                GameInst.CamPos[1] +  GameInst.CamDir[1]*this.CameraDist,
+                                GameInst.CamPos[2] +  GameInst.CamDir[2]*this.CameraDist],
+                            "color":[0.52,0.7,1.0,0.6],
+                        }
+                    );
+                    this.SelectedObjectId = this.SelectedObjectType.length-1
+                    this._mvCamToSelectedObject();
+                }
             } 
             else if(mediaIsKeyOnce('2')) // DELETE Obj
             {
@@ -162,13 +175,17 @@ class CCreation
             ctx2d.globalAlpha = 1.0;
             ctx2d.font = "20px Arial";
             var offset = 150;
+            
             ctx2d.fillText("Creation Mode",50,offset);
             ctx2d.fillText("  1 : Stone",50,offset + 30*1);
             ctx2d.fillText("  2 : Tree",50,offset + 30*2);
             ctx2d.fillText("  3 : Enemie",50,offset + 30*3);
-            ctx2d.fillText("  7 : Load from clipboard ",50,offset + 30*4);
-            ctx2d.fillText("  9 : Save to clipboard ",50,offset + 30*5);
-            ctx2d.fillText("-/+ : Move Speed",50,offset + 30*6);
+            ctx2d.fillText("  4 : Vehicule",50,offset + 30*4);
+            ctx2d.fillText("  5 : Tower1",50,offset + 30*5);
+            ctx2d.fillText("  6 : Tower2",50,offset + 30*6);
+            ctx2d.fillText("  7 : Load from clipboard ",50,offset + 30*7);
+            ctx2d.fillText("  9 : Save to clipboard ",50,offset + 30*8);
+            ctx2d.fillText("-/+ : Move Speed",50,offset + 30*9);
         }
         else if (this.MenuLevel==2)
         {   

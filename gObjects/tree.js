@@ -35,7 +35,7 @@ class CTrees
         this.collisionMatrixList.push(collMat);
     }
 
-    update()
+    updateCreation()
     {
 
     }

@@ -42,7 +42,7 @@ class CGame
 		this.Screen = new CScreen("canvas3D","canvas2D");
 		this.Guns = new CGuns();
 		this.Stone = new CStone(this);
-		this.Vehicules = new CVehicules();
+		this.Vehicules = new CVehicules(this);
 		this.Info = new CInfo();
 		this.Trees = new CTrees(this);
 		this.Creation = new CCreation(this);
@@ -83,8 +83,11 @@ class CGame
 				this.Creation.MenuLevel=1;
 				this.State="Create";
 			}
-			else
+			else 
+			{
+				this.Vehicules = new CVehicules(this);
 				this.State="Play";
+			}
 		} 
 		
 		// Game State Machine
@@ -92,6 +95,9 @@ class CGame
 			case "Create":
 				this.Creation.update();
 				this.Enemies.updateCreation();
+				this.Vehicules.updateCreation();
+				this.Stone.updateCreation();
+				this.Trees.updateCreation();
 				break;
 			case "Play":
 
@@ -162,6 +168,8 @@ class CGame
 				}
 
 				
+				// Update Vehicule if not used by any human
+				if(this.Vehicules.Free)	{this.Vehicules.update();}
 				
 				
 	
@@ -201,8 +209,6 @@ class CGame
 
 		this.Info.update();
 			
-		// Update Vehicule if not used by any human
-		if(this.Vehicules.Free)	{this.Vehicules.update();}
 
 	}
 
