@@ -2,14 +2,14 @@ var CreationInt;
 
 var CreationConf=
 {
-    "stone1":{"MaxObject":10,"genNbZones":2,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":20,"genSizeX":1500,"genSizeZ":1500},
-    "stone2":{"MaxObject":10,"genNbZones":0,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":20,"genSizeX":1500,"genSizeZ":1500},
-    "stone3":{"MaxObject":2,"genNbZones":2,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":5,"genSizeX":1500,"genSizeZ":1500},
-    "tower1":{"MaxObject":5,"genNbZones":5,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":20,"genSizeX":1500,"genSizeZ":1500},
-    "tower2":{"MaxObject":4,"genNbZones":4,"genZoneSizeMin":100,"genZoneSizeMax":100,"genYGroundOffset":20,"genSizeX":1500,"genSizeZ":1500},
-    "trees":{"MaxObject":30,"genNbZones":5,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":-5,"genSizeX":1500,"genSizeZ":1500},
-    "enemies":{"MaxObject":25,"genNbZones":3,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":500,"genSizeX":1500,"genSizeZ":1500},
-    "vehicules":{"MaxObject":1,"genNbZones":1,"genZoneSizeMin":100,"genZoneSizeMax":100,"genYGroundOffset":20,"genSizeX":100,"genSizeZ":100}
+    "stone1":{"MaxObject":40,"genNbZones":0,"genNbPZ":0,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":20,"genSizeX":1500,"genSizeZ":1500},
+    "stone2":{"MaxObject":40,"genNbZones":0,"genNbPZ":2,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":20,"genSizeX":1500,"genSizeZ":1500},
+    "stone3":{"MaxObject":40,"genNbZones":3,"genNbPZ":1,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":5,"genSizeX":1500,"genSizeZ":1500},
+    "tower1":{"MaxObject":20,"genNbZones":5,"genNbPZ":1,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":20,"genSizeX":1500,"genSizeZ":1500},
+    "tower2":{"MaxObject":20,"genNbZones":4,"genNbPZ":1,"genZoneSizeMin":100,"genZoneSizeMax":100,"genYGroundOffset":20,"genSizeX":1500,"genSizeZ":1500},
+    "trees":{"MaxObject":50,"genNbZones":4,"genNbPZ":7,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":-5,"genSizeX":1500,"genSizeZ":1500},
+    "enemies":{"MaxObject":50,"genNbZones":3,"genNbPZ":10,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":500,"genSizeX":1500,"genSizeZ":1500},
+    "vehicules":{"MaxObject":1,"genNbZones":1,"genNbPZ":1,"genZoneSizeMin":100,"genZoneSizeMax":100,"genYGroundOffset":20,"genSizeX":100,"genSizeZ":100}
 };
 
 
@@ -72,7 +72,7 @@ class CCreation
             var lZonePosZ = (Math.random()-0.5)*conf.genSizeZ;
 
             
-            for(var lObjId=0;lObjId<(conf.MaxObject/conf.genNbZones);lObjId++)
+            for(var lObjId=0;lObjId<(conf.genNbPZ);lObjId++)
             {
 
                 var x = (Math.random()-0.5)*lZoneSizeX + lZonePosX;

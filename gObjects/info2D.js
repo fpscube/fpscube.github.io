@@ -151,7 +151,7 @@ class CInfo
 		// LEVEL TITLE Display
 		else if(this.LevelTitleAnim.running)
 		{
-			var text = "KILL " + this.NbEnemies + " ENEMIES";
+			var text = "NEW LEVEL : KILL " + this.NbEnemies + " ENEMIES";
 			var coef = this.LevelTitleAnim.getValue();
 			var fontSize=canvas2D.width/text.length;
 			var xPos = canvas2D.width/2 - (fontSize*text.length)/4;
