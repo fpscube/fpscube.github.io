@@ -28,9 +28,9 @@ function mediaInit()
 
 function fullScreenRequest()
 {
-	// var container = document.getElementById('game');
-	// if(container.webkitRequestFullScreen) container.webkitRequestFullScreen();
-	// if(container.mozRequestFullScreen)	container.mozRequestFullScreen();
+	var container = document.getElementById('game');
+	if(container.webkitRequestFullScreen) container.webkitRequestFullScreen();
+    if(container.mozRequestFullScreen)	container.mozRequestFullScreen();
 }
 
 function mediaSetSpeedSlow(speedCoef)
@@ -103,6 +103,7 @@ function mediaIsKeyOnce(name)
 function mediaSetMouseUpFct(evt){
 	if (evt.button==0) 
 	gMediaKeyPressed["Fire"]=0;
+    gMediaKeyPressed["Mouse1"]=0;
     if (evt.button>0) 
     {
 	    gMediaKeyPressed["Zoom"]=0;
@@ -114,6 +115,8 @@ function mediaSetMouseDownFct(evt){
     fullScreenRequest();
 	if (evt.button==0)
     gMediaKeyPressed["Fire"]=1;
+    gMediaKeyPressed["Mouse1"]=1;
+    gMediaKeyPressedOnce["Mouse1"]=null;
     if (evt.button>0) 
     {
         gMediaKeyPressed["Zoom"]=1;

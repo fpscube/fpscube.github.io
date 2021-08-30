@@ -2,13 +2,13 @@ var CreationInt;
 
 var CreationConf=
 {
-    "stone1":{"MaxObject":40,"genNbZones":0,"genNbPZ":0,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":20,"genSizeX":1500,"genSizeZ":1500},
-    "stone2":{"MaxObject":40,"genNbZones":0,"genNbPZ":2,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":20,"genSizeX":1500,"genSizeZ":1500},
-    "stone3":{"MaxObject":40,"genNbZones":3,"genNbPZ":1,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":5,"genSizeX":1500,"genSizeZ":1500},
-    "tower1":{"MaxObject":20,"genNbZones":5,"genNbPZ":1,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":20,"genSizeX":1500,"genSizeZ":1500},
-    "tower2":{"MaxObject":20,"genNbZones":4,"genNbPZ":1,"genZoneSizeMin":100,"genZoneSizeMax":100,"genYGroundOffset":20,"genSizeX":1500,"genSizeZ":1500},
-    "trees":{"MaxObject":50,"genNbZones":4,"genNbPZ":7,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":-5,"genSizeX":1500,"genSizeZ":1500},
-    "enemies":{"MaxObject":50,"genNbZones":3,"genNbPZ":10,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":500,"genSizeX":1500,"genSizeZ":1500},
+    "stone1":{"MaxObject":1000,"genNbZones":0,"genNbPZ":0,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":20,"genSizeX":1500,"genSizeZ":1500},
+    "stone2":{"MaxObject":1000,"genNbZones":0,"genNbPZ":2,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":20,"genSizeX":1500,"genSizeZ":1500},
+    "stone3":{"MaxObject":1000,"genNbZones":3,"genNbPZ":1,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":5,"genSizeX":1500,"genSizeZ":1500},
+    "tower1":{"MaxObject":1000,"genNbZones":5,"genNbPZ":1,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":20,"genSizeX":1500,"genSizeZ":1500},
+    "tower2":{"MaxObject":1000,"genNbZones":4,"genNbPZ":1,"genZoneSizeMin":100,"genZoneSizeMax":100,"genYGroundOffset":20,"genSizeX":1500,"genSizeZ":1500},
+    "trees":{"MaxObject":1000,"genNbZones":4,"genNbPZ":7,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":-5,"genSizeX":1500,"genSizeZ":1500},
+    "enemies":{"MaxObject":1000,"genNbZones":3,"genNbPZ":10,"genZoneSizeMin":100,"genZoneSizeMax":500,"genYGroundOffset":500,"genSizeX":1500,"genSizeZ":1500},
     "vehicules":{"MaxObject":1,"genNbZones":1,"genNbPZ":1,"genZoneSizeMin":100,"genZoneSizeMax":100,"genYGroundOffset":20,"genSizeX":100,"genSizeZ":100}
 };
 
@@ -114,8 +114,6 @@ class CCreation
         {
             var objName;
 
-            if(mediaIsKeyOnce("+"))this.CamSpeed*=2.0;
-            if(mediaIsKeyOnce("-"))this.CamSpeed/=2.0;
     
     
             if(mediaIsKeyOnce('1')) {this.ObjName="stones";   this.MenuLevel=2;}
@@ -171,26 +169,24 @@ class CCreation
                 
 
             var deltaWheel = mediaWheelEvt();
-            if(deltaWheel>0 && this.SelectedObjectId!=-1) 
+            if(deltaWheel<0 && this.SelectedObjectId!=-1) 
             {
                 this.CameraDist*=0.75;
+                if(this.CameraDist<50) this.CameraDist=50;
                 this._mvCamToSelectedObject();
             }  
-            if(deltaWheel<0)
+            if(deltaWheel>0 && this.SelectedObjectId!=-1)
             {
                 this.CameraDist*=1.5;
+                if(this.CameraDist>500) this.CameraDist=500;
                 this._mvCamToSelectedObject();
             } 
     
 
-            else if(mediaIsKeyOnce('1'))// CREATE Obj
+            if(mediaIsKeyOnce('1') || mediaIsKeyOnce("Mouse1"))// CREATE Obj
             {
                 var lMaxObject = CreationConf[this.ObjName].MaxObject;
-                if(this.SelectedObjectType.length>= lMaxObject)
-                {
-                    alert("Max object is " + lMaxObject);
-                }
-                else
+                if(this.SelectedObjectType.length<= lMaxObject)
                 {
                     this.SelectedObjectType.push(
                         {   
@@ -211,10 +207,6 @@ class CCreation
                 {
                     this.SelectedObjectType.splice(this.SelectedObjectId,1)  
                     this.SelectedObjectId = -1;
-                }
-                else
-                {
-                    alert("there is no object to remove")
                 }
       
         
@@ -257,6 +249,9 @@ class CCreation
         if(this.CamSpeed>2000) this.CamSpeed=2000;
         if(this.CamSpeed<10) this.CamSpeed=10;
 
+
+
+
         if(GameInst.CamPos[0]>3000.0) GameInst.CamPos[0]=3000.0
         if(GameInst.CamPos[0]<-3000.0) GameInst.CamPos[0]=-3000.0
         if(GameInst.CamPos[2]>3000.0) GameInst.CamPos[2]=3000.0
@@ -296,6 +291,7 @@ class CCreation
             ctx2d.fillText("  3 : Stone 3",50,offset + 30*3);
             ctx2d.fillText("  4 : Tower 1",50,offset + 30*4);
             ctx2d.fillText("  5 : Tower 2",50,offset + 30*5);
+            ctx2d.fillText("  9 : Exit",50,offset + 30*6);
         }
         else if (this.MenuLevel==3)
         {   
