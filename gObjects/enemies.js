@@ -16,15 +16,12 @@ class CEnemies
         {
             pGame.Level["enemies"]=[];
         }
-        else
-        {
-            this.updateCreation()
-        }
+        this.updateCreation(pGame);
     }
 
-    updateCreation()
+    updateCreation(pGame)
     {   
-        var levelInfo = GameInst.Level.enemies;
+        var levelInfo = pGame.Level.enemies;
 
         for(i=0;i<levelInfo.length;i++)
         {

@@ -9,9 +9,14 @@ class CStone
     {
         CStoneInst = this;
         this.CollisionMatrixList = [];this.turn=0;
-        if (pGame.Level["stones"]==null) pGame.Level["stones"]=[];
+        if (pGame.Level["stone1"]==null) pGame.Level["stone1"]=[];
+        if (pGame.Level["stone2"]==null) pGame.Level["stone2"]=[];
+        if (pGame.Level["stone3"]==null) pGame.Level["stone3"]=[];
         if (pGame.Level["tower1"]==null) pGame.Level["tower1"]=[];
         if (pGame.Level["tower2"]==null) pGame.Level["tower2"]=[];
+
+        this.updateCreation(pGame)
+
     }
 
     _clearCollisionMatrix()
@@ -27,7 +32,7 @@ class CStone
     }
 
 
-    updateCreation()
+    updateCreation(pGame)
     {
 
     }
@@ -49,9 +54,8 @@ class CStone
 
         mat4.identity(mvMatrix);
 
-
-        var levelInfo = GameInst.Level.stones;
-
+        //stone1
+        var levelInfo = GameInst.Level.stone1;
         for(i=0;i<levelInfo.length;i++)
         {
             shaderVertexColorVector = levelInfo[i].color;
@@ -64,10 +68,40 @@ class CStone
             mvPopMatrix();
         }
 
+        //stone2
+        var levelInfo = GameInst.Level.stone2;
+        shaderVertexColorVector = [0.82,0.82,0.82,1.0];
+        for(i=0;i<levelInfo.length;i++)
+        {
+
+            mvPushMatrix();
+                mat4.translate(mvMatrix,mvMatrix,levelInfo[i].position);  
+                mat4.rotate(mvMatrix,mvMatrix,  degToRad(85), [1, 0, 0]);   
+                mat4.scale(mvMatrix,mvMatrix,[20.0,20.0,25.0]); 
+                Sphere.Draw(SphereShaderProgram); 
+                this._storeCollisionMatrix(mvMatrix);
+            mvPopMatrix();
+    
+        }
+
+        //stone3
+        var levelInfo = GameInst.Level.stone3;
+        shaderVertexColorVector = [0.82,0.82,0.82,1.0];
+        for(i=0;i<levelInfo.length;i++)
+        {
+    
+            mvPushMatrix();
+                mat4.translate(mvMatrix,mvMatrix,levelInfo[i].position);
+                mat4.rotate(mvMatrix,mvMatrix,  degToRad(-5), [0, 0,1]);
+                mat4.rotate(mvMatrix,mvMatrix,  degToRad(84), [1, 0, 0]);   
+                mat4.scale(mvMatrix,mvMatrix,[50.0,200.0,10.0]); 
+                Sphere.Draw(SphereShaderProgram); 
+                this._storeCollisionMatrix(mvMatrix);
+            mvPopMatrix();
 
 
+        }
 
- 
         //Tower 1
         var levelInfo = GameInst.Level.tower1;
         for(var iLevel=0;iLevel<levelInfo.length;iLevel++)

@@ -35,6 +35,9 @@ class CGame
 		gl.enable(gl.DEPTH_TEST); 
 		gl.enable(gl.CULL_FACE);     
 
+		this.Creation = new CCreation(this);
+		this.Creation.levelGeneration(this);
+
 		// init gl object	
 		squareInit();
 		SphereInit();
@@ -45,11 +48,11 @@ class CGame
 		this.Vehicules = new CVehicules(this);
 		this.Info = new CInfo();
 		this.Trees = new CTrees(this);
-		this.Creation = new CCreation(this);
 		
 		this.Enemies = new CEnemies(this);
 		var intPos = [-630,600,90];
 		this.Hero = new CHuman(intPos,2,[1,0,-1],true,this.UserData["playerName"].substring(0, 10));
+
 
 		
 	}
@@ -94,15 +97,15 @@ class CGame
 		switch (this.State) {
 			case "Create":
 				this.Creation.update();
-				this.Enemies.updateCreation();
-				this.Vehicules.updateCreation();
-				this.Stone.updateCreation();
-				this.Trees.updateCreation();
+				this.Enemies.updateCreation(this);
+				this.Vehicules.updateCreation(this);
+				this.Stone.updateCreation(this);
+				this.Trees.updateCreation(this);
 				break;
 			case "Play":
 
 				//Change Gun
-				if(mediaWheelEvt()) {
+				if(mediaWheelEvt()!=0) {
 					this.Hero.ChangeGun();
 				}
 

@@ -39,23 +39,11 @@ class CVehicules
         if (pGame.Level["vehicules"]==null)
         {
             pGame.Level["vehicules"]=[];
-            this.Pos = [0,0,0];
         }
-        else
-        {
-            var levelInfo = pGame.Level.vehicules;
+        
+        this.Pos = [0.0,0.0,0.0];
+        this.updateCreation(pGame);
 
-            if(levelInfo.length>0) 
-            {
-                var initPos = levelInfo[0].position;
-                this.Pos = [initPos[0],initPos[1],initPos[2]];
-            }
-            else
-            {
-                this.Pos = [0,0,0];
-
-            }
-        }
 
         this.EngineOn = false;
         this.Free = true;
@@ -127,9 +115,9 @@ class CVehicules
     }
 
   
-    updateCreation()
+    updateCreation(pGame)
     {   
-        var levelInfo = GameInst.Level.vehicules;
+        var levelInfo = pGame.Level.vehicules;
 
         if(levelInfo.length>0) 
         {

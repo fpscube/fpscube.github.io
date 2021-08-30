@@ -5,7 +5,6 @@ var gMediaTouchStartPos;
 var gMediaCamMvVec;
 var gMediaTouchMvInProgress;
 var gMediaWheelEvt;
-var gMediaWheelLastEvt;
 var gMediaTouchMode=false;
 var gMediaDoubleTapTimer=0;
 var gMediaDoubleTapX=0;
@@ -123,13 +122,9 @@ function mediaSetMouseDownFct(evt){
 }
 
 
-function mediaWheelFct(evt){
-    if((timeGetCurrentInMs() - gMediaWheelLastEvt) > 100)
-    {
-        gMediaWheelLastEvt = timeGetCurrentInMs();
-        gMediaWheelEvt=1;
-    }        
-   	
+function mediaWheelFct(evt)
+{
+    gMediaWheelEvt=evt.deltaY;
 }
 
 function mediaWheelEvt(){ 
