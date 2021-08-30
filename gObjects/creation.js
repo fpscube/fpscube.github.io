@@ -167,8 +167,7 @@ class CCreation
                                                     GameInst.CamPos[2] +  GameInst.CamDir[2]*this.CameraDist];
             }
 
-            if(mediaIsKeyOnce("+"))this.CamSpeed*=2.0;
-            if(mediaIsKeyOnce("-"))this.CamSpeed/=2.0;
+  
                 
 
             var deltaWheel = mediaWheelEvt();
@@ -251,6 +250,19 @@ class CCreation
             }
             
         }
+
+        if(mediaIsKeyOnce("+"))this.CamSpeed*=2.0;
+        if(mediaIsKeyOnce("-"))this.CamSpeed/=2.0;
+
+        if(this.CamSpeed>2000) this.CamSpeed=2000;
+        if(this.CamSpeed<10) this.CamSpeed=10;
+
+        if(GameInst.CamPos[0]>3000.0) GameInst.CamPos[0]=3000.0
+        if(GameInst.CamPos[0]<-3000.0) GameInst.CamPos[0]=-3000.0
+        if(GameInst.CamPos[2]>3000.0) GameInst.CamPos[2]=3000.0
+        if(GameInst.CamPos[2]<-3000.0) GameInst.CamPos[2]=-3000.0
+        if(GameInst.CamPos[1]>2000.0) GameInst.CamPos[1]=2000.0
+        if(GameInst.CamPos[1]<-50.0) GameInst.CamPos[1]=-50.0
     }
 
     
@@ -270,8 +282,8 @@ class CCreation
             ctx2d.fillText("  2 : Tree",50,offset + 30*2);
             ctx2d.fillText("  3 : Enemie",50,offset + 30*3);
             ctx2d.fillText("  4 : Vehicule",50,offset + 30*4);
-            ctx2d.fillText("  5 : Clear Level",50,offset + 30*5);
-            ctx2d.fillText("  6 : Gen Level",50,offset + 30*6);
+            ctx2d.fillText("  5 : Gen Level",50,offset + 30*5);
+            ctx2d.fillText("  6 : Clear Level",50,offset + 30*6);
             ctx2d.fillText("  7 : Load from clipboard ",50,offset + 30*7);
             ctx2d.fillText("  9 : Save to clipboard ",50,offset + 30*8);
             ctx2d.fillText("-/+ : Move Speed",50,offset + 30*9);
@@ -281,9 +293,9 @@ class CCreation
             ctx2d.fillText("Creation Mode",50,offset);
             ctx2d.fillText("  1 : Stone 1",50,offset + 30*1);
             ctx2d.fillText("  2 : Stone 2",50,offset + 30*2);
-            ctx2d.fillText("  2 : Stone 3",50,offset + 30*3);
-            ctx2d.fillText("  3 : Tower 1",50,offset + 30*4);
-            ctx2d.fillText("  4 : Tower 2",50,offset + 30*5);
+            ctx2d.fillText("  3 : Stone 3",50,offset + 30*3);
+            ctx2d.fillText("  4 : Tower 1",50,offset + 30*4);
+            ctx2d.fillText("  5 : Tower 2",50,offset + 30*5);
         }
         else if (this.MenuLevel==3)
         {   
