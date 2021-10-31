@@ -61,10 +61,7 @@ class CInfo
 			if (GameInst.Hero.IsTouched) this.AnimInjury.start(200,0.7,0.0);
 	
 		}
-		else if (GameInst.State=="Create")
-		{
-			this.HelpCreationMode = 1;
-		}
+
 		this.LifeQt = GameInst.Hero.Life;
 		this.InjuryAlpha = this.AnimInjury.getValue();
 		this.NbEnemies = CEnemiesInst.NbALive;
@@ -141,13 +138,7 @@ class CInfo
 			
 		}
 		
-	
 
-		// help creation mode
-		if(this.HelpCreationMode)
-		{
-	
-		}
 		// LEVEL TITLE Display
 		else if(this.LevelTitleAnim.running)
 		{
@@ -194,7 +185,7 @@ class CInfo
 			mvPopMatrix();
 		}
 
-  
+		
 		// Enemy name Display
 		ctx2d.font = "14px Arial";
 		ctx2d.fillText(this.EnName,canvas2D.width/2.0 + 14,canvas2D.height/2.0);

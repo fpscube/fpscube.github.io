@@ -109,7 +109,7 @@ class CVehicules
         var collision = pCollision ;
         for (var i=0;i<this.CollisionMatrixList.length;i++)
         {
-            collision = Sphere.GetCollisionPos(pRayPoint1,pRayPoint2,this.CollisionMatrixList[i],collision,pDistSquaredOffset);
+            collision = Sphere.GetCollisionPos(pRayPoint1,pRayPoint2,this.CollisionMatrixList[i],collision,pDistSquaredOffset,[this,"vehicule",0]);
         }
         return collision;
     }

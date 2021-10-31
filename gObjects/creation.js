@@ -26,7 +26,8 @@ class CCreation
         this.CameraDist = 50.0;
         this.ObjName = "none";
         this.PrevObjName = "none";
-
+        this.ObjDisplayName = ""
+        CreationInt=this;
     }
 
     _mvCamToSelectedObject()
@@ -269,6 +270,7 @@ class CCreation
         ctx2d.font = "20px Arial";
         var offset = 150;
 
+        
         if (this.MenuLevel==1)
         {
              
@@ -312,8 +314,16 @@ class CCreation
             ctx2d.fillText("-/+  : Move Speed",50,offset + 30*8);
 
         }
+        		
+		// Cross Display	
 
 
+		ctx2d.font = "14px Arial";
+		ctx2d.fillText(this.ObjDisplayName,canvas2D.width/2.0 + 14,canvas2D.height/2.0);
+
+		ctx2d.fillStyle = 'white';
+		ctx2d.globalAlpha = 0.8;
+		ctx2d.fillRect(canvas2D.width/2.0-2.0,canvas2D.height/2.0-2.0,4.0,4.0);
 		
     }
 }

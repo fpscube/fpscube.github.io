@@ -509,12 +509,11 @@ class CBullet
 
             if (collision != null && collision[3]!=null) 
             {
-                var human = collision[3];
+                var human = collision[3]
                 // prevent gun source explosion collision
-                if(human!=this.HumanSrc)
+                if(human[0]!=this.HumanSrc && human[1]=="human")
                 {
-                    console.log("col1\n");
-                    human.BulletCollision(this.Dir,100.0,this.Power,this.HumanSrc)
+                    human[0].BulletCollision(this.Dir,100.0,this.Power,this.HumanSrc)
                 }
             }
 

@@ -111,7 +111,7 @@ function groundGetCollisionPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOf
   var groundYLevel2 = groundGetY(pRayPoint2[0],pRayPoint2[2]);
 	if ((pRayPoint1[1]>=groundYLevel1) && (pRayPoint2[1]<groundYLevel2))
 	{
-    var collision = [pRayPoint2[0],groundYLevel2,pRayPoint2[2]];	
+    var collision = [pRayPoint2[0],groundYLevel2,pRayPoint2[2],[0,"ground",0]];	
     
     if (pCollision!=null)
     {
@@ -326,7 +326,7 @@ function groundWaterGetCollisionPoint(pRayPoint1,pRayPoint2,pCollision,pDistSqua
 	var collision = pCollision;
 	if ((pRayPoint1[1]>=groundWaterYLevel) && (pRayPoint2[1]<groundWaterYLevel))
 	{
-		var collision = [pRayPoint2[0],groundWaterYLevel,pRayPoint2[0]];	
+		var collision = [pRayPoint2[0],groundWaterYLevel,pRayPoint2[0],[0,"water",0]];	
 		if (pCollision!=null)
 		{
 		  var prevSquaredDist = vec3.squaredDistance(pRayPoint1,pCollision);

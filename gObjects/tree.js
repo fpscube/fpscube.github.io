@@ -25,14 +25,14 @@ class CTrees
         for(var iTree=0;iTree<levelInfo.length;iTree++)
         {
             //first check squared distance from trees
-            var distSquaredFromRayPoint2 = vec3.squaredDistance(levelInfo[iTree].position,pRayPoint2);
-            if(distSquaredFromRayPoint2>(100*100)) continue;
+            var distSquaredFromRayPoint2 = vec3.squaredDistance(levelInfo[iTree].position,pRayPoint1);
+            if(distSquaredFromRayPoint2>(200*200)) continue;
 
             //next check collision with all sphere
             if(this.collisionMatrixList[iTree]==null) continue;
             for (var i=0;i<this.collisionMatrixList[iTree].length;i++)
             {
-                collision = Sphere.GetCollisionPos(pRayPoint1,pRayPoint2,this.collisionMatrixList[iTree][i],collision,pDistSquaredOffset);
+                collision = Sphere.GetCollisionPos(pRayPoint1,pRayPoint2,this.collisionMatrixList[iTree][i],collision,pDistSquaredOffset,[this,"tree",iTree]);
             }
         }
 

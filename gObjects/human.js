@@ -267,7 +267,7 @@ UpdateHeroDead()
 
 
 
-UpdateHero(pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules,pDisconnectionTimeInMs,pHumanInTarget)
+UpdateHero(pFireAuto,pFireDir,pMvAsk,pMvMediaAngle,pVehicules)
 {
 
     var elapsed = timeGetElapsedInS();
@@ -616,10 +616,9 @@ BulletCollision(pDir,pSpeed,pPower,pHumanSrc)
 
 }
 
-getCollisionPoint(pRayPoint1,pRayPoint2,pLastCollPt,pDistSquaredOffset)
+getCollisionPoint(pRayPoint1,pRayPoint2,pLastCollisionInfo,pDistSquaredOffset)
 {
-    var collision = Sphere.GetCollisionPosUsingMatrixList(pRayPoint1,pRayPoint2,this.CollisionMatrixList,pLastCollPt,pDistSquaredOffset,this)   ; 
-    return (collision);
+    return(Sphere.GetCollisionPosUsingMatrixList(pRayPoint1,pRayPoint2,this.CollisionMatrixList,pLastCollisionInfo,pDistSquaredOffset,[this,"human",this.Name])); 
 }
 
 
