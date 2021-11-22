@@ -26,7 +26,8 @@ class CCreation
         this.CameraDist = 50.0;
         this.ObjName = "none";
         this.PrevObjName = "none";
-        this.ObjDisplayName = ""
+        this.ObjDisplayName = "";
+        this.ObjDisplayPos= null;
         CreationInt=this;
     }
 
@@ -164,10 +165,7 @@ class CCreation
                 this.SelectedObjectType[this.SelectedObjectId].position = [GameInst.CamPos[0] +  GameInst.CamDir[0]*this.CameraDist,
                                                     GameInst.CamPos[1] +  GameInst.CamDir[1]*this.CameraDist,
                                                     GameInst.CamPos[2] +  GameInst.CamDir[2]*this.CameraDist];
-            }
-
-  
-                
+            }                
 
             var deltaWheel = mediaWheelEvt();
             if(deltaWheel<0 && this.SelectedObjectId!=-1) 
@@ -184,7 +182,7 @@ class CCreation
             } 
     
 
-            if(mediaIsKeyOnce('1') || mediaIsKeyOnce("Mouse1"))// CREATE Obj
+            if(mediaIsKeyOnce('1') )//|| mediaIsKeyOnce("Mouse1"))// CREATE Obj
             {
                 var lMaxObject = CreationConf[this.ObjName].MaxObject;
                 if(this.SelectedObjectType.length<= lMaxObject)
@@ -235,7 +233,7 @@ class CCreation
                 this._mvCamToSelectedObject();
             }
 
-            else if(mediaIsKeyOnce("9")) // Return Object
+            else if(mediaIsKeyOnce("9")) // Return 
             {
                 this.MenuLevel=this.PrevMenuLevel;
                 this.ObjName = this.PrevObjName;
@@ -250,15 +248,51 @@ class CCreation
         if(this.CamSpeed>2000) this.CamSpeed=2000;
         if(this.CamSpeed<10) this.CamSpeed=10;
 
-
-
-
         if(GameInst.CamPos[0]>3000.0) GameInst.CamPos[0]=3000.0
         if(GameInst.CamPos[0]<-3000.0) GameInst.CamPos[0]=-3000.0
         if(GameInst.CamPos[2]>3000.0) GameInst.CamPos[2]=3000.0
         if(GameInst.CamPos[2]<-3000.0) GameInst.CamPos[2]=-3000.0
         if(GameInst.CamPos[1]>2000.0) GameInst.CamPos[1]=2000.0
         if(GameInst.CamPos[1]<-50.0) GameInst.CamPos[1]=-50.0
+
+        this.ObjDisplayPos = collisionGetPoint(GameInst.CamPos,[GameInst.CamPos[0]+GameInst.CamDir[0]*2000,GameInst.CamPos[1]+GameInst.CamDir[1]*2000,GameInst.CamPos[2]+GameInst.CamDir[2]*2000],mvMatrix,0);
+       
+
+        if(this.ObjDisplayPos[3]!=null && this.ObjDisplayPos[3][1]!=null)
+        {
+            this.ObjDisplayName=this.ObjDisplayPos[3][1] + "-" + this.ObjDisplayPos[3][2] ;
+            this.ObjDisplayType =  this.ObjDisplayPos[3][1];
+            this.ObjDisplayId = this.ObjDisplayPos[3][2];
+        
+        }
+        else
+        {
+            this.ObjDisplayName = "";
+            this.ObjDisplayType = 0;
+            this.ObjDisplayId  = -1;
+        }
+
+        if(mediaIsKeyOnce("Mouse1") )
+        {
+            if(this.MenuLevel!=3 && this.ObjDisplayType!=0)
+            {
+                this.ObjName = this.ObjDisplayPos[3][1];
+                this.PrevMenuLevel = 2;
+                this.SelectedObjectType = GameInst.Level[this.ObjDisplayType];
+                this.SelectedObjectId = this.ObjDisplayId;
+                this.MenuLevel=3;
+            }
+            else if(this.MenuLevel==3)
+            {
+                this.MenuLevel=1;
+                this.PrevMenuLevel = 1;
+                this.SelectedObjectId = -1;
+                this.SelectedObjectType ="";
+            }
+        }
+
+       
+
     }
 
     
@@ -315,15 +349,23 @@ class CCreation
 
         }
         		
-		// Cross Display	
-
-
+		// Cross Display
+		ctx2d.fillStyle = 'white';
+        if(this.MenuLevel==3)  ctx2d.fillStyle = 'cyan';	
 		ctx2d.font = "14px Arial";
 		ctx2d.fillText(this.ObjDisplayName,canvas2D.width/2.0 + 14,canvas2D.height/2.0);
 
-		ctx2d.fillStyle = 'white';
 		ctx2d.globalAlpha = 0.8;
 		ctx2d.fillRect(canvas2D.width/2.0-2.0,canvas2D.height/2.0-2.0,4.0,4.0);
-		
+
+		// Sphere Display	
+        if(this.ObjDisplayName != "")
+        {
+            shaderVertexColorVector = [0.82,0.82,0.82,1.0];
+            mvPushMatrix();
+                mat4.translate(mvMatrix,mvMatrix,this.ObjDisplayPos);  
+                Sphere.Draw(SphereShaderProgram); 
+            mvPopMatrix();
+        }
     }
 }

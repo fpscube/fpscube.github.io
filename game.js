@@ -246,26 +246,6 @@ class CGame
 		this.Hero.draw();
 		this.Guns.draw();
 
-		
-		if (this.State == "Create")
-		{
-			var result = collisionGetPoint(this.CamPos,[this.CamPos[0]+this.CamDir[0]*2000,this.CamPos[1]+this.CamDir[1]*2000,this.CamPos[2]+this.CamDir[2]*2000],mvMatrix,0);
-
-			if(result[3]!=null && result[3][1]!=null)
-			{
-				CreationInt.ObjDisplayName=result[3][1] + "-" + result[3][2] ;
-			}
-			else
-			{
-				CreationInt.ObjDisplayName="";
-			}
-
-			shaderVertexColorVector = [0.82,0.82,0.82,1.0];
-			mvPushMatrix();
-				mat4.translate(mvMatrix,mvMatrix,result);  
-				Sphere.Draw(SphereShaderProgram); 
-			mvPopMatrix();
-		}
 
 		gl.cullFace(gl.FRONT);	
 			

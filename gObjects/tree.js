@@ -32,7 +32,7 @@ class CTrees
             if(this.collisionMatrixList[iTree]==null) continue;
             for (var i=0;i<this.collisionMatrixList[iTree].length;i++)
             {
-                collision = Sphere.GetCollisionPos(pRayPoint1,pRayPoint2,this.collisionMatrixList[iTree][i],collision,pDistSquaredOffset,[this,"tree",iTree]);
+                collision = Sphere.GetCollisionPos(pRayPoint1,pRayPoint2,this.collisionMatrixList[iTree][i],collision,pDistSquaredOffset,[this,"trees",iTree]);
             }
         }
 
