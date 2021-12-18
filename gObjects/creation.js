@@ -255,23 +255,26 @@ class CCreation
         if(GameInst.CamPos[1]>2000.0) GameInst.CamPos[1]=2000.0
         if(GameInst.CamPos[1]<-50.0) GameInst.CamPos[1]=-50.0
 
-        this.ObjDisplayPos = collisionGetPoint(GameInst.CamPos,[GameInst.CamPos[0]+GameInst.CamDir[0]*2000,GameInst.CamPos[1]+GameInst.CamDir[1]*2000,GameInst.CamPos[2]+GameInst.CamDir[2]*2000],mvMatrix,0);
+
+        // detect the first object point by mouse dir (limited 2000)
+        {
+            this.ObjDisplayPos = collisionGetPoint(GameInst.CamPos,[GameInst.CamPos[0]+GameInst.CamDir[0]*2000,GameInst.CamPos[1]+GameInst.CamDir[1]*2000,GameInst.CamPos[2]+GameInst.CamDir[2]*2000],mvMatrix,0);
        
-
-        if(this.ObjDisplayPos[3]!=null && this.ObjDisplayPos[3][1]!=null)
-        {
-            this.ObjDisplayName=this.ObjDisplayPos[3][1] + "-" + this.ObjDisplayPos[3][2] ;
-            this.ObjDisplayType =  this.ObjDisplayPos[3][1];
-            this.ObjDisplayId = this.ObjDisplayPos[3][2];
-        
+            if(this.ObjDisplayPos[3]!=null && this.ObjDisplayPos[3][1]!=null)
+            {
+                this.ObjDisplayName=this.ObjDisplayPos[3][1] + "-" + this.ObjDisplayPos[3][2] ;
+                this.ObjDisplayType =  this.ObjDisplayPos[3][1];
+                this.ObjDisplayId = this.ObjDisplayPos[3][2];            
+            }
+            else
+            {
+                this.ObjDisplayName = "";
+                this.ObjDisplayType = 0;
+                this.ObjDisplayId  = -1;
+            }
         }
-        else
-        {
-            this.ObjDisplayName = "";
-            this.ObjDisplayType = 0;
-            this.ObjDisplayId  = -1;
-        }
 
+        // select/deselect elemnt
         if(mediaIsKeyOnce("Mouse1") )
         {
             if(this.MenuLevel!=3 && this.ObjDisplayType!=0)

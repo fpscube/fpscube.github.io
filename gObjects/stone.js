@@ -8,7 +8,9 @@ class CStone
     constructor(pGame)
     {
         CStoneInst = this;
-        this.CollisionMatrixList = [];this.turn=0;
+        this.CollisionMatrixList = [];
+        
+        this.turn=0;
         if (pGame.Level["stone1"]==null) pGame.Level["stone1"]=[];
         if (pGame.Level["stone2"]==null) pGame.Level["stone2"]=[];
         if (pGame.Level["stone3"]==null) pGame.Level["stone3"]=[];
@@ -24,11 +26,11 @@ class CStone
         this.CollisionMatrixList = [];
     }
 
-    _storeCollisionMatrix(pMvMatrix)
+    _storeCollisionMatrix(pMvMatrix,pObjType,pId)
     {
         var collMat = mat4.create();
         mat4.copy(collMat,pMvMatrix);
-        this.CollisionMatrixList.push(collMat);
+        this.CollisionMatrixList.push([collMat,[this,pObjType,pId]]);
     }
 
 
@@ -42,7 +44,7 @@ class CStone
         var collision = pCollision ;
         for (var i=0;i<this.CollisionMatrixList.length;i++)
         {
-            collision = Sphere.GetCollisionPos(pRayPoint1,pRayPoint2,this.CollisionMatrixList[i],collision,pDistSquaredOffset,[this,"stone",i]);
+            collision = Sphere.GetCollisionPos(pRayPoint1,pRayPoint2,this.CollisionMatrixList[i][0],collision,pDistSquaredOffset,this.CollisionMatrixList[i][1]);
         }
 
         return collision;
@@ -64,7 +66,7 @@ class CStone
                 mat4.rotate(mvMatrix,mvMatrix,  degToRad(0), [1, 0, 0]);   
                 mat4.scale(mvMatrix,mvMatrix,[40.0,3.0,40.0]); 
                 Sphere.Draw(SphereShaderProgram);   
-                this._storeCollisionMatrix(mvMatrix);
+                this._storeCollisionMatrix(mvMatrix,"stone1",i);
             mvPopMatrix();
         }
 
@@ -79,7 +81,7 @@ class CStone
                 mat4.rotate(mvMatrix,mvMatrix,  degToRad(85), [1, 0, 0]);   
                 mat4.scale(mvMatrix,mvMatrix,[20.0,20.0,25.0]); 
                 Sphere.Draw(SphereShaderProgram); 
-                this._storeCollisionMatrix(mvMatrix);
+                this._storeCollisionMatrix(mvMatrix,"stone2",i);
             mvPopMatrix();
     
         }
@@ -96,7 +98,7 @@ class CStone
                 mat4.rotate(mvMatrix,mvMatrix,  degToRad(84), [1, 0, 0]);   
                 mat4.scale(mvMatrix,mvMatrix,[50.0,200.0,10.0]); 
                 Sphere.Draw(SphereShaderProgram); 
-                this._storeCollisionMatrix(mvMatrix);
+                this._storeCollisionMatrix(mvMatrix,"stone3",i);
             mvPopMatrix();
 
 
@@ -120,7 +122,7 @@ class CStone
                 mat4.rotate(mvMatrix,mvMatrix,  degToRad(115), [1, 0, 0]);   
                 mat4.scale(mvMatrix,mvMatrix,[60.0,6.0,350]); 
                 Sphere.Draw(SphereShaderGlowProgram);   
-                this._storeCollisionMatrix(mvMatrix);
+                this._storeCollisionMatrix(mvMatrix,"tower1",iLevel);
                 mvPopMatrix(); 
             }               
             mvPopMatrix();
@@ -143,7 +145,7 @@ class CStone
                     mat4.rotate(mvMatrix,mvMatrix,  degToRad(140), [1, 0, 0]);   
                     mat4.scale(mvMatrix,mvMatrix,[60.0,6.0,350]); 
                     Sphere.Draw(SphereShaderGlowProgram);   
-                    this._storeCollisionMatrix(mvMatrix);
+                    this._storeCollisionMatrix(mvMatrix,"tower2",iLevel);
                     mvPopMatrix(); 
                 }   
             mvPopMatrix();          
