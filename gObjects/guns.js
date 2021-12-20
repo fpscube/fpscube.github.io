@@ -511,7 +511,7 @@ class CBullet
             {
                 var human = collision[3]
                 // prevent gun source explosion collision
-                if(human[0]!=this.HumanSrc && human[1]=="human")
+                if(human[0]!=this.HumanSrc && human[1]=="enemies")
                 {
                     human[0].BulletCollision(this.Dir,100.0,this.Power,this.HumanSrc)
                 }

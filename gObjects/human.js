@@ -616,9 +616,9 @@ BulletCollision(pDir,pSpeed,pPower,pHumanSrc)
 
 }
 
-getCollisionPoint(pRayPoint1,pRayPoint2,pLastCollisionInfo,pDistSquaredOffset)
+getCollisionPoint(pRayPoint1,pRayPoint2,pLastCollisionInfo,pDistSquaredOffset,pUserData)
 {
-    return(Sphere.GetCollisionPosUsingMatrixList(pRayPoint1,pRayPoint2,this.CollisionMatrixList,pLastCollisionInfo,pDistSquaredOffset,[this,"human",this.Name])); 
+    return(Sphere.GetCollisionPosUsingMatrixList(pRayPoint1,pRayPoint2,this.CollisionMatrixList,pLastCollisionInfo,pDistSquaredOffset,pUserData)); 
 }
 
 

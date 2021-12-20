@@ -82,7 +82,7 @@ class CEnemies
     {
         var collision = pLastCollPt;
         for(var i =0 ;i<this.humans.length;i++){
-            collision = this.humans[i].getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset);
+            collision = this.humans[i].getCollisionPoint(pRayPoint1,pRayPoint2,collision,pDistSquaredOffset,[this.humans[i],"enemies",i]);
         }
         return collision;
     }

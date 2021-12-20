@@ -265,6 +265,9 @@ class CCreation
                 this.ObjDisplayName=this.ObjDisplayPos[3][1] + "-" + this.ObjDisplayPos[3][2] ;
                 this.ObjDisplayType =  this.ObjDisplayPos[3][1];
                 this.ObjDisplayId = this.ObjDisplayPos[3][2];            
+                console.log( this.ObjDisplayName + "/")        
+                console.log( this.ObjDisplayType)
+                console.log( this.ObjDisplayId)
             }
             else
             {
