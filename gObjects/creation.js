@@ -42,6 +42,21 @@ class CCreation
         }
     }
 
+    
+
+    _mvCamToSelectedObjectToCam()
+    {
+        if(this.SelectedObjectId!=-1)
+        {
+
+           this.SelectedObjectType[this.SelectedObjectId].position[0] = GameInst.CamDir[0]*this.CameraDist;
+           this.SelectedObjectType[this.SelectedObjectId].position[2] = GameInst.CamDir[2]*this.CameraDist;
+           this.SelectedObjectType[this.SelectedObjectId].position[1] = GameInst.CamDir[1]*this.CameraDist;
+        }
+    }
+
+
+    
     levelClear(pGame)
     {
         for( var key in CreationConf)
@@ -159,6 +174,18 @@ class CCreation
         else if(this.MenuLevel == 3)
         {
 
+            var deltaWheel = mediaWheelEvt();
+            if(deltaWheel<0 && this.SelectedObjectId!=-1) 
+            {
+                this.CameraDist*=0.75;
+                if(this.CameraDist<50) this.CameraDist=50;
+            }  
+            if(deltaWheel>0 && this.SelectedObjectId!=-1)
+            {
+                this.CameraDist*=1.5;
+                if(this.CameraDist>2500) this.CameraDist=2500;
+            } 
+    
             
             if( this.SelectedObjectId!=-1)
             {
@@ -167,20 +194,6 @@ class CCreation
                                                     GameInst.CamPos[2] +  GameInst.CamDir[2]*this.CameraDist];
             }                
 
-            var deltaWheel = mediaWheelEvt();
-            if(deltaWheel<0 && this.SelectedObjectId!=-1) 
-            {
-                this.CameraDist*=0.75;
-                if(this.CameraDist<50) this.CameraDist=50;
-                this._mvCamToSelectedObject();
-            }  
-            if(deltaWheel>0 && this.SelectedObjectId!=-1)
-            {
-                this.CameraDist*=1.5;
-                if(this.CameraDist>500) this.CameraDist=500;
-                this._mvCamToSelectedObject();
-            } 
-    
 
             if(mediaIsKeyOnce('1') )//|| mediaIsKeyOnce("Mouse1"))// CREATE Obj
             {
@@ -268,6 +281,7 @@ class CCreation
                 console.log( this.ObjDisplayName + "/")        
                 console.log( this.ObjDisplayType)
                 console.log( this.ObjDisplayId)
+
             }
             else
             {
@@ -287,6 +301,11 @@ class CCreation
                 this.SelectedObjectType = GameInst.Level[this.ObjDisplayType];
                 this.SelectedObjectId = this.ObjDisplayId;
                 this.MenuLevel=3;
+                var objPos = this.SelectedObjectType[this.SelectedObjectId].position
+                var d0 =  objPos[0]- GameInst.CamPos[0]
+                var d1 =  objPos[1]- GameInst.CamPos[1]
+                var d2 =  objPos[2]- GameInst.CamPos[2]
+                this.CameraDist = Math.sqrt(d0*d0 + d1*d1 + d2*d2);
             }
             else if(this.MenuLevel==3)
             {
