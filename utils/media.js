@@ -101,9 +101,19 @@ function mediaIsKeyOnce(name)
 
 
 function mediaSetMouseUpFct(evt){
-	if (evt.button==0) 
-	gMediaKeyPressed["Fire"]=0;
-    gMediaKeyPressed["Mouse1"]=0;
+    if (evt.button==0) 
+    {
+        gMediaKeyPressed["Fire"]=0;
+        gMediaKeyPressed["Mouse1"]=0;
+    }
+    if (evt.button==1) 
+    {
+        gMediaKeyPressed["Mouse2"]=0;
+    }
+    if (evt.button==2) 
+    {
+        gMediaKeyPressed["Mouse3"]=0;
+    }
     if (evt.button>0) 
     {
 	    gMediaKeyPressed["Zoom"]=0;
@@ -113,14 +123,26 @@ function mediaSetMouseUpFct(evt){
 
 function mediaSetMouseDownFct(evt){	
     fullScreenRequest();
-	if (evt.button==0)
-    gMediaKeyPressed["Fire"]=1;
-    gMediaKeyPressed["Mouse1"]=1;
-    gMediaKeyPressedOnce["Mouse1"]=null;
+    if (evt.button==0)
+    {
+        gMediaKeyPressed["Fire"]=1;
+        gMediaKeyPressed["Mouse1"]=1;
+        gMediaKeyPressedOnce["Mouse1"]=null;
+    }
     if (evt.button>0) 
     {
         gMediaKeyPressed["Zoom"]=1;
         gMediaKeyPressed["Exit"]=1;
+    }
+    if (evt.button==1) 
+    {
+        gMediaKeyPressed["Mouse2"]=1;
+        gMediaKeyPressedOnce["Mouse2"]=null;
+    }
+    if (evt.button==2) 
+    {
+        gMediaKeyPressed["Mouse3"]=1;
+        gMediaKeyPressedOnce["Mouse3"]=null;
     }
 }
 
