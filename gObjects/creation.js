@@ -300,6 +300,7 @@ class CCreation
                 this.PrevMenuLevel = 2;
                 this.SelectedObjectType = GameInst.Level[this.ObjDisplayType];
                 this.SelectedObjectId = this.ObjDisplayId;
+                this.SelectedObjectName = this.ObjDisplayName;
                 this.MenuLevel=3;
                 var objPos = this.SelectedObjectType[this.SelectedObjectId].position
                 var d0 =  objPos[0]- GameInst.CamPos[0]
@@ -375,10 +376,18 @@ class CCreation
         }
         		
 		// Cross Display
-		ctx2d.fillStyle = 'white';
-        if(this.MenuLevel==3)  ctx2d.fillStyle = 'cyan';	
-		ctx2d.font = "14px Arial";
-		ctx2d.fillText(this.ObjDisplayName,canvas2D.width/2.0 + 14,canvas2D.height/2.0);
+        if(this.MenuLevel==3)  
+        {
+            ctx2d.fillStyle = 'cyan';	
+            ctx2d.font = "bold 16px Arial";            
+            ctx2d.fillText(this.SelectedObjectName,canvas2D.width/2.0 + 14,canvas2D.height/2.0);
+        }
+        else
+        {
+            ctx2d.fillStyle = 'white';
+            ctx2d.font = "14px Arial";
+            ctx2d.fillText(this.ObjDisplayName,canvas2D.width/2.0 + 14,canvas2D.height/2.0);
+        }
 
 		ctx2d.globalAlpha = 0.8;
 		ctx2d.fillRect(canvas2D.width/2.0-2.0,canvas2D.height/2.0-2.0,4.0,4.0);
