@@ -22,7 +22,7 @@ class CCreation
         this.MenuLevel = 1;
         this.PrevMenuLevel = 1;
         this.SelectedObject = ""
-        this.SelectedObjectId = 0
+        this.SelectedObjectId = -1
         this.CameraDist = 50.0;
         this.ObjName = "none";
         this.PrevObjName = "none";
@@ -127,51 +127,6 @@ class CCreation
         }
 
 
-        if(this.MenuLevel == 1)
-        {
-            var objName;
-
-    
-    
-            if(mediaIsKeyOnce('1')) {this.ObjName="stones";   this.MenuLevel=2;}
-            if(mediaIsKeyOnce('2')) {this.ObjName="trees";    this.MenuLevel=3;} 
-            if(mediaIsKeyOnce('3')) {this.ObjName="enemies";  this.MenuLevel=3;}
-            if(mediaIsKeyOnce('4')) {this.ObjName="vehicules";this.MenuLevel=3;}
-            if(mediaIsKeyOnce('5')) {this.levelGeneration(GameInst)}
-            if(mediaIsKeyOnce('6')) {this.levelClear(GameInst)}
-
-            if(mediaIsKeyOnce("7"))
-            {
-                try{
-                    navigator.clipboard.readText().then(
-                        clipText => GameInst.Level = JSON.parse(clipText));
-                }
-                catch (e) {
-                    alert("you need a valid json in your clipboard")
-                }
-            }
-            if(mediaIsKeyOnce("9")) navigator.clipboard.writeText(JSON.stringify(GameInst.Level , null, 2));
-
-            this.SelectedObjectId = -1;
-            this.PrevMenuLevel = 1;
-
-            this.SelectedObjectType = GameInst.Level[this.ObjName];
-        }
-        else if(this.MenuLevel == 2 && this.ObjName=="stones")
-        {
-            this.PrevObjName = this.ObjName;
-            if(mediaIsKeyOnce('1')) {this.ObjName="stone1";  this.MenuLevel=3}
-            if(mediaIsKeyOnce('2')) {this.ObjName="stone2";  this.MenuLevel=3} 
-            if(mediaIsKeyOnce('3')) {this.ObjName="stone3";  this.MenuLevel=3}
-            if(mediaIsKeyOnce('4')) {this.ObjName="tower1";  this.MenuLevel=3}
-            if(mediaIsKeyOnce('5')) {this.ObjName="tower2";  this.MenuLevel=3}
-            if(mediaIsKeyOnce('9')) {this.MenuLevel = 1}   
-            this.SelectedObjectId = -1;
-
-            this.PrevMenuLevel = 2;
-            this.SelectedObjectType = GameInst.Level[this.ObjName];
-        }
-        else if(this.MenuLevel == 3)
         {
 
             var deltaWheel = mediaWheelEvt();
@@ -189,13 +144,14 @@ class CCreation
             
             if( this.SelectedObjectId!=-1)
             {
+                console.log(this.SelectedObjectType)
                 this.SelectedObjectType[this.SelectedObjectId].position = [GameInst.CamPos[0] +  GameInst.CamDir[0]*this.CameraDist,
                                                     GameInst.CamPos[1] +  GameInst.CamDir[1]*this.CameraDist,
                                                     GameInst.CamPos[2] +  GameInst.CamDir[2]*this.CameraDist];
             }                
 
 
-            if(mediaIsKeyOnce('1') )//|| mediaIsKeyOnce("Mouse1"))// CREATE Obj
+            if(this.SelectedObjectId!=-1 && (mediaIsKeyOnce('1') || mediaIsKeyOnce("Mouse2")))// CREATE Obj
             {
                 var lMaxObject = CreationConf[this.ObjName].MaxObject;
                 if(this.SelectedObjectType.length<= lMaxObject)
@@ -213,46 +169,16 @@ class CCreation
                     this._mvCamToSelectedObject();
                 }
             } 
-            else if(mediaIsKeyOnce('2')) // DELETE Obj
+            else if(this.SelectedObjectId!=-1 && (mediaIsKeyOnce('2') || mediaIsKeyOnce("Mouse3"))) // DELETE Obj
             {
                 if(this.SelectedObjectId != -1)
                 {
                     this.SelectedObjectType.splice(this.SelectedObjectId,1)  
                     this.SelectedObjectId = -1;
-                }
-      
+                }      
         
             }            
-            else if(mediaIsKeyOnce("3")) // Unselect Object
-            {
-                this.SelectedObjectId=-1
-            }
-            else if(mediaIsKeyOnce("4")) // Prev Object
-            {
-                if(this.SelectedObjectType.length >0)
-                {
-                    this.SelectedObjectId = (this.SelectedObjectId-1)
-                    if(this.SelectedObjectId <0) this.SelectedObjectId = (this.SelectedObjectType.length -1)
-                }
-                this._mvCamToSelectedObject();
 
-            }
-            else if(mediaIsKeyOnce("5")) // Next Object
-            {
-                if(this.SelectedObjectType.length >0)
-                {
-                    this.SelectedObjectId = (this.SelectedObjectId+1) % this.SelectedObjectType.length
-                }
-                this._mvCamToSelectedObject();
-            }
-
-            else if(mediaIsKeyOnce("9")) // Return 
-            {
-                this.MenuLevel=this.PrevMenuLevel;
-                this.ObjName = this.PrevObjName;
-                this.SelectedObjectId = -1;
-            }
-            
         }
 
         if(mediaIsKeyOnce("+"))this.CamSpeed*=2.0;
@@ -294,7 +220,7 @@ class CCreation
         // select/deselect elemnt
         if(mediaIsKeyOnce("Mouse1") )
         {
-            if(this.MenuLevel!=3 && this.ObjDisplayType!=0)
+            if(this.SelectedObjectId==-1 && this.ObjDisplayType!=0)
             {
                 this.ObjName = this.ObjDisplayPos[3][1];
                 this.PrevMenuLevel = 2;
@@ -329,51 +255,6 @@ class CCreation
         ctx2d.globalAlpha = 1.0;
         ctx2d.font = "20px Arial";
         var offset = 150;
-
-        
-        if (this.MenuLevel==1)
-        {
-             
-            ctx2d.fillText("Creation Mode",50,offset);
-            ctx2d.fillText("  1 : Stone",50,offset + 30*1);
-            ctx2d.fillText("  2 : Tree",50,offset + 30*2);
-            ctx2d.fillText("  3 : Enemie",50,offset + 30*3);
-            ctx2d.fillText("  4 : Vehicule",50,offset + 30*4);
-            ctx2d.fillText("  5 : Gen Level",50,offset + 30*5);
-            ctx2d.fillText("  6 : Clear Level",50,offset + 30*6);
-            ctx2d.fillText("  7 : Load from clipboard ",50,offset + 30*7);
-            ctx2d.fillText("  9 : Save to clipboard ",50,offset + 30*8);
-            ctx2d.fillText("-/+ : Move Speed",50,offset + 30*9);
-        }
-        else if(this.MenuLevel == 2 && this.ObjName=="stones")
-        {          
-            ctx2d.fillText("Creation Mode",50,offset);
-            ctx2d.fillText("  1 : Stone 1",50,offset + 30*1);
-            ctx2d.fillText("  2 : Stone 2",50,offset + 30*2);
-            ctx2d.fillText("  3 : Stone 3",50,offset + 30*3);
-            ctx2d.fillText("  4 : Tower 1",50,offset + 30*4);
-            ctx2d.fillText("  5 : Tower 2",50,offset + 30*5);
-            ctx2d.fillText("  9 : Exit",50,offset + 30*6);
-        }
-        else if (this.MenuLevel==3)
-        {   
-            var title = this.ObjName + " " + this.SelectedObjectType.length + "/" +  CreationConf[this.ObjName].MaxObject
-            if(this.SelectedObjectId!=-1)
-            {
-                title +=  " (selected:" + this.SelectedObjectId + ")"
-            }
-            
-            ctx2d.fillText(title,50,offset);
-            ctx2d.fillText("  1 : New Object",50,offset + 30*1);
-            ctx2d.fillText("  2 : Delete",50,offset + 30*2);
-            ctx2d.fillText("  3 : Unselect",50,offset + 30*3);
-            ctx2d.fillText("  4 : Select Previous",50,offset + 30*4);
-            ctx2d.fillText("  5 : Select Next",50,offset + 30*5);
-            ctx2d.fillText("  9 : Exit",50,offset + 30*6);
-            ctx2d.fillText("wheel: Zoom",50,offset + 30*7);
-            ctx2d.fillText("-/+  : Move Speed",50,offset + 30*8);
-
-        }
         		
 		// Cross Display
         if(this.MenuLevel==3)  
