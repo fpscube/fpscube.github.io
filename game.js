@@ -14,6 +14,7 @@ class CGame
  	init() {
 	
 		// Data Init
+		groundInit();
 		timeInit();
 		mediaInit();
 		this.CamPos = [-370,13,100]; 
@@ -41,7 +42,6 @@ class CGame
 		// init gl object	
 		squareInit();
 		SphereInit();
-		groundInit();
 		this.Screen = new CScreen("canvas3D","canvas2D");
 		this.Guns = new CGuns();
 		this.Stone = new CStone(this);

@@ -51,6 +51,10 @@ function initShaders(vertexShaderStr,fragmentShaderStr) {
 	outShaderProgram.vertexNormalAttribute = gl.getAttribLocation(outShaderProgram, "aVertexNormal");
 	gl.enableVertexAttribArray(outShaderProgram.vertexNormalAttribute);
 
+	outShaderProgram.vertexColorAttributeArray = gl.getAttribLocation(outShaderProgram, "aVertexColor");
+	gl.enableVertexAttribArray(outShaderProgram.vertexColorAttributeArray);
+
+
     outShaderProgram.vertexColorAttribute = gl.getUniformLocation(outShaderProgram, "uVertexColor");
 	outShaderProgram.counter = gl.getUniformLocation(outShaderProgram, "uCounter");
 	outShaderProgram.waterY = gl.getUniformLocation(outShaderProgram, "uWaterY");

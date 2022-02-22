@@ -9,99 +9,51 @@ var groundSectorInst;
 var groundWaterYLevel=-29.5;
 var groundShaderProgram;
 var groundShaderNormalProgram;
-
+var groundHeight;
+var groundNormal;
+var gGroundShaderNormalProgram=-1;
 
 var groundVertexShader = ` 
 	attribute vec4 aVertexPosition;
-	attribute vec3 aVertexNormal;
+	attribute vec4 aVertexColor;
 	uniform mat4 uMVMatrix;
 	uniform mat4 uPMatrix;
-	uniform mat4 uMVInverseTransposeMatrix;    
-	varying vec3 v_normal;  
-	varying vec4 v_position;  
+	varying lowp vec4 v_color;  
 	void main() {
 
-	v_position = uMVMatrix * aVertexPosition;
+    // Multiply the position by the matrix.
+    gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
 
-	// Multiply the position by the matrix.
-  gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
-
-	// orient the normals and pass to the fragment shader
-	v_normal =normalize( mat3(uMVInverseTransposeMatrix) * aVertexNormal);
+    // orient the normals and pass to the fragment shader
+    v_color = aVertexColor;
 
 	}
 `;
 var groundFragmentShader = `
-precision lowp float;  
-    varying vec3 v_normal;   
-    varying vec4 v_position;      
-    uniform vec4 uVertexColor;    
-    uniform float uCounter; 
-    uniform float uWaterY;
+  varying lowp vec4 v_color;       
+
+  void main() {
+    gl_FragColor = v_color;
     
-
-    void main() {
-      float light;
-      float lightWater=1.0;
-      float waterIndex=0.0;
-      vec4 colorGround;
-      vec4 colorWater;
-      vec4 color;
-
-      if(v_position.y < uWaterY) 
-      {
-        float dist = length(vec3(v_position));
-        float dist2 = length(vec3(v_position) - vec3(1000.0,0.0,5000.0));
-        float dist3 = length(vec3(v_position) - vec3(5000.0,0.0,300.0));
-        waterIndex = 0.0 -(v_position.y - uWaterY) ;
-        if (waterIndex>1.0) waterIndex = 1.0;
-        if (waterIndex<0.0) waterIndex = 0.0;
-        float x = (sin((dist+ 2.0*uCounter)/30.0) + sin((dist2+ 3.0*uCounter)/35.0) + sin((dist3 + 10.0*uCounter)/60.0))/6.0 + 0.5;
-        if (dist>5000.0) x=0.2;
-        lightWater = x*0.5 ;
-      }
-  
-      light = dot(v_normal, vec3(0.0,1.0,0.0)); 
-      
-      colorGround = vec4(0.1,0.1,0.1,uVertexColor.a); 
-      colorWater = vec4(0.1,0.1,0.1,uVertexColor.a); 
-      
-      colorGround += vec4(uVertexColor.x*light,uVertexColor.y*light,uVertexColor.z*light,0.0) ;
-      if(lightWater>0.45) lightWater = 0.45  + (lightWater -0.45) *20.0;
-      colorWater += vec4(0.025*lightWater,0.100*lightWater,0.170*lightWater,0.0) ;
-
-
-      color = mix(colorGround,colorWater,waterIndex);
-
-      
-     gl_FragColor = vec4(color.x,color.y,color.z,1.0);
-      
-    }
+  }
 `;
+
 
 
 
 function groundGetY(x,z)
 {
- y = Math.sin(x/50)*5+Math.sin(z/50)*5 + Math.sin(x/90)*9 + Math.sin(z/90)*9 + Math.sin(x/150)*15 + Math.sin(z/150)*15 -(x/200)**2 -(z/200)**2;
- //y = ((x/100)**2)+((z/100)**2);
+  y = (Math.sin(x/50)*5+Math.sin(z/50)*5 + Math.sin(x/90)*9 + Math.sin(z/90)*9 + Math.sin(x/150)*15 + Math.sin(z/150)*15 -(x/200)**2 -(z/200)**2 )*1.5+ 30;
+  //y = ((x/100)**2)+((z/100)**2);
+ 
+   return(y);
 
-  return(y);
 }
 
 function groundGetNormalVec(x,z)
 {
-  vector1 =  vec3.create();
-  vector2 =  vec3.create();
-  vector3 =  vec3.create();
-  vec3.normalize(vector1,[-0.15,(5*50*Math.cos(x/50))/(50**2)+(9*90*Math.cos(x/90))/(90**2)+(15*150*Math.cos(x/150))/(150**2),0.0]);
-  vec3.normalize(vector2,[0,(5*50*Math.cos(z/50))/(50**2)+(9*90*Math.cos(z/90))/(90**2)+(15*150*Math.cos(z/150))/(150**2),0.15 ]);
-  //vec3.normalize(vector1,[-0.25, (2*100*x)/(100**2*100),0.0]);
-//  vec3.normalize(vector2,[0,(2*100*z)/(100**2*100),0.25]);
-  vec3.cross(vector3,vector1,vector2)   ;
 
-// vec3.normalize(normVector,[1, -Math.cos(x/10)/10   - Math.cos(z/10)/10  ,1]);
-  return(vector3);
+  return([0,1,0]);
 }
 
 function groundGetCollisionPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOffset)
@@ -127,38 +79,7 @@ function groundGetCollisionPoint(pRayPoint1,pRayPoint2,pCollision,pDistSquaredOf
 	return collision;
 }
 
-function groundInitShaders(vertexShaderStr,fragmentShaderStr) {
 
-	var vertexShader = shaderCompil(vertexShaderStr,gl.VERTEX_SHADER);
-	var fragmentShader = shaderCompil(fragmentShaderStr,gl.FRAGMENT_SHADER);
-
-	var outShaderProgram = gl.createProgram();
-	gl.attachShader(outShaderProgram, vertexShader);
-	gl.attachShader(outShaderProgram, fragmentShader);
-	gl.linkProgram(outShaderProgram);
-
-	if (!gl.getProgramParameter(outShaderProgram, gl.LINK_STATUS)) {
-		alert("Could not initialise shaders");
-	}
-	gl.uniform1i(outShaderProgram.texture, 0);
-
-	outShaderProgram.vertexPositionAttribute = gl.getAttribLocation(outShaderProgram, "aVertexPosition");
-	gl.enableVertexAttribArray(outShaderProgram.vertexPositionAttribute);
-
-	outShaderProgram.vertexNormalAttribute = gl.getAttribLocation(outShaderProgram, "aVertexNormal");
-	gl.enableVertexAttribArray(outShaderProgram.vertexNormalAttribute);
-
-  outShaderProgram.vertexColorAttribute = gl.getUniformLocation(outShaderProgram, "uVertexColor");
-	outShaderProgram.counter = gl.getUniformLocation(outShaderProgram, "uCounter");
-	outShaderProgram.waterY = gl.getUniformLocation(outShaderProgram, "uWaterY");
-	outShaderProgram.pMatrixUniform = gl.getUniformLocation(outShaderProgram, "uPMatrix");
-	outShaderProgram.mvMatrixUniform = gl.getUniformLocation(outShaderProgram, "uMVMatrix");
-	outShaderProgram.mvInverseTransposeMatrix = gl.getUniformLocation(outShaderProgram, "uMVInverseTransposeMatrix");
-
-	return outShaderProgram;
-}
-
-var gGroundShaderNormalProgram=-1;
 
 class CGroundSector
 {
@@ -166,7 +87,7 @@ class CGroundSector
   {
     
    var groundPositions=[];
-   var groundNormals=[];
+   var groundColors=[];
    var groundIndices=[];
 
    if(gGroundShaderNormalProgram == -1)
@@ -177,6 +98,80 @@ class CGroundSector
    groundShaderNormalProgram = gGroundShaderNormalProgram;
    groundShaderProgram = groundShaderNormalProgram;
   
+   groundHeight = [];
+   var light = [];
+
+   var trSize = pSize/pRes;
+
+    for (var ix=0;ix<=pRes;ix+=1)
+    {    
+      groundHeight[ix] = [];
+      for (var iz=0;iz<=pRes;iz+=1)
+      {
+        var x = pPosX + ix*pSize/pRes - pSize/2;
+        var z = pPosZ + iz*pSize/pRes - pSize/2;
+        groundHeight[ix][iz]=  groundGetY(x,z)
+      }
+    }
+  
+    for (var ix=0;ix<=pRes;ix+=1)
+    {    
+      light[ix] = [];
+      for (var iz=0;iz<=pRes;iz+=1)
+      {
+        var normal = [0,0,0];
+        var normalt = [0,0,0];
+        var height_11 = groundHeight[ix][iz]
+        var vec_00;var vec_01;var vec_02;var vec_10;var vec_12;var vec_20;var vec_21;var vec_22;
+
+        if(ix>0 && iz>0)        vec_00 = [ -trSize,groundHeight[ix-1][iz-1]-height_11,-trSize];
+        if(ix>0)                vec_01 = [ -trSize,groundHeight[ix-1][iz+0]-height_11, 0];
+        if(ix>0 && iz<pRes)     vec_02 = [ -trSize,groundHeight[ix-1][iz+1]-height_11, trSize];
+        if(iz>0)                vec_10 = [ 0,groundHeight[ix+0][iz-1]-height_11,-trSize];
+        if(iz<pRes)             vec_12 = [ 0,groundHeight[ix+0][iz+1]-height_11, trSize];        
+        if(ix<pRes && iz>0)     vec_20 = [ trSize,groundHeight[ix+1][iz-1]-height_11,-trSize];
+        if(ix<pRes)             vec_21 = [ trSize,groundHeight[ix+1][iz+0]-height_11, 0];
+        if(ix<pRes && iz<pRes)  vec_22 = [ trSize,groundHeight[ix+1][iz+1]-height_11, trSize];
+
+        if(ix>0 && iz>0) 
+        {
+          vec3.cross(normalt,vec_10,vec_00);
+          vec3.add(normal,normalt,normal);
+
+          vec3.cross(normalt,vec_00,vec_01);
+          vec3.add(normal,normalt,normal);
+        }
+        if(ix>0 && iz<pRes)  
+        {
+          vec3.cross(normalt,vec_01,vec_02);
+          vec3.add(normal,normalt,normal);
+
+          vec3.cross(normalt,vec_02,vec_12);
+          vec3.add(normal,normalt,normal);
+        }
+        if(ix<pRes && iz<pRes) 
+        {
+          vec3.cross(normalt,vec_12,vec_22);
+          vec3.add(normal,normalt,normal);
+
+          vec3.cross(normalt,vec_22,vec_21);
+          vec3.add(normal,normalt,normal);
+        }
+        if(ix<pRes && iz>0)
+        {
+          vec3.cross(normalt,vec_21,vec_20);
+          vec3.add(normal,normalt,normal);
+
+          vec3.cross(normalt,vec_20,vec_10);
+          vec3.add(normal,normalt,normal);
+        }
+
+        vec3.normalize(normalt,normalt);
+        light[ix][iz]  = (vec3.dot([0,1.0,0.0],normalt)-0.5)*2.0
+
+      }
+    }
+
     for (var ix=0;ix<=pRes;ix+=1)
     {    
       for (var iz=0;iz<=pRes;iz+=1)
@@ -186,15 +181,32 @@ class CGroundSector
         
         // compute ground position
         groundPositions.push(x);
-        groundPositions.push(groundGetY(x,z));
+        groundPositions.push(groundHeight[ix][iz]);
         groundPositions.push(z);
   
         
           // compute normal position
-          var normVector = groundGetNormalVec(x,z);
-          groundNormals.push(normVector[0]);
-          groundNormals.push(normVector[1]);
-          groundNormals.push(normVector[2]);
+          var lightCur = light[ix][iz]
+          var color
+          if(groundHeight[ix][iz]<-50) color=hexColorToGL("#64ABE3") //deep ocean #64ABE3 
+          else if(groundHeight[ix][iz]<-30) color=hexColorToGL("#92C4EE")//deep ocean #92C4EE 
+          else if(groundHeight[ix][iz]<0)   color=hexColorToGL("#BBDBF7") //ocean #BBDBF7
+          else if(groundHeight[ix][iz]<5)   color=hexColorToGL("#F6E3D4")//beach1  #F6E3D4
+          else if(groundHeight[ix][iz]<10)  color=hexColorToGL("#FDD8B5") //beach2  #FDD8B5
+          else if(groundHeight[ix][iz]<20)  color=hexColorToGL("#F9D199") //beach3  #F9D199
+          else if(groundHeight[ix][iz]<50)  color=hexColorToGL("#8c9e60") //forest  #8c9e60
+          else if(groundHeight[ix][iz]<100) color=hexColorToGL("#515038")//forest  #515038
+          else if(groundHeight[ix][iz]<200) color=hexColorToGL("#b1ab9a") //forest  #b1ab9a
+          else if(groundHeight[ix][iz]<1000) color=hexColorToGL("#757350")//forest  #757350
+          else if(groundHeight[ix][iz]<1200)color=hexColorToGL("#79e9bf") //snow  #79e9bf
+          else if(groundHeight[ix][iz]<1500)color=hexColorToGL("#e7ebfc") //snow  #e7ebfc
+          else if(groundHeight[ix][iz]<5000)color=hexColorToGL("#f6f7fb") //snow  #f6f7fb
+
+
+          // color=hexColorToGL("#F6E3D4")//beach1  #F6E3D4
+          groundColors.push(color[0]*lightCur);
+          groundColors.push(color[1]*lightCur);
+          groundColors.push(color[2]*lightCur);
   
         if (((ix+1)<=pRes) && ((iz+1)<=pRes))
         {
@@ -212,6 +224,7 @@ class CGroundSector
   
     
     gl.useProgram(groundShaderProgram);
+    gCurrentShaderProgram = groundShaderProgram;
   
     // Vertex Buffer
     this.groundVertexBuffer = gl.createBuffer();
@@ -220,12 +233,12 @@ class CGroundSector
     gl.bindBuffer(gl.ARRAY_BUFFER, this.groundVertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(groundPositions), gl.STATIC_DRAW);	
   
-    // Normal Buffer	
-    this.groundNormalBuffer = gl.createBuffer();
-    this.groundNormalBuffer.itemSize = 3;
-    this.groundNormalBuffer.numItems = groundNormals.length/3;
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.groundNormalBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(groundNormals), gl.STATIC_DRAW);	
+    // Color Buffer	
+    this.groundColorBuffer = gl.createBuffer();
+    this.groundColorBuffer.itemSize = 3;
+    this.groundColorBuffer.numItems = groundColors.length/3;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.groundColorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(groundColors), gl.STATIC_DRAW);	
       
     // Index Buffer
     this.groundIndiceBuffer = gl.createBuffer ();
@@ -256,22 +269,18 @@ class CGroundSector
     gl.bindBuffer(gl.ARRAY_BUFFER, this.groundVertexBuffer);
     gl.vertexAttribPointer(groundShaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.groundNormalBuffer);
-    gl.vertexAttribPointer(groundShaderProgram.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.groundColorBuffer);
+    gl.vertexAttribPointer(groundShaderProgram.vertexColorAttributeArray, 3, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.groundIndiceBuffer);
-        		
-    gl.uniform4fv (groundShaderProgram.vertexColorAttribute, shaderVertexColorVector);
-    
+        		    
     gl.uniformMatrix4fv(groundShaderProgram.mvMatrixUniform, false, mvMatrix);
     gl.uniformMatrix4fv(groundShaderProgram.pMatrixUniform, false, pMatrix);
-    
-    mat4.invert(mvInverseMatrix,mvMatrix);
-    mat4.transpose(mvInverseTransposeMatrix,mvInverseMatrix);
-    gl.uniformMatrix4fv(groundShaderProgram.mvInverseTransposeMatrix, false, mvInverseTransposeMatrix);
-
-    
+        
     gl.drawElements(gl.TRIANGLES,this.nbElement, gl.UNSIGNED_SHORT,0);
+
+   // gl.useProgram(groundShaderProgram);
+    //gl.drawElements(gl.LINES,this.nbElement, gl.UNSIGNED_SHORT,0);
   }
 
 
@@ -279,40 +288,17 @@ class CGroundSector
 
 
 groundSize = 10000;
-groundRes = 10;
 
 function groundInit()
 {
-  groundSectorInst = [];
-  for (ix=0;ix<groundRes;ix++)
-  {
-    groundSectorInst[ix]=[];
-    for (iz=0;iz<groundRes;iz++)
-    {
-      var x = -groundSize/2 +  ix*groundSize/groundRes;
-      var z = -groundSize/2 +  iz*groundSize/groundRes;
-      groundSectorInst[ix][iz] = new CGroundSector(x,z,groundSize/groundRes,40);
-
-    }
-  }
+  groundSectorInst = new CGroundSector(0,0,1000,200);
 }
 
 
-function groundDraw(pPosX,pPosZ)
+function groundDraw()
 {
-  var step = groundSize/groundRes;
-  var ix = Math.floor(pPosX/step + 0.5) + groundRes/2;
-  var iz = Math.floor(pPosZ/step + 0.5) + groundRes/2;
 
-  groundSectorInst[ix][iz].drawSector();
-  groundSectorInst[ix][iz-1].drawSector();
-  groundSectorInst[ix][iz+1].drawSector();
-  groundSectorInst[ix-1][iz].drawSector();
-  groundSectorInst[ix-1][iz-1].drawSector();
-  groundSectorInst[ix-1][iz+1].drawSector();
-  groundSectorInst[ix+1][iz].drawSector();
-  groundSectorInst[ix+1][iz-1].drawSector();
-  groundSectorInst[ix+1][iz+1].drawSector();
+  groundSectorInst.drawSector();
   
   gl.disable(gl.CULL_FACE);   
   groundWaterDraw(); 
@@ -348,17 +334,17 @@ function groundIsUnderWater(y)
 function groundWaterDraw()
 {
 
-  shaderWaterY = groundWaterYLevel;
-  var offset = Math.cos(shaderCounter/20.0 + 2.0)/2.0+Math.cos(shaderCounter/15.0 +3.0)/4.0;
-  shaderWaterY += offset;
-	mat4.identity(mvMatrix); 
-	mat4.translate(mvMatrix,mvMatrix, [0.0,groundWaterYLevel-32.0 + offset,0.0]);	
-	mat4.scale(mvMatrix,mvMatrix,[9000.0,30.0,9000.0]);	
+  // shaderWaterY = groundWaterYLevel;
+  // var offset = Math.cos(shaderCounter/20.0 + 2.0)/2.0+Math.cos(shaderCounter/15.0 +3.0)/4.0;
+  // shaderWaterY += offset;
+	// mat4.identity(mvMatrix); 
+	// mat4.translate(mvMatrix,mvMatrix, [0.0,groundWaterYLevel-32.0 + offset,0.0]);	
+	// mat4.scale(mvMatrix,mvMatrix,[9000.0,30.0,9000.0]);	
 
-	gl.uniform1f (groundShaderProgram.counter, shaderCounter);
-	gl.uniform1f (groundShaderProgram.waterY, shaderWaterY);
-	Sphere.Draw(groundShaderProgram);
-  shaderWaterY = -1000;
+	// gl.uniform1f (groundShaderProgram.counter, shaderCounter);
+	// gl.uniform1f (groundShaderProgram.waterY, shaderWaterY);
+	// Sphere.Draw(groundShaderProgram);
+  // shaderWaterY = -1000;
 
 
   

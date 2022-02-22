@@ -43,6 +43,14 @@ function getCurDirByPos(pPos)
 }
 
 
+function hexColorToGL(hex) {
+  var r = parseInt(hex.slice(1, 3), 16),
+      g = parseInt(hex.slice(3, 5), 16),
+      b = parseInt(hex.slice(5, 7), 16);
+
+  return ([r/255.0,g/255.0,b/255.0])
+}
+
 function lookAt(pVec3Dir)
 {
     var lookAtMatrix = mat4.create();
