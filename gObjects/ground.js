@@ -291,7 +291,7 @@ groundSize = 10000;
 
 function groundInit()
 {
-  groundSectorInst = new CGroundSector(0,0,5000,300);
+  groundSectorInst = new CGroundSector(0,0,4000,200);
 }
 
 
@@ -335,14 +335,14 @@ function groundWaterDraw()
 
 	mat4.identity(mvMatrix); 
 	mat4.scale(mvMatrix,mvMatrix,[10000.0,1.0,10000.0]);	
-	mat4.translate(mvMatrix,mvMatrix, [0.0,-50.0,0.0]);		
+	mat4.translate(mvMatrix,mvMatrix, [0.0,-100.0,0.0]);		
   mat4.rotate(mvMatrix,mvMatrix, degToRad(-90), [ 1, 0, 0]); 
   shaderVertexColorVector = hexColorToGL("#396682") ;
   shaderVertexColorVector[3] = 1.0
 	squareDraw(SquareShaderProgram);
   var offset = Math.cos(shaderCounter/20.0 + 2.0)/2.0+Math.cos(shaderCounter/15.0 +3.0)/4.0;
 	mat4.identity(mvMatrix); 
-  
+
 	mat4.scale(mvMatrix,mvMatrix,[10000.0,1.0,10000.0]);	
 	mat4.translate(mvMatrix,mvMatrix, [0.0,groundWaterYLevel + offset,0.0]);	
   mat4.rotate(mvMatrix,mvMatrix, degToRad(-90), [ 1, 0, 0]);  
