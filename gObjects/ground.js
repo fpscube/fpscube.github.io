@@ -6,7 +6,7 @@ var groundPositions;
 var groundNormals;
 var groundIndices;
 var groundSectorInst;
-var groundWaterYLevel=-29.5;
+var groundWaterYLevel=-0;
 var groundShaderProgram;
 var groundShaderNormalProgram;
 var groundHeight;
@@ -43,8 +43,8 @@ var groundFragmentShader = `
 
 function groundGetY(x,z)
 {
-  y = (Math.sin(x/50)*5+Math.sin(z/50)*5 + Math.sin(x/90)*9 + Math.sin(z/90)*9 + Math.sin(x/150)*15 + Math.sin(z/150)*15 -(x/200)**2 -(z/200)**2 )*1.5+ 30;
-  //y = ((x/100)**2)+((z/100)**2);
+  y = (Math.sin(x/50)*5+Math.sin(z/50)*5 + Math.sin(x/90)*9 + Math.sin(z/90)*9 + Math.sin(x/150)*15 + Math.sin(z/150)*15 -(x/200)**2 -(z/200)**2 )*1+ 50;
+  if (y < -50) y=-50
  
    return(y);
 
@@ -187,20 +187,22 @@ class CGroundSector
         
           // compute normal position
           var lightCur = light[ix][iz]
-          var color
-          if(groundHeight[ix][iz]<-50) color=hexColorToGL("#64ABE3") //deep ocean #64ABE3 
-          else if(groundHeight[ix][iz]<-30) color=hexColorToGL("#92C4EE")//deep ocean #92C4EE 
-          else if(groundHeight[ix][iz]<0)   color=hexColorToGL("#BBDBF7") //ocean #BBDBF7
-          else if(groundHeight[ix][iz]<5)   color=hexColorToGL("#F6E3D4")//beach1  #F6E3D4
-          else if(groundHeight[ix][iz]<10)  color=hexColorToGL("#FDD8B5") //beach2  #FDD8B5
-          else if(groundHeight[ix][iz]<20)  color=hexColorToGL("#F9D199") //beach3  #F9D199
-          else if(groundHeight[ix][iz]<50)  color=hexColorToGL("#8c9e60") //forest  #8c9e60
-          else if(groundHeight[ix][iz]<100) color=hexColorToGL("#515038")//forest  #515038
-          else if(groundHeight[ix][iz]<200) color=hexColorToGL("#b1ab9a") //forest  #b1ab9a
-          else if(groundHeight[ix][iz]<1000) color=hexColorToGL("#757350")//forest  #757350
-          else if(groundHeight[ix][iz]<1200)color=hexColorToGL("#79e9bf") //snow  #79e9bf
-          else if(groundHeight[ix][iz]<1500)color=hexColorToGL("#e7ebfc") //snow  #e7ebfc
-          else if(groundHeight[ix][iz]<5000)color=hexColorToGL("#f6f7fb") //snow  #f6f7fb
+          var color =[]
+          var heightCur = groundHeight[ix][iz]
+          if(groundHeight[ix][iz]<-30) color=hexColorToGL("#396682") //deep ocean #64ABE3 
+          else if(groundHeight[ix][iz]<-15)mixColor(color,"#396682","#92C4EE",-30,-15,heightCur);//deep ocean #92C4EE 
+          else if(groundHeight[ix][iz]<-1) mixColor(color,"#92C4EE","#BBDBF7",-30,-1,heightCur);
+          else if(groundHeight[ix][iz]<5)  mixColor(color,"#BBDBF7","#F6E3D4",-1,5,heightCur);
+          else if(groundHeight[ix][iz]<10) mixColor(color,"#F6E3D4","#FDD8B5",5,10,heightCur);
+          else if(groundHeight[ix][iz]<20)  mixColor(color,"#FDD8B5","#F9D199",10,20,heightCur); //beach3  #F9D199
+          else if(groundHeight[ix][iz]<50)  mixColor(color,"#F9D199","#8c9e60",20,50,heightCur);  //forest  #8c9e60
+          else if(groundHeight[ix][iz]<100) mixColor(color,"#8c9e60","#515038",50,100,heightCur); //forest  #515038
+          else if(groundHeight[ix][iz]<200)  mixColor(color,"#515038","#b1ab9a",100,200,heightCur); //forest  #b1ab9a
+          else if(groundHeight[ix][iz]<1000)  mixColor(color,"#b1ab9a","#757350",200,1000,heightCur); //forest  #757350
+          else if(groundHeight[ix][iz]<1200) mixColor(color,"#757350","#79e9bf",1000,1200,heightCur);  //snow  #79e9bf
+          else if(groundHeight[ix][iz]<1500) mixColor(color,"#79e9bf","#e7ebfc",1200,1500,heightCur); //snow  #e7ebfc
+          else if(groundHeight[ix][iz]<2000) mixColor(color,"#e7ebfc","#ffffff",1500,2000,heightCur); //snow  #ffffff
+          else color = [1.0,1.0,1.0];
 
 
           // color=hexColorToGL("#F6E3D4")//beach1  #F6E3D4
@@ -253,8 +255,6 @@ class CGroundSector
 
     gCurrentGraphicalObject = 0;
 
-    shaderWaterY = -2008.5;
-    shaderVertexColorVector = [0.8,0.8,0.4,1.0];
     mat4.identity(mvMatrix)    ;
     
     if(gCurrentShaderProgram != groundShaderProgram) 
@@ -291,7 +291,7 @@ groundSize = 10000;
 
 function groundInit()
 {
-  groundSectorInst = new CGroundSector(0,0,1000,200);
+  groundSectorInst = new CGroundSector(0,0,5000,300);
 }
 
 
@@ -300,9 +300,7 @@ function groundDraw()
 
   groundSectorInst.drawSector();
   
-  gl.disable(gl.CULL_FACE);   
-  groundWaterDraw(); 
-  gl.enable(gl.CULL_FACE);   
+
 }
 
 
@@ -334,18 +332,23 @@ function groundIsUnderWater(y)
 function groundWaterDraw()
 {
 
-  // shaderWaterY = groundWaterYLevel;
-  // var offset = Math.cos(shaderCounter/20.0 + 2.0)/2.0+Math.cos(shaderCounter/15.0 +3.0)/4.0;
-  // shaderWaterY += offset;
-	// mat4.identity(mvMatrix); 
-	// mat4.translate(mvMatrix,mvMatrix, [0.0,groundWaterYLevel-32.0 + offset,0.0]);	
-	// mat4.scale(mvMatrix,mvMatrix,[9000.0,30.0,9000.0]);	
 
-	// gl.uniform1f (groundShaderProgram.counter, shaderCounter);
-	// gl.uniform1f (groundShaderProgram.waterY, shaderWaterY);
-	// Sphere.Draw(groundShaderProgram);
-  // shaderWaterY = -1000;
-
+	mat4.identity(mvMatrix); 
+	mat4.scale(mvMatrix,mvMatrix,[10000.0,1.0,10000.0]);	
+	mat4.translate(mvMatrix,mvMatrix, [0.0,-50.0,0.0]);		
+  mat4.rotate(mvMatrix,mvMatrix, degToRad(-90), [ 1, 0, 0]); 
+  shaderVertexColorVector = hexColorToGL("#396682") ;
+  shaderVertexColorVector[3] = 1.0
+	squareDraw(SquareShaderProgram);
+  var offset = Math.cos(shaderCounter/20.0 + 2.0)/2.0+Math.cos(shaderCounter/15.0 +3.0)/4.0;
+	mat4.identity(mvMatrix); 
+  
+	mat4.scale(mvMatrix,mvMatrix,[10000.0,1.0,10000.0]);	
+	mat4.translate(mvMatrix,mvMatrix, [0.0,groundWaterYLevel + offset,0.0]);	
+  mat4.rotate(mvMatrix,mvMatrix, degToRad(-90), [ 1, 0, 0]);  
+  shaderVertexColorVector = hexColorToGL("#64ABE3") ;
+  shaderVertexColorVector[3] = 0.5
+	squareDraw(SquareShaderProgram);
 
   
 }

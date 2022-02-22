@@ -245,13 +245,16 @@ class CGame
 		this.Vehicules.draw();		
 		this.Hero.draw();
 		this.Guns.draw();
-
+		gl.disable(gl.CULL_FACE);   
+		groundWaterDraw(); 
+		gl.enable(gl.CULL_FACE); 
 
 		gl.cullFace(gl.FRONT);	
 			
 		mat4.identity(mvMatrix); 
 	
-		shaderVertexColorVector = [7.0/256.0,11.0/256.0,45.0/256.0,1.0]; 
+		shaderVertexColorVector = hexColorToGL("#000044")
+		shaderVertexColorVector[3]=1.0
 		mat4.translate(mvMatrix,mvMatrix, this.CamPos);	
 		mat4.scale(mvMatrix,mvMatrix,[9000.0,9000.0,9000.0]);	
 		Sphere.Draw(SphereShaderSkyProgram);

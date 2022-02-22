@@ -51,6 +51,20 @@ function hexColorToGL(hex) {
   return ([r/255.0,g/255.0,b/255.0])
 }
 
+function mixColor(mixedColor,color1Str,color2Str,val1,val2,val)
+{
+  if((val2-val1) > 5)  val2=val1+5
+  var color1=hexColorToGL(color1Str)
+  var color2=hexColorToGL(color2Str)
+  var coef = (val-val1)/(val2-val1);
+  if(coef>1.0) coef =1.0;
+  
+  mixedColor[0]=color1[0] + (color2[0]-color1[0])*coef
+  mixedColor[1]=color1[1] + (color2[1]-color1[1])*coef
+  mixedColor[2]=color1[2] + (color2[2]-color1[2])*coef
+}
+
+
 function lookAt(pVec3Dir)
 {
     var lookAtMatrix = mat4.create();
